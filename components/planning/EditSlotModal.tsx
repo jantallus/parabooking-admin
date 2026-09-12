@@ -56,6 +56,7 @@ export default function EditSlotModal({
   const [groupSize, setGroupSize] = useState(1);
   const [groupLocked, setGroupLocked] = useState(false);
   const [showGroupSelector, setShowGroupSelector] = useState(false);
+  const [showEncaissement, setShowEncaissement] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [manualCounts, setManualCounts] = useState<Record<string, number>>({});
   const [isManual, setIsManual] = useState(false);
@@ -320,6 +321,7 @@ export default function EditSlotModal({
     setEncaisseurId(inferredEncaisseur);
     setIsManual(false);
     setMoveGroup(false);
+    setShowEncaissement(false);
     setPaymentScope('slot');
     setSelectedComplementIds(Array.isArray(pd?.selected_complements) ? (pd.selected_complements as { id: number }[]).map(c => Number(c.id)) : []);
     setFlightPriceOverride(pd?.price_override_cents != null ? (Number(pd.price_override_cents) / 100).toFixed(2) : '');
@@ -1553,8 +1555,21 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
 
                 {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && (
                   <div className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 space-y-3">
-                    <label className="text-[10px] font-black uppercase text-slate-400 block">Encaissement</label>
                     {(() => {
+                      const pd = selectedEvent?.payment_data;
+                      const isGiftCard = pd?.code_type === 'gift_card' && !!pd?.code;
+                      const isStripePaid = pd?.online === true && !isGiftCard;
+                      const ENC_SHORT: Record<string, string> = { esp: 'Esp', cb: 'CB', chq: 'Chq', ancv: 'ANCV', ancv_connect: 'ANCV+', a_facturer: 'Fact.', np: 'NP', online: 'Stripe' };
+                      const badge = isGiftCard ? '🎁' : isStripePaid ? 'Stripe' : (paymentType ? (ENC_SHORT[paymentType] ?? paymentType) : 'NP');
+                      const badgeColor = (!paymentType || paymentType === 'np') ? 'text-slate-400 bg-slate-100' : 'text-emerald-700 bg-emerald-50 border border-emerald-200';
+                      return (
+                        <button type="button" onClick={() => setShowEncaissement(v => !v)} className="w-full flex items-center justify-between text-left">
+                          <span className="text-[10px] font-black uppercase text-slate-400">Encaissement</span>
+                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg ${badgeColor}`}>{badge} {showEncaissement ? '▲' : '▼'}</span>
+                        </button>
+                      );
+                    })()}
+                    {showEncaissement && (() => {
                       const pd = selectedEvent?.payment_data;
                       const isStripePaid = pd?.online === true;
                       const isGiftCard = pd?.code_type === 'gift_card' && !!pd?.code;
