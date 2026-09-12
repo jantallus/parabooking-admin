@@ -317,6 +317,7 @@ export default function PlanningAdmin() {
       ? (groupColors.get(`grp:${rawTitle.split('(')[0].trim()}`) ?? '#a78bfa')
       : null;
     const effectiveBorderColor = groupColor ?? aiglonGroupColor;
+    if (ep.second_booking) console.log('[AIGLON]', ep.title, 'is_group_booking:', (ep.second_booking as {is_group_booking?:boolean})?.is_group_booking, 'aiglonGroupColor:', aiglonGroupColor, 'effectiveBorderColor:', effectiveBorderColor);
 
     // ── Vue splitée Aiglon sans Pax 2 ──
     if (isShortFlight && !ep.second_booking?.title) {
