@@ -290,6 +290,9 @@ export default function EditSlotModal({
       const followers = sameDaySlots.filter(a => new RegExp(`\\(${esc}\\)$`).test(a.title || ''));
       if (followers.length > 0) detectedGroupSize = followers.length + 1;
     }
+    // Détection groupe aiglon sur 1 seul créneau (is_group_booking stocké en base)
+    const isAiglonGroupSlot = !!(selectedEvent.second_booking as { is_group_booking?: boolean } | null | undefined)?.is_group_booking;
+    if (isAiglonGroupSlot && detectedGroupSize < 2) detectedGroupSize = 2;
     setGroupSize(detectedGroupSize);
     setGroupLocked(detectedGroupSize > 1);
     setShowGroupSelector(detectedGroupSize >= 2);

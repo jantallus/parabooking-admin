@@ -220,7 +220,7 @@ export default function PlanningAdmin() {
         if (!map.has(m[1])) map.set(m[1], palette[idx++ % palette.length]);
       }
       // Aiglon group bookings — couleur par nom de client (namespace "grp:" pour éviter les conflits)
-      if (ep2.isShortFlight && ep2.second_booking?.is_group_booking) {
+      if (ep2.second_booking?.is_group_booking) {
         const key = `grp:${t.split('(')[0].trim()}`;
         if (!map.has(key)) map.set(key, palette[idx++ % palette.length]);
       }
@@ -313,7 +313,7 @@ export default function PlanningAdmin() {
 
     // ── Détection vol court (aiglon) — calculé dans calendarEvents ──
     const isShortFlight = !!(ep as Slot & { isShortFlight?: boolean }).isShortFlight;
-    const aiglonGroupColor = (isShortFlight && ep.second_booking?.is_group_booking)
+    const aiglonGroupColor = ep.second_booking?.is_group_booking
       ? (groupColors.get(`grp:${rawTitle.split('(')[0].trim()}`) ?? '#a78bfa')
       : null;
     const effectiveBorderColor = groupColor ?? aiglonGroupColor;
