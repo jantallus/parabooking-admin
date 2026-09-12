@@ -308,17 +308,19 @@ export default function PlanningAdmin() {
 
     // ── Détection vol court (aiglon) — calculé dans calendarEvents ──
     const isShortFlight = !!(ep as Slot & { isShortFlight?: boolean }).isShortFlight;
+    const isAiglonGroupBooking = isShortFlight && !!ep.second_booking?.is_group_booking;
+    const effectiveBorderColor = groupColor ?? (isAiglonGroupBooking ? '#a78bfa' : null);
 
     // ── Vue splitée Aiglon sans Pax 2 ──
     if (isShortFlight && !ep.second_booking?.title) {
       return (
-        <div style={{ position: 'relative', height: '100%', overflow: 'hidden', borderLeft: groupColor ? `4px solid ${groupColor}` : undefined }}>
+        <div style={{ position: 'relative', height: '100%', overflow: 'hidden', borderLeft: effectiveBorderColor ? `4px solid ${effectiveBorderColor}` : undefined }}>
           {/* Fond blanc sur le 1/3 droit */}
           <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '33%', background: 'white', zIndex: 1 }} />
           {/* Séparateur */}
           <div style={{ position: 'absolute', top: 2, bottom: 2, right: '33%', width: '1px', background: 'rgba(255,255,255,0.5)', zIndex: 2 }} />
           {/* Contenu Pax 1 (2/3 gauche) */}
-          <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: '33%', padding: '1px 3px', paddingLeft: groupColor ? '2px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', zIndex: 0 }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: '33%', padding: '1px 3px', paddingLeft: effectiveBorderColor ? '2px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', zIndex: 0 }}>
             {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
             <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}{badges && ` ${badges}`}</span>
             {infoLine && subSpan(infoLine)}
@@ -335,17 +337,17 @@ export default function PlanningAdmin() {
       const sbPayShort = sb.payment_type ? (TYPE_SHORT[sb.payment_type] ?? null) : null;
 
       return (
-        <div style={{ display: 'flex', height: '100%', overflow: 'hidden', borderLeft: groupColor ? `4px solid ${groupColor}` : undefined }}>
+        <div style={{ display: 'flex', height: '100%', overflow: 'hidden', borderLeft: effectiveBorderColor ? `4px solid ${effectiveBorderColor}` : undefined }}>
           {/* Pax 1 */}
           {isExp ? (
             <NativeStopDiv
-              style={{ flex: 1, padding: '1px 3px', paddingLeft: groupColor ? '2px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', cursor: 'pointer' }}
+              style={{ flex: 1, padding: '1px 3px', paddingLeft: effectiveBorderColor ? '2px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', cursor: 'pointer' }}
               onNativeClick={() => togglePax2(ep.id)}
             >
               <span style={{ fontSize: '9px', fontWeight: 'bold', opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>← {finalDisplayName}</span>
             </NativeStopDiv>
           ) : (
-            <div style={{ flex: 2, padding: '1px 3px', paddingLeft: groupColor ? '2px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden' }}>
+            <div style={{ flex: 2, padding: '1px 3px', paddingLeft: effectiveBorderColor ? '2px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden' }}>
               {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
               <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}{badges && ` ${badges}`}</span>
               {infoLine && subSpan(infoLine)}
@@ -378,7 +380,7 @@ export default function PlanningAdmin() {
     }
 
     return (
-      <div style={{ padding: '1px 3px', paddingLeft: groupColor ? '2px' : '3px', borderLeft: groupColor ? `4px solid ${groupColor}` : undefined, overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+      <div style={{ padding: '1px 3px', paddingLeft: effectiveBorderColor ? '2px' : '3px', borderLeft: effectiveBorderColor ? `4px solid ${effectiveBorderColor}` : undefined, overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column', gap: '1px' }}>
         {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
         <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {finalDisplayName}{badges && ` ${badges}`}

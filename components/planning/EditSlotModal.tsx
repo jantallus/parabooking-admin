@@ -818,7 +818,7 @@ export default function EditSlotModal({
         if (nextSlot) updatesToApply.push({ id: nextSlot.id, data: { title: `↪️ Suite ${effectiveTitle || 'Vol'}`, flight_type_id: formData.flight_type_id, status: 'booked', notes: 'Extension auto' } });
       }
     } else {
-      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null } : null } : { second_booking: null };
+      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
       updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: effectiveTitle, status: effectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
     }
 
