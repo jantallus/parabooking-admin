@@ -790,7 +790,7 @@ export default function EditSlotModal({
         // If this slot was already added (passengers_per_slot > 1), add as second_booking instead
         const existingIdx = updatesToApply.findIndex(u => u.id === baseSlot.id && u.data.status === 'booked');
         if (existingIdx >= 0) {
-          (updatesToApply[existingIdx].data as Record<string, unknown>).second_booking = { title: passengerTitle, phone: '', weight: passengerWeights[index] ? parseInt(passengerWeights[index]) : null, payment_type: null, encaisseur_id: null };
+          (updatesToApply[existingIdx].data as Record<string, unknown>).second_booking = { title: passengerTitle, phone: '', weight: passengerWeights[index] ? parseInt(passengerWeights[index]) : null, payment_type: null, encaisseur_id: null, ...(showGroupSelector && { is_group_booking: true }) };
           return;
         }
         const isExistingBooked = groupRootSlots.some(s => s.id === baseSlot.id);
