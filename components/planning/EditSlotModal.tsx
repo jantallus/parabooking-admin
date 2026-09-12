@@ -55,6 +55,7 @@ export default function EditSlotModal({
   const [blockUntilMs, setBlockUntilMs] = useState<number>(0);
   const [groupSize, setGroupSize] = useState(1);
   const [groupLocked, setGroupLocked] = useState(false);
+  const [showGroupSelector, setShowGroupSelector] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [manualCounts, setManualCounts] = useState<Record<string, number>>({});
   const [isManual, setIsManual] = useState(false);
@@ -291,6 +292,7 @@ export default function EditSlotModal({
     }
     setGroupSize(detectedGroupSize);
     setGroupLocked(detectedGroupSize > 1);
+    setShowGroupSelector(detectedGroupSize >= 3);
     setIsEditing(selectedEvent.status !== 'booked');
     setPassengerWeights([selectedEvent.weight?.toString() || '']);
     const sb = selectedEvent.second_booking;
@@ -1114,11 +1116,14 @@ export default function EditSlotModal({
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && !isShortFlightType && (
             <button onClick={() => setActiveTab('client')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'client' ? 'bg-white text-sky-500 shadow-sm' : 'text-slate-400'}`}>👤 Client</button>
           )}
-          {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && isShortFlightType && (
+          {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && isShortFlightType && !showGroupSelector && (
             <>
               <button onClick={() => setActiveTab('client')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'client' ? 'bg-white text-sky-500 shadow-sm' : 'text-slate-400'}`}>👤 Pax 1</button>
               <button onClick={() => setActiveTab('client2')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'client2' ? 'bg-white text-sky-500 shadow-sm' : 'text-slate-400'}`}>👤 Pax 2</button>
             </>
+          )}
+          {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && isShortFlightType && showGroupSelector && (
+            <div className="flex-1 py-2 px-3 rounded-lg font-black text-[9px] uppercase bg-white text-sky-500 shadow-sm text-center">👥 {groupSize} pax</div>
           )}
           <button onClick={() => setActiveTab('note')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'note' ? 'bg-white text-amber-500 shadow-sm' : 'text-slate-400'}`}>📝 Note</button>
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && selectedEvent?.status !== 'available' && !isClientLocked && (
@@ -1407,6 +1412,12 @@ export default function EditSlotModal({
 
                 {formData.flight_type_id && (
                   <div className="bg-white p-4 rounded-2xl border-2 border-slate-100 mt-4 shadow-sm">
+                    {isShortFlightType && !showGroupSelector && !groupLocked ? (
+                      <button onClick={() => { setShowGroupSelector(true); setGroupSize(3); setActiveTab('client'); }} className="w-full text-xs font-bold text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 py-2.5 rounded-xl border border-sky-200 transition-all">
+                        👥 Groupe (+de 2 pax)
+                      </button>
+                    ) : (
+                      <>
                     <label className="text-[10px] font-black uppercase text-slate-400 block mb-3">Taille du groupe (Total)</label>
                     {groupLocked ? (
                       <div className="space-y-3">
@@ -1416,13 +1427,13 @@ export default function EditSlotModal({
                           <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 font-black text-xl flex items-center justify-center">+</div>
                           <span className="text-sm font-bold text-slate-400 ml-2">{groupSize} passager{groupSize > 1 ? 's' : ''} dans ce groupe</span>
                         </div>
-                        <button onClick={() => { setGroupLocked(false); setGroupSize(1); }} className="w-full text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 py-2 rounded-lg border border-indigo-100 transition-all">
+                        <button onClick={() => { setGroupLocked(false); setGroupSize(isShortFlightType ? 3 : 1); }} className="w-full text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 py-2 rounded-lg border border-indigo-100 transition-all">
                           + Ajouter des passagers
                         </button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-4">
-                        <button onClick={() => handleMainChange(-1)} className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-black text-xl hover:bg-slate-200 transition-colors flex items-center justify-center">-</button>
+                        <button onClick={() => { if (isShortFlightType && groupSize <= 3) { setShowGroupSelector(false); setGroupSize(1); } else { handleMainChange(-1); } }} className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-black text-xl hover:bg-slate-200 transition-colors flex items-center justify-center">-</button>
                         <span className="text-2xl font-black text-slate-900 w-8 text-center">{groupSize}</span>
                         <button onClick={() => handleMainChange(1)} className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-black text-xl hover:bg-slate-200 transition-colors flex items-center justify-center">+</button>
                         <span className="text-sm font-bold text-slate-500 ml-2">
@@ -1431,6 +1442,8 @@ export default function EditSlotModal({
                             : 'Passager(s) au total'}
                         </span>
                       </div>
+                    )}
+                      </>
                     )}
                     {!groupLocked && (groupSize > 1 || isManual || groupRootSlots.length > 1) && displayDistribution && (
                       <div className={`mt-4 p-3 rounded-xl border-2 transition-all ${displayDistribution.canFit ? (isManual ? 'bg-indigo-50 border-indigo-200' : 'bg-emerald-50 border-emerald-200') : 'bg-rose-50 border-rose-200'}`}>
