@@ -412,7 +412,7 @@ export default function PlanningAdmin() {
         onMouseLeave={e => (e.currentTarget.style.opacity = '0.85')}
       >{arg.resource.title}</span>
       <button
-        onClick={(e) => { e.stopPropagation(); setHiddenMonitorIds(prev => new Set([...prev, arg.resource.id])); }}
+        onClick={(e) => { e.stopPropagation(); setHiddenMonitorIds(prev => new Set([...prev, arg.resource.id])); setExtraShownIds(prev => { const next = new Set(prev); next.delete(arg.resource.id); return next; }); }}
         title="Masquer ce pilote"
         style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', opacity: 0.4, fontSize: '11px', padding: '0 2px', lineHeight: '1', color: 'inherit' }}
         onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
