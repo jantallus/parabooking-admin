@@ -1064,7 +1064,7 @@ export default function EditSlotModal({
         const pax2Data = movePax === 'pax2' && selectedEvent.second_booking?.title
           ? { title: selectedEvent.second_booking.title, phone: selectedEvent.second_booking.phone || '', weight: selectedEvent.second_booking.weight ?? null, payment_type: selectedEvent.second_booking.payment_type || null, encaisseur_id: selectedEvent.second_booking.encaisseur_id || null }
           : { title: selectedEvent.title || '', phone: selectedEvent.phone || '', weight: selectedEvent.weight ?? null, payment_type: selectedEvent.payment_data?.payment_type || null, encaisseur_id: selectedEvent.payment_data?.encaisseur_id || null };
-        updatesToApply.push({ id: targetSlot.id, data: { second_booking: pax2Data } });
+        updatesToApply.push({ id: targetSlot.id, data: { title: targetSlot.title, weight: targetSlot.weight, flight_type_id: targetSlot.flight_type_id, notes: targetSlot.notes, status: targetSlot.status, phone: targetSlot.phone, email: targetSlot.email, weightChecked: targetSlot.weight_checked, booking_options: targetSlot.booking_options, client_message: targetSlot.client_message, payment_data: targetSlot.payment_data, second_booking: pax2Data } });
         currentBookingSlotIds.forEach(id => updatesToApply.push({ id, data: { status: 'available', title: '', phone: '', email: '', flight_type_id: null, second_booking: null } }));
       } else {
       currentBookingSlotIds.forEach(id => updatesToApply.push({ id, data: { status: 'available', title: '', phone: '', email: '', flight_type_id: null, second_booking: null } }));
