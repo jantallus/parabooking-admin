@@ -211,13 +211,18 @@ export default function PlanningAdmin() {
     const map = new Map<string, string>();
     let idx = 0;
     calendarEvents.forEach(ev => {
-      const ep2 = ev.extendedProps as { title?: string; status?: string };
+      const ep2 = ev.extendedProps as Slot & { isShortFlight?: boolean };
       if (ep2.status !== 'booked') return;
       const t = ep2.title || '';
       if (!t || t.toUpperCase().includes('NON DISPO') || t.includes('❌') || t.toUpperCase().includes('PAUSE') || t.includes('☕')) return;
       const m = t.match(/\(([^)]+)\)$/);
       if (m) {
         if (!map.has(m[1])) map.set(m[1], palette[idx++ % palette.length]);
+      }
+      // Aiglon group bookings — couleur par nom de client (namespace "grp:" pour éviter les conflits)
+      if (ep2.isShortFlight && ep2.second_booking?.is_group_booking) {
+        const key = `grp:${t.split('(')[0].trim()}`;
+        if (!map.has(key)) map.set(key, palette[idx++ % palette.length]);
       }
     });
     return map;
@@ -308,8 +313,10 @@ export default function PlanningAdmin() {
 
     // ── Détection vol court (aiglon) — calculé dans calendarEvents ──
     const isShortFlight = !!(ep as Slot & { isShortFlight?: boolean }).isShortFlight;
-    const isAiglonGroupBooking = isShortFlight && !!ep.second_booking?.is_group_booking;
-    const effectiveBorderColor = groupColor ?? (isAiglonGroupBooking ? '#a78bfa' : null);
+    const aiglonGroupColor = (isShortFlight && ep.second_booking?.is_group_booking)
+      ? (groupColors.get(`grp:${rawTitle.split('(')[0].trim()}`) ?? '#a78bfa')
+      : null;
+    const effectiveBorderColor = groupColor ?? aiglonGroupColor;
 
     // ── Vue splitée Aiglon sans Pax 2 ──
     if (isShortFlight && !ep.second_booking?.title) {
