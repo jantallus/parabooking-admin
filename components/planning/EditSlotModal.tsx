@@ -1054,12 +1054,12 @@ export default function EditSlotModal({
       });
       if (!targetSlot) { toast.error("❌ Le créneau cible n'est plus disponible."); return; }
       if (targetSlot.id === selectedEvent.id) { toast.info('ℹ️ Le créneau est déjà à cet emplacement avec ce pilote.'); return; }
-      currentBookingSlotIds.forEach(id => updatesToApply.push({ id, data: { status: 'available', title: '', phone: '', email: '', flight_type_id: null } }));
+      currentBookingSlotIds.forEach(id => updatesToApply.push({ id, data: { status: 'available', title: '', phone: '', email: '', flight_type_id: null, second_booking: null } }));
       const newStartMs = new Date(targetSlot.start_time).getTime();
       for (let i = 0; i < slotsNeeded; i++) {
         const ms = newStartMs + i * slotDuration * 60000;
         const slotToBook = appointments.find(a => a.monitor_id?.toString() === targetSlot.monitor_id?.toString() && new Date(a.start_time).getTime() === ms);
-        if (slotToBook) updatesToApply.push({ id: slotToBook.id, data: { ...formData, title: i === 0 ? formData.title : `↪️ Suite ${formData.title || 'Vol'}`, status: 'booked', notes: i === 0 ? formData.notes : 'Extension auto', payment_data: selectedEvent.payment_data } });
+        if (slotToBook) updatesToApply.push({ id: slotToBook.id, data: { ...formData, title: i === 0 ? formData.title : `↪️ Suite ${formData.title || 'Vol'}`, status: 'booked', notes: i === 0 ? formData.notes : 'Extension auto', payment_data: selectedEvent.payment_data, ...(isShortFlightType && i === 0 && { second_booking: selectedEvent.second_booking ?? null }) } });
       }
     }
     applyAll(updatesToApply);
