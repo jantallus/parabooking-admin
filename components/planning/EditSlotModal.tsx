@@ -2067,7 +2067,11 @@ export default function EditSlotModal({
                           return d.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) === moveConfig.date && d.toLocaleTimeString('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hour12: false }) === moveConfig.time;
                         });
                         if (!targetSlot) isBusy = true;
-                        else if (targetSlot.status !== 'available' && !currentBookingSlotIds.includes(targetSlot.id)) isBusy = true;
+                        else if (targetSlot.status !== 'available' && !currentBookingSlotIds.includes(targetSlot.id)) {
+                          // Pour aiglon : créneau booked sans Pax 2 = pas occupé
+                          const halfFull = isShortFlightType && !targetSlot.second_booking?.title && targetSlot.flight_type_id?.toString() === formData.flight_type_id?.toString();
+                          if (!halfFull) isBusy = true;
+                        }
                         else if (slotsNeeded2 > 1) {
                           const startMs = new Date(targetSlot.start_time).getTime();
                           for (let i = 1; i < slotsNeeded2; i++) {
