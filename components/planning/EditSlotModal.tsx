@@ -451,6 +451,13 @@ export default function EditSlotModal({
     return dur > 0 && dur * 2 <= slotDuration;
   }, [isAravisContext, slotDuration, formData.flight_type_id, flightTypes]);
 
+  const paxPerSlot = useMemo(() => {
+    const ft = flightTypes.find(f => f.id?.toString() === (selectedEvent?.flight_type_id ?? formData.flight_type_id)?.toString());
+    return ft?.passengers_per_slot || 1;
+  }, [flightTypes, selectedEvent?.flight_type_id, formData.flight_type_id]);
+
+  const groupTotalPax = useMemo(() => groupRootSlots.length * paxPerSlot, [groupRootSlots.length, paxPerSlot]);
+
   const smartFlightOptions = useMemo(() => {
     const dateStr = selectedEvent?.start ? new Date(selectedEvent.start as Date | string).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) : '';
     const planSchedules: Record<string, Set<string>> = {};
@@ -877,7 +884,7 @@ export default function EditSlotModal({
   };
 
   const handleReleaseGroup = async () => {
-    if (!selectedEvent || !await confirm(`🧹 Action irréversible. Libérer les ${groupRootSlots.length} créneaux de ce groupe ?`)) return;
+    if (!selectedEvent || !await confirm(`🧹 Action irréversible. Libérer les ${groupTotalPax} passagers de ce groupe ?`)) return;
     const flight = flightTypes.find(f => f.id.toString() === formData.flight_type_id?.toString());
     const flightDur = flight?.duration_minutes || flight?.duration || 0;
     const slotsNeeded = (flight?.allow_multi_slots && slotDuration > 0 && flightDur > slotDuration) ? Math.ceil(flightDur / slotDuration) : 1;
@@ -994,13 +1001,13 @@ export default function EditSlotModal({
         const sTime = new Date(slot.start_time).getTime();
         if (!assignedSlots.some(a => a.monitor_id === slot.monitor_id && Math.abs(new Date(a.start_time).getTime() - sTime) < slotsNeeded * slotDuration * 60000)) { assignedSlots.push(slot); remaining--; }
       }
-      if (remaining > 0) { toast.error(`❌ Impossible : Pas assez de créneaux simultanés pour placer les ${groupRootSlots.length} passagers à partir de ${moveConfig.time}.`); return; }
+      if (remaining > 0) { toast.error(`❌ Impossible : Pas assez de créneaux simultanés pour placer les ${groupTotalPax} passagers à partir de ${moveConfig.time}.`); return; }
       if (assignedSlots.length === groupRootSlots.length && assignedSlots.every((s, i) => s.id === groupRootSlots[i].id)) { toast.info('ℹ️ Le groupe est déjà assigné exactement à ces mêmes créneaux et pilotes.'); return; }
       slotsToFree.forEach(id => updatesToApply.push({ id, data: { status: 'available', title: '', phone: '', email: '', flight_type_id: null, second_booking: null } }));
       groupRootSlots.forEach((oldSlot, g) => {
         const newBaseSlot = assignedSlots[g];
         const passengerTitle = oldSlot.title || formData.title;
-        updatesToApply.push({ id: newBaseSlot.id, data: { ...formData, title: passengerTitle, status: 'booked', notes: oldSlot.notes, payment_data: oldSlot.payment_data } });
+        updatesToApply.push({ id: newBaseSlot.id, data: { ...formData, title: passengerTitle, status: 'booked', notes: oldSlot.notes, payment_data: oldSlot.payment_data, second_booking: oldSlot.second_booking ?? null } });
         if (slotsNeeded > 1) {
           const baseStartMs = new Date(newBaseSlot.start_time).getTime();
           for (let i = 1; i < slotsNeeded; i++) {
@@ -1959,7 +1966,7 @@ export default function EditSlotModal({
                           <button onClick={handleRelease} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Les 2</button>
                         </div>
                         {groupRootSlots.length > 1 && (
-                          <button onClick={handleReleaseGroup} className="w-full bg-rose-50 border border-rose-200 text-rose-600 rounded-xl font-black uppercase italic text-[9px] tracking-widest hover:bg-rose-500 hover:text-white transition-colors py-2 shadow-sm">🧹 Libérer groupe ({groupRootSlots.length})</button>
+                          <button onClick={handleReleaseGroup} className="w-full bg-rose-50 border border-rose-200 text-rose-600 rounded-xl font-black uppercase italic text-[9px] tracking-widest hover:bg-rose-500 hover:text-white transition-colors py-2 shadow-sm">🧹 Libérer groupe ({groupTotalPax})</button>
                         )}
                       </div>
                     ) : (
@@ -1974,7 +1981,7 @@ export default function EditSlotModal({
                               <button onClick={handleRelease} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">{isNoteOnly ? '🗑️ Effacer la note' : (showKeepNote ? '🗑️ Libérer + effacer note' : '🗑️ Libérer ce créneau')}</button>
                               {showKeepNote && <button onClick={handleClearNote} className="flex-1 font-black uppercase italic text-[9px] tracking-widest transition-all rounded-xl py-2 shadow-sm bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-500 hover:text-white">📝 Effacer la note</button>}
                               {showKeepNote && <button onClick={handleReleaseKeepNote} className="flex-1 font-black uppercase italic text-[9px] tracking-widest transition-all rounded-xl py-2 shadow-sm bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50">🔓 Libérer + garder note</button>}
-                              {groupRootSlots.length > 1 && (<button onClick={handleReleaseGroup} className="flex-1 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl font-black uppercase italic text-[9px] tracking-widest hover:bg-rose-500 hover:text-white transition-colors py-2 shadow-sm">🧹 Libérer groupe ({groupRootSlots.length})</button>)}
+                              {groupRootSlots.length > 1 && (<button onClick={handleReleaseGroup} className="flex-1 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl font-black uppercase italic text-[9px] tracking-widest hover:bg-rose-500 hover:text-white transition-colors py-2 shadow-sm">🧹 Libérer groupe ({groupTotalPax})</button>)}
                             </>
                           );
                         })()}
@@ -2012,7 +2019,7 @@ export default function EditSlotModal({
                 {groupRootSlots.length > 1 && (
                   <div className="mb-4 bg-emerald-50 p-3 rounded-2xl border border-emerald-100 flex items-center gap-3">
                     <input type="checkbox" className="w-5 h-5 accent-emerald-500 cursor-pointer" checked={moveGroup} onChange={e => setMoveGroup(e.target.checked)} />
-                    <label className="text-xs font-bold text-emerald-900 cursor-pointer select-none" onClick={() => setMoveGroup(!moveGroup)}>Déplacer TOUT le groupe ({groupRootSlots.length} passagers)</label>
+                    <label className="text-xs font-bold text-emerald-900 cursor-pointer select-none" onClick={() => setMoveGroup(!moveGroup)}>Déplacer TOUT le groupe ({groupTotalPax} passagers)</label>
                   </div>
                 )}
                 <div>
