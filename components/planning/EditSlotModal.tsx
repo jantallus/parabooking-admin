@@ -1053,10 +1053,14 @@ export default function EditSlotModal({
     } else {
       const [targetHour, targetMin] = moveConfig.time.split(':').map(Number);
       const targetTimeMs = (targetHour * 60 + targetMin) * 60000;
-      const targetSlot = availableTargetSlots.find(a => {
+      const matchesTarget = (a: Slot) => {
         const d = new Date(a.start_time);
         return d.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) === moveConfig.date && (d.getHours() * 60 + d.getMinutes()) * 60000 === targetTimeMs && (moveConfig.monitorId === 'random' || a.monitor_id?.toString() === moveConfig.monitorId);
-      });
+      };
+      // Priorité : créneau aiglon à moitié plein sur un autre moniteur, avant le slot source
+      const targetSlot = availableTargetSlots.find(a => a.id !== selectedEvent!.id && a.status === 'booked' && matchesTarget(a))
+        ?? availableTargetSlots.find(a => a.id !== selectedEvent!.id && matchesTarget(a))
+        ?? availableTargetSlots.find(a => matchesTarget(a));
       if (!targetSlot) { toast.error("❌ Le créneau cible n'est plus disponible."); return; }
       if (targetSlot.id === selectedEvent.id) { toast.info('ℹ️ Le créneau est déjà à cet emplacement avec ce pilote.'); return; }
       if (isShortFlightType && targetSlot.status === 'booked') {
