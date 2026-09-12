@@ -399,7 +399,12 @@ export default function EditSlotModal({
 
   const availableTargetSlots = useMemo(() => {
     return appointments.filter(a => {
-      if (a.status !== 'available' && !currentBookingSlotIds.includes(a.id)) return false;
+      if (a.status !== 'available' && !currentBookingSlotIds.includes(a.id)) {
+        // Pour aiglon : autoriser aussi les créneaux booked avec Pax 2 vide
+        const ft = formData.flight_type_id ? flightTypes.find(f => f.id?.toString() === formData.flight_type_id.toString()) : null;
+        const isShortFT = ft && (ft.passengers_per_slot || 1) > 1;
+        if (!(isShortFT && a.status === 'booked' && !a.second_booking?.title && a.flight_type_id?.toString() === formData.flight_type_id?.toString())) return false;
+      }
 
       const d = new Date(a.start_time);
       if (d.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) !== moveConfig.date) return false;
@@ -1054,12 +1059,21 @@ export default function EditSlotModal({
       });
       if (!targetSlot) { toast.error("❌ Le créneau cible n'est plus disponible."); return; }
       if (targetSlot.id === selectedEvent.id) { toast.info('ℹ️ Le créneau est déjà à cet emplacement avec ce pilote.'); return; }
+      if (isShortFlightType && targetSlot.status === 'booked') {
+        // Créneau aiglon à moitié plein : ajouter le passager déplacé en Pax 2
+        const pax2Data = movePax === 'pax2' && selectedEvent.second_booking?.title
+          ? { title: selectedEvent.second_booking.title, phone: selectedEvent.second_booking.phone || '', weight: selectedEvent.second_booking.weight ?? null, payment_type: selectedEvent.second_booking.payment_type || null, encaisseur_id: selectedEvent.second_booking.encaisseur_id || null }
+          : { title: selectedEvent.title || '', phone: selectedEvent.phone || '', weight: selectedEvent.weight ?? null, payment_type: selectedEvent.payment_data?.payment_type || null, encaisseur_id: selectedEvent.payment_data?.encaisseur_id || null };
+        updatesToApply.push({ id: targetSlot.id, data: { second_booking: pax2Data } });
+        currentBookingSlotIds.forEach(id => updatesToApply.push({ id, data: { status: 'available', title: '', phone: '', email: '', flight_type_id: null, second_booking: null } }));
+      } else {
       currentBookingSlotIds.forEach(id => updatesToApply.push({ id, data: { status: 'available', title: '', phone: '', email: '', flight_type_id: null, second_booking: null } }));
       const newStartMs = new Date(targetSlot.start_time).getTime();
       for (let i = 0; i < slotsNeeded; i++) {
         const ms = newStartMs + i * slotDuration * 60000;
         const slotToBook = appointments.find(a => a.monitor_id?.toString() === targetSlot.monitor_id?.toString() && new Date(a.start_time).getTime() === ms);
         if (slotToBook) updatesToApply.push({ id: slotToBook.id, data: { ...formData, title: i === 0 ? formData.title : `↪️ Suite ${formData.title || 'Vol'}`, status: 'booked', notes: i === 0 ? formData.notes : 'Extension auto', payment_data: selectedEvent.payment_data, ...(isShortFlightType && i === 0 && { second_booking: selectedEvent.second_booking ?? null }) } });
+      }
       }
     }
     applyAll(updatesToApply);
