@@ -1958,6 +1958,9 @@ export default function EditSlotModal({
                           <button onClick={handleReleasePax2} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Pax 2</button>
                           <button onClick={handleRelease} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Les 2</button>
                         </div>
+                        {groupRootSlots.length > 1 && (
+                          <button onClick={handleReleaseGroup} className="w-full bg-rose-50 border border-rose-200 text-rose-600 rounded-xl font-black uppercase italic text-[9px] tracking-widest hover:bg-rose-500 hover:text-white transition-colors py-2 shadow-sm">🧹 Libérer groupe ({groupRootSlots.length})</button>
+                        )}
                       </div>
                     ) : (
                       <div className="flex gap-2 pt-2">
@@ -2006,7 +2009,7 @@ export default function EditSlotModal({
                     </div>
                   </div>
                 )}
-                {groupRootSlots.length > 1 && !isShortFlightType && (
+                {groupRootSlots.length > 1 && (
                   <div className="mb-4 bg-emerald-50 p-3 rounded-2xl border border-emerald-100 flex items-center gap-3">
                     <input type="checkbox" className="w-5 h-5 accent-emerald-500 cursor-pointer" checked={moveGroup} onChange={e => setMoveGroup(e.target.checked)} />
                     <label className="text-xs font-bold text-emerald-900 cursor-pointer select-none" onClick={() => setMoveGroup(!moveGroup)}>Déplacer TOUT le groupe ({groupRootSlots.length} passagers)</label>
