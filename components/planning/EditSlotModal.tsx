@@ -466,7 +466,11 @@ export default function EditSlotModal({
     return ft?.passengers_per_slot || 1;
   }, [flightTypes, selectedEvent?.flight_type_id, formData.flight_type_id]);
 
-  const groupTotalPax = useMemo(() => groupRootSlots.length * paxPerSlot, [groupRootSlots.length, paxPerSlot]);
+  const groupTotalPax = useMemo(() => {
+    if (paxPerSlot <= 1) return groupRootSlots.length;
+    // Pour vols multi-pax (aiglon) : compter les passagers réels, pas slots × capacité
+    return groupRootSlots.reduce((sum, slot) => sum + 1 + (slot.second_booking?.title ? 1 : 0), 0);
+  }, [groupRootSlots, paxPerSlot]);
 
   const smartFlightOptions = useMemo(() => {
     const dateStr = selectedEvent?.start ? new Date(selectedEvent.start as Date | string).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) : '';
