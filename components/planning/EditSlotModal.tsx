@@ -292,7 +292,7 @@ export default function EditSlotModal({
     }
     setGroupSize(detectedGroupSize);
     setGroupLocked(detectedGroupSize > 1);
-    setShowGroupSelector(detectedGroupSize >= 3);
+    setShowGroupSelector(detectedGroupSize >= 2);
     setIsEditing(selectedEvent.status !== 'booked');
     setPassengerWeights([selectedEvent.weight?.toString() || '']);
     const sb = selectedEvent.second_booking;
@@ -1148,7 +1148,7 @@ export default function EditSlotModal({
             </>
           )}
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && isShortFlightType && showGroupSelector && (
-            <div className="flex-1 py-2 px-3 rounded-lg font-black text-[9px] uppercase bg-white text-sky-500 shadow-sm text-center">👥 {groupSize} pax</div>
+            <div className="flex-1 py-2 px-3 rounded-lg font-black text-[9px] uppercase bg-white text-sky-500 shadow-sm text-center">👥 Groupe {groupSize}</div>
           )}
           <button onClick={() => setActiveTab('note')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'note' ? 'bg-white text-amber-500 shadow-sm' : 'text-slate-400'}`}>📝 Note</button>
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && selectedEvent?.status !== 'available' && !isClientLocked && (
@@ -1438,8 +1438,8 @@ export default function EditSlotModal({
                 {formData.flight_type_id && (
                   <div className="bg-white p-4 rounded-2xl border-2 border-slate-100 mt-4 shadow-sm">
                     {isShortFlightType && !showGroupSelector && !groupLocked ? (
-                      <button onClick={() => { setShowGroupSelector(true); setGroupSize(3); setActiveTab('client'); }} className="w-full text-xs font-bold text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 py-2.5 rounded-xl border border-sky-200 transition-all">
-                        👥 Groupe (+de 2 pax)
+                      <button onClick={() => { setShowGroupSelector(true); setGroupSize(2); setActiveTab('client'); }} className="w-full text-xs font-bold text-sky-600 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 py-2.5 rounded-xl border border-sky-200 transition-all">
+                        👥 Groupe
                       </button>
                     ) : (
                       <>
@@ -1458,7 +1458,7 @@ export default function EditSlotModal({
                       </div>
                     ) : (
                       <div className="flex items-center gap-4">
-                        <button onClick={() => { if (isShortFlightType && groupSize <= 3) { setShowGroupSelector(false); setGroupSize(1); } else { handleMainChange(-1); } }} className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-black text-xl hover:bg-slate-200 transition-colors flex items-center justify-center">-</button>
+                        <button onClick={() => { if (isShortFlightType && groupSize <= 2) { setShowGroupSelector(false); setGroupSize(1); } else { handleMainChange(-1); } }} className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-black text-xl hover:bg-slate-200 transition-colors flex items-center justify-center">-</button>
                         <span className="text-2xl font-black text-slate-900 w-8 text-center">{groupSize}</span>
                         <button onClick={() => handleMainChange(1)} className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-black text-xl hover:bg-slate-200 transition-colors flex items-center justify-center">+</button>
                         <span className="text-sm font-bold text-slate-500 ml-2">
