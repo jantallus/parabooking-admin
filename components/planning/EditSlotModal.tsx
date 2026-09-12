@@ -981,7 +981,7 @@ export default function EditSlotModal({
         const d = new Date(a.start_time);
         if (d.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) !== moveConfig.date) return false;
         if ((d.getHours() * 60 + d.getMinutes()) * 60000 < targetTimeMs) return false;
-        if (moveConfig.monitorId !== 'random' && a.monitor_id?.toString() !== moveConfig.monitorId) return false;
+        if (!moveGroup && moveConfig.monitorId !== 'random' && a.monitor_id?.toString() !== moveConfig.monitorId) return false;
         return true;
       });
       const validStartSlots: Slot[] = [];
@@ -2033,7 +2033,7 @@ export default function EditSlotModal({
                     {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
-                <div>
+                {!moveGroup && (<div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Pilote</label>
                   <select className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-bold" value={moveConfig.monitorId} onChange={e => setMoveConfig({ ...moveConfig, monitorId: e.target.value })}>
                     <option value="random">🎲 Aléatoire (Peu importe)</option>
@@ -2060,7 +2060,7 @@ export default function EditSlotModal({
                       return <option key={m.id} value={m.id} disabled={isBusy} className={isBusy ? 'text-slate-300 bg-slate-100' : 'text-slate-900'}>{m.title} {isBusy ? '(Occupé)' : ''}</option>;
                     })}
                   </select>
-                </div>
+                </div>)}
                 <div className="pt-4 space-y-3">
                   <button onClick={handleMove} disabled={!moveConfig.time} className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all ${!moveConfig.time ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 text-white hover:bg-emerald-600'}`}>Transférer le créneau</button>
                   <button onClick={onClose} className="w-full text-slate-300 font-bold uppercase text-[10px]">Annuler</button>
