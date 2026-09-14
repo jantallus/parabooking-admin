@@ -11,7 +11,7 @@ import EditSlotModal from '@/components/planning/EditSlotModal';
 import GenSlotsModal from '@/components/planning/GenSlotsModal';
 import ReplaceMonitorModal from '@/components/planning/ReplaceMonitorModal';
 import { useToast } from '@/components/ui/ToastProvider';
-import { Wrench, CalendarDays } from 'lucide-react';
+import { Wrench, CalendarDays, Search, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { CurrentUser, Slot, FlightType } from '@/lib/types';
@@ -70,6 +70,9 @@ export default function PlanningAdmin() {
   const currentUser = useCurrentUser();
   const [showGenModal, setShowGenModal] = useState(false);
   const [replaceMonitor, setReplaceMonitor] = useState<{ id: string; title: string } | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [expandedPax2, setExpandedPax2] = useState<Set<number>>(new Set());
   const togglePax2 = useCallback((id: number) => {
     setExpandedPax2(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
@@ -429,6 +432,27 @@ export default function PlanningAdmin() {
     </div>
   ), [setReplaceMonitor]);
 
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (q.length < 2) return [];
+    const mo = ['jan','fév','mar','avr','mai','juin','juil','aoû','sep','oct','nov','déc'];
+    return appointments
+      .filter(a => {
+        if (a.status !== 'booked') return false;
+        return [a.title, a.phone, a.billing_name, a.second_booking?.title, a.second_booking?.phone]
+          .some(f => f?.toLowerCase().includes(q));
+      })
+      .map(a => {
+        const monitor = (monitors as { id: string; title: string }[]).find(m => m.id === String(a.monitor_id));
+        const d = new Date(a.start_time);
+        const dateLabel = `${d.getDate()} ${mo[d.getMonth()]} ${d.getFullYear()} · ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')}`;
+        const dateStr = a.start_time.slice(0, 10);
+        return { id: a.id, dateStr, dateLabel, title: a.title, phone: a.phone, billing_name: a.billing_name, second: a.second_booking?.title, monitor: monitor?.title ?? '—' };
+      })
+      .sort((x, y) => x.dateStr.localeCompare(y.dateStr))
+      .slice(0, 20);
+  }, [searchQuery, appointments, monitors]);
+
   const memoizedCalendar = useMemo(() => (
     <FullCalendar
       ref={calendarRef}
@@ -487,7 +511,7 @@ export default function PlanningAdmin() {
             Planning <span className="text-sky-500">Vols</span>
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center bg-white border-2 border-slate-200 rounded-2xl px-4 py-1 shadow-sm hover:border-sky-300 transition-colors">
             <CalendarDays size={18} className="mr-2 text-slate-500" />
             <input
@@ -501,6 +525,13 @@ export default function PlanningAdmin() {
             />
           </div>
           <button
+            onClick={() => { setShowSearch(s => !s); setTimeout(() => searchInputRef.current?.focus(), 50); }}
+            className={`p-3 rounded-2xl border-2 shadow-sm transition-colors ${showSearch ? 'bg-sky-600 border-sky-600 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-sky-300'}`}
+            title="Rechercher un passager"
+          >
+            <Search size={16} />
+          </button>
+          <button
             onClick={() => setShowGenModal(true)}
             disabled={currentUser?.role !== 'admin'}
             className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] shadow-xl hover:scale-105 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
@@ -509,6 +540,71 @@ export default function PlanningAdmin() {
           </button>
         </div>
       </header>
+
+      {/* Panel recherche */}
+      {showSearch && (
+        <div className="mx-2 md:mx-4 mb-4 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
+            <Search size={16} className="text-sky-500 shrink-0" />
+            <input
+              ref={searchInputRef}
+              type="search"
+              placeholder="Nom, prénom, téléphone, email..."
+              className="flex-1 text-sm font-medium text-slate-700 placeholder-slate-300 outline-none"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Escape' && (setShowSearch(false), setSearchQuery(''))}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="text-slate-300 hover:text-slate-500">
+                <X size={14} />
+              </button>
+            )}
+            <button onClick={() => { setShowSearch(false); setSearchQuery(''); }} className="text-slate-400 hover:text-slate-600">
+              <X size={16} />
+            </button>
+          </div>
+          {searchQuery.trim().length < 2 ? (
+            <p className="px-4 py-4 text-xs text-slate-400">Tapez au moins 2 caractères pour rechercher.</p>
+          ) : searchResults.length === 0 ? (
+            <p className="px-4 py-4 text-xs text-slate-400">Aucune réservation trouvée pour &laquo;{searchQuery}&raquo;.</p>
+          ) : (
+            <ul className="divide-y divide-slate-50 max-h-80 overflow-y-auto">
+              {searchResults.map(r => (
+                <li key={`${r.id}-${r.dateStr}`}>
+                  <button
+                    className="w-full text-left px-4 py-3 hover:bg-sky-50 transition-colors"
+                    onClick={() => {
+                      calendarRef.current?.getApi().gotoDate(r.dateStr);
+                      setCurrentDate(r.dateStr);
+                      setShowSearch(false);
+                      setSearchQuery('');
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-slate-800 truncate">
+                          {r.title || '—'}
+                          {r.second && <span className="text-slate-400 font-normal"> + {r.second}</span>}
+                        </p>
+                        {(r.phone || r.billing_name) && (
+                          <p className="text-[11px] text-slate-400 truncate">
+                            {r.phone}{r.phone && r.billing_name ? ' · ' : ''}{r.billing_name && r.billing_name !== r.title ? r.billing_name : ''}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[11px] font-bold text-sky-600">{r.dateLabel}</p>
+                        <p className="text-[10px] text-slate-400">{r.monitor}</p>
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl md:rounded-[35px] shadow-2xl border border-slate-200 p-2 md:p-6 overflow-hidden">
         {isLoading ? (

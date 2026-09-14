@@ -328,6 +328,7 @@ export default function StandbyPage() {
   const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '' });
   const [showArchive, setShowArchive] = useState(false);
   const [currentUserName, setCurrentUserName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -464,6 +465,13 @@ export default function StandbyPage() {
     }),
   [clients]);
 
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return null;
+    return clients.filter(c => [c.name, c.phone, c.email, c.flight_type, c.notes, c.availability_text, c.pilot_name]
+      .some(f => f?.toLowerCase().includes(q)));
+  }, [clients, searchQuery]);
+
   const archiveStats = useMemo(() => {
     const byType = new Map<string, number>();
     const byPilot = new Map<string, number>();
@@ -514,21 +522,114 @@ export default function StandbyPage() {
             <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-white inline-block border-l-2 border-l-rose-500" /> Doublon possible</span>
           </div>
         </div>
-        <button onClick={openCreate} className="bg-slate-900 text-white px-5 py-3 rounded-2xl font-black text-sm hover:bg-sky-600 transition-colors whitespace-nowrap">
-          + Ajouter
-        </button>
+        <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2 bg-white border-2 border-slate-200 rounded-2xl px-3 py-2 focus-within:border-sky-400 transition-colors shadow-sm">
+            <span className="text-slate-400 text-sm">🔍</span>
+            <input
+              type="search"
+              placeholder="Nom, tél, email, type de vol..."
+              className="text-sm font-medium text-slate-700 placeholder-slate-300 outline-none bg-transparent w-44 sm:w-56"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="text-slate-300 hover:text-slate-500 text-xs font-black">✕</button>
+            )}
+          </div>
+          <button onClick={openCreate} className="bg-slate-900 text-white px-5 py-3 rounded-2xl font-black text-sm hover:bg-sky-600 transition-colors whitespace-nowrap">
+            + Ajouter
+          </button>
+        </div>
       </div>
 
+      {/* Résultats de recherche */}
+      {searchResults !== null && (
+        <div className="overflow-x-auto rounded-3xl shadow-sm border border-sky-100 bg-sky-50/30">
+          <div className="px-4 py-2 border-b border-sky-100 flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase text-sky-500 tracking-widest">
+              🔍 {searchResults.length} résultat{searchResults.length !== 1 ? 's' : ''} pour &laquo;{searchQuery}&raquo;
+            </span>
+            <button onClick={() => setSearchQuery('')} className="text-[10px] text-slate-400 hover:text-slate-600 font-black uppercase">Effacer</button>
+          </div>
+          {searchResults.length === 0 ? (
+            <p className="text-center py-8 text-slate-400 text-sm">Aucune demande ne correspond à cette recherche.</p>
+          ) : (
+            <table className="w-full text-sm min-w-[700px]">
+              <thead>
+                <tr className="bg-white/60 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                  <th className="text-left p-3 pl-4">Statut</th>
+                  <th className="text-left p-3">Contact</th>
+                  <th className="text-left p-3">Pax</th>
+                  <th className="text-left p-3">Vol</th>
+                  <th className="text-left p-3">Disponibilité</th>
+                  <th className="text-left p-3">Programmé</th>
+                  <th className="text-left p-3">Notes</th>
+                  <th className="p-3" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-sky-100">
+                {searchResults.map(c => {
+                  const isMultiW = isMultiWeek(c);
+                  const isDup = duplicateIds.has(c.id);
+                  return (
+                    <tr key={c.id} className={`${rowBg(c, isMultiW, isDup)} transition-colors`}>
+                      <td className="p-3 pl-4">
+                        <div className="space-y-1">
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-lg ${c.status === 'done' ? 'text-emerald-600 bg-emerald-50' : c.status === 'scheduled' ? 'text-orange-600 bg-orange-50' : 'text-slate-500 bg-slate-100'}`}>
+                            {c.status === 'done' ? '✓ Effectué' : c.status === 'scheduled' ? 'Programmé' : 'En attente'}
+                          </span>
+                          {c.processing_by && <p className="text-[9px] text-amber-600 font-black">⚙️ {c.processing_by}</p>}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <p className="font-bold text-slate-800 truncate max-w-[140px]">{c.name || '—'}</p>
+                        {c.phone && <p className="text-xs text-slate-400">{c.phone}</p>}
+                        {c.email && <p className="text-xs text-slate-400 truncate max-w-[140px]">{c.email}</p>}
+                        <div className="flex gap-1.5 mt-1">
+                          {c.phone && <a href={`tel:${c.phone}`} className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center text-[10px]">📞</a>}
+                          {c.phone && <a href={`sms:${c.phone}`} className="w-5 h-5 rounded-full bg-sky-50 flex items-center justify-center text-[10px]">💬</a>}
+                          {c.email && <a href={`mailto:${c.email}`} className="w-5 h-5 rounded-full bg-violet-50 flex items-center justify-center text-[10px]">📧</a>}
+                        </div>
+                      </td>
+                      <td className="p-3 font-bold text-slate-700">
+                        {c.nb_passengers > 1 ? <span className="bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full text-xs font-black">{c.nb_passengers} pers.</span> : '1'}
+                        {c.weight_info && <p className="text-[10px] text-slate-400 mt-0.5">{c.weight_info}</p>}
+                      </td>
+                      <td className="p-3 text-xs font-bold text-slate-700">{c.flight_type || '—'}</td>
+                      <td className="p-3">
+                        {c.availability_start && <p className="text-xs font-bold text-slate-700">{fmtDate(c.availability_start)}{c.availability_end && c.availability_end !== c.availability_start ? ` → ${fmtDate(c.availability_end)}` : ''}</p>}
+                        {c.availability_text && <p className="text-[10px] text-slate-400 truncate max-w-[120px]">{c.availability_text}</p>}
+                      </td>
+                      <td className="p-3">
+                        {c.booked_date ? <p className="text-xs font-bold text-orange-700">{fmtDate(c.booked_date)} {c.booked_time}</p> : <span className="text-slate-300">—</span>}
+                        {c.pilot_name && <p className="text-[10px] text-slate-400">{c.pilot_name}</p>}
+                      </td>
+                      <td className="p-3 max-w-[160px]"><p className="text-[10px] text-slate-400 line-clamp-2">{c.notes}</p></td>
+                      <td className="p-3">
+                        <div className="flex gap-1">
+                          <button onClick={() => openEdit(c)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-700 transition-colors">✏️</button>
+                          <button onClick={() => handleDelete(c.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-500 transition-colors">🗑️</button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
       {/* Tableau actif */}
-      {loading ? (
+      {searchResults === null && loading ? (
         <div className="text-center py-12 text-slate-400 animate-pulse">Chargement...</div>
-      ) : active.length === 0 ? (
+      ) : searchResults === null && active.length === 0 ? (
         <div className="text-center py-16 text-slate-300">
           <p className="text-4xl mb-3">🪂</p>
           <p className="font-bold text-lg">Aucun client en attente</p>
           <p className="text-sm">Ajoutez un contact avec le bouton ci-dessus</p>
         </div>
-      ) : (
+      ) : searchResults === null && (
         <div className="overflow-x-auto rounded-3xl shadow-sm border border-slate-100">
           <table className="w-full text-sm min-w-[700px]">
             <thead>
