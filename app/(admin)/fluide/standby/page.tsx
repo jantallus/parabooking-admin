@@ -1095,13 +1095,16 @@ export default function StandbyPage() {
                         onChange={e => setForm(f => ({ ...f, flight_type: e.target.value }))}
                       >
                         <option value="">— Choisir —</option>
-                        {grouped ? seasons.map(s => (
-                          <optgroup key={s} label={s || 'Autres'}>
-                            {allFlightTypes.filter(ft => (ft.season || '') === s).map(ft => (
-                              <option key={ft.id} value={ft.name}>{ft.name}</option>
-                            ))}
-                          </optgroup>
-                        )) : allFlightTypes.map(ft => (
+                        {grouped ? seasons.map(s => {
+                          const label = s === 'summer' ? 'Été' : s === 'winter' ? 'Hiver' : s || 'Autres';
+                          return (
+                            <optgroup key={s} label={label}>
+                              {allFlightTypes.filter(ft => (ft.season || '') === s).map(ft => (
+                                <option key={ft.id} value={ft.name}>{ft.name}</option>
+                              ))}
+                            </optgroup>
+                          );
+                        }) : allFlightTypes.map(ft => (
                           <option key={ft.id} value={ft.name}>{ft.name}</option>
                         ))}
                       </select>
