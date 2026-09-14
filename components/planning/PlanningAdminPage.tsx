@@ -294,8 +294,15 @@ export default function PlanningAdmin() {
     };
     const isGiftCard = pd?.code_type === 'gift_card' && !!pd?.code;
     if (ep.price_cents) {
-      const euros = (ep.price_cents / 100).toFixed(0);
-      if (isUnpaid || isNP) priceStr = `À enc. ${euros} €`;
+      // Perçu net : CB → cb_net_cents, Stripe → stripe_net_cents, sinon prix total
+      const netCents = (() => {
+        if (isUnpaid || isNP || !pd) return ep.price_cents!;
+        if (pd.payment_type === 'cb' && pd.cb_net_cents != null) return Number(pd.cb_net_cents);
+        if ((pd.payment_type === 'online' || pd.online) && pd.stripe_net_cents != null) return Number(pd.stripe_net_cents);
+        return ep.price_cents!;
+      })();
+      const euros = (netCents / 100).toFixed(0);
+      if (isUnpaid || isNP) priceStr = `À enc. ${(ep.price_cents / 100).toFixed(0)} €`;
       else if (isGiftCard) priceStr = `🎁 ${pd!.code}${pd?.online ? ' + Stripe' : ''}`;
       else if (pd?.payment_type === 'online' || pd?.online) priceStr = `${euros} € · Stripe`;
       else if (pd?.payment_type && TYPE_SHORT[pd.payment_type]) priceStr = `${TYPE_SHORT[pd.payment_type]} · ${euros} €`;

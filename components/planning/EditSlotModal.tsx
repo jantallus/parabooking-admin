@@ -1135,11 +1135,21 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                   const bnFirst = bn.split(/\s/)[0].toLowerCase();
                   return (firstWord === bnFirst && bn.length > t.length) ? bn : t;
                 })()}</span>
-                {flight && (
-                  <span className={`text-xs font-black px-2.5 py-1 rounded-xl ${needsCollection ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
-                    {needsCollection ? `À enc. ${(flight.price_cents / 100).toFixed(0)} €` : `${(flight.price_cents / 100).toFixed(0)} €`}
-                  </span>
-                )}
+                {flight && (() => {
+                  const baseCents = (pd?.price_override_cents ?? flight.price_cents) + (pd?.complement_total_cents ?? 0);
+                  const netCents = (() => {
+                    if (needsCollection || !pd) return baseCents;
+                    if (pd.payment_type === 'cb' && pd.cb_net_cents != null) return Number(pd.cb_net_cents);
+                    if ((pd.payment_type === 'online' || pd.online) && pd.stripe_net_cents != null) return Number(pd.stripe_net_cents);
+                    return baseCents;
+                  })();
+                  const euros = (netCents / 100).toFixed(0);
+                  return (
+                    <span className={`text-xs font-black px-2.5 py-1 rounded-xl ${needsCollection ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                      {needsCollection ? `À enc. ${euros} €` : `${euros} €`}
+                    </span>
+                  );
+                })()}
               </div>
               {weightLine && <p className="text-[10px] font-bold text-slate-400">⚖️ {weightLine}</p>}
             </div>
