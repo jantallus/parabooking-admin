@@ -354,6 +354,13 @@ export default function PlanningAdmin() {
       const sb = ep.second_booking!;
       const isExp = expandedPax2.has(ep.id);
       const sbPayShort = sb.payment_type ? (TYPE_SHORT[sb.payment_type] ?? null) : null;
+      const sbPayLine = ep.price_cents
+        ? (!sb.payment_type
+          ? `À enc. ${(ep.price_cents / 100).toFixed(0)} €`
+          : sbPayShort
+          ? `${sbPayShort} · ${(ep.price_cents / 100).toFixed(2)} €`
+          : `${(ep.price_cents / 100).toFixed(2)} €`)
+        : (sbPayShort || null);
 
       return (
         <div style={{ position: 'relative', display: 'flex', height: '100%', overflow: 'hidden' }}>
@@ -390,7 +397,7 @@ export default function PlanningAdmin() {
                 {sb.phone && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>📞</span>}
                 {ep.flight_name && subSpan(ep.flight_name)}
                 {sb.weight && subSpan(`${sb.weight} kg`)}
-                {subSpan(sbPayShort ? sbPayShort : (!sb.payment_type && ep.price_cents ? `À enc. ${(ep.price_cents / 100).toFixed(0)} €` : '⚠️ non enc.'))}
+                {subSpan(sbPayLine ?? '⚠️ non enc.')}
               </>
             ) : (
               <>
@@ -399,9 +406,7 @@ export default function PlanningAdmin() {
                 </span>
                 {sb.phone && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>📞</span>}
                 {ep.flight_name && <span style={{ fontSize: '8px', opacity: 0.75, lineHeight: '1.1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{ep.flight_name}</span>}
-                {!sb.payment_type && ep.price_cents
-                  ? <span style={{ fontSize: '8px', opacity: 0.8, lineHeight: '1.1', flexShrink: 0 }}>À enc. {(ep.price_cents / 100).toFixed(0)} €</span>
-                  : sbPayShort ? <span style={{ fontSize: '8px', opacity: 0.8, lineHeight: '1.1', flexShrink: 0 }}>{sbPayShort}</span> : null}
+                {sbPayLine && <span style={{ fontSize: '8px', opacity: 0.8, lineHeight: '1.1', flexShrink: 0 }}>{sbPayLine}</span>}
               </>
             )}
           </NativeStopDiv>
