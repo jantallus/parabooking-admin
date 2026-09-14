@@ -329,7 +329,7 @@ export default function StandbyPage() {
   const [parsed, setParsed] = useState<ReturnType<typeof parseStandbyMessage> | null>(null);
   const [scheduleModal, setScheduleModal] = useState<StandbyClient | null>(null);
   const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '', monitor_id: '' });
-  const [freeMonitors, setFreeMonitors] = useState<Array<{ id: string; first_name: string }>>([]);
+  const [freeMonitors, setFreeMonitors] = useState<Array<{ id: string; first_name: string; slot_id?: number }>>([]);
   const [loadingMonitors, setLoadingMonitors] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [currentUserName, setCurrentUserName] = useState('');
@@ -458,14 +458,13 @@ export default function StandbyPage() {
   };
 
   const fetchFreeMonitors = async (date: string, time: string, source: string | null) => {
-    if (!date) { setFreeMonitors([]); return; }
+    if (!date || !time) { setFreeMonitors([]); return; }
     setLoadingMonitors(true);
-    const enseigne = (isAravisContext || source === 'aravis') ? 'aravis' : 'fluide';
     try {
-      const r = await apiFetch(`/api/standby/free-monitors?date=${date}&time=${encodeURIComponent(time)}&enseigne=${enseigne}`);
+      const r = await apiFetch(`/api/standby/free-monitors?date=${date}&time=${encodeURIComponent(time)}`);
       if (!r.ok) return;
-      const monitors: Array<{ id: string; first_name: string }> = (await r.json()).map(
-        (m: { id: number | string; first_name: string }) => ({ ...m, id: String(m.id) })
+      const monitors: Array<{ id: string; first_name: string; slot_id?: number }> = (await r.json()).map(
+        (m: { id: number | string; first_name: string; slot_id?: number }) => ({ ...m, id: String(m.id) })
       );
       setFreeMonitors(monitors);
       if (monitors.length > 0) {
@@ -492,9 +491,32 @@ export default function StandbyPage() {
 
   const saveSchedule = async () => {
     if (!scheduleModal) return;
-    const updated = { ...scheduleModal, ...schedForm, status: 'scheduled' as const };
+    const selectedMonitor = freeMonitors.find(m => m.id === schedForm.monitor_id);
+    const slotId = selectedMonitor?.slot_id ?? null;
+    // Si un créneau disponible est identifié, on le réserve dans le planning
+    if (slotId) {
+      const slotRes = await apiFetch(`/api/slots/${slotId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          status: 'booked',
+          title: scheduleModal.name,
+          phone: scheduleModal.phone || '',
+          email: scheduleModal.email || '',
+        }),
+      });
+      if (!slotRes.ok) { toast.error('Impossible de réserver le créneau'); return; }
+    }
+    const updated = {
+      ...scheduleModal, ...schedForm,
+      status: 'scheduled' as const,
+      slot_id: slotId,
+    };
     const res = await apiFetch(`/api/standby/${scheduleModal.id}`, { method: 'PUT', body: JSON.stringify(updated) });
-    if (res.ok) { toast.success('Créneau enregistré — ligne passée en orange'); setScheduleModal(null); load(); }
+    if (res.ok) {
+      toast.success(slotId ? 'Créneau réservé dans le planning' : 'Créneau mémorisé — à confirmer dans le planning');
+      setScheduleModal(null);
+      load();
+    }
   };
 
   const active = useMemo(() => clients.filter(c => c.status !== 'done'), [clients]);
@@ -1185,7 +1207,7 @@ export default function StandbyPage() {
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                  Moniteur {loadingMonitors && <span className="text-sky-400 normal-case font-normal">Chargement...</span>}
+                  Créneau disponible {loadingMonitors && <span className="text-sky-400 normal-case font-normal">Recherche...</span>}
                 </label>
                 {freeMonitors.length > 0 ? (
                   <select
@@ -1196,16 +1218,17 @@ export default function StandbyPage() {
                       setSchedForm(s => ({ ...s, monitor_id: e.target.value, pilot_name: m?.first_name || '' }));
                     }}
                   >
-                    <option value="">— Choisir —</option>
+                    <option value="">— Choisir un moniteur —</option>
                     {freeMonitors.map(m => <option key={m.id} value={m.id}>{m.first_name}</option>)}
                   </select>
+                ) : schedForm.booked_date && schedForm.booked_time && !loadingMonitors ? (
+                  <p className="mt-1 text-xs font-bold text-amber-600 bg-amber-50 rounded-2xl p-3">
+                    Aucun créneau généré à cette heure — utilise «&nbsp;Ouvrir le calendrier&nbsp;» pour créer le vol manuellement.
+                  </p>
                 ) : (
-                  <input
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1"
-                    value={schedForm.pilot_name}
-                    onChange={e => setSchedForm(s => ({ ...s, pilot_name: e.target.value }))}
-                    placeholder={schedForm.booked_date ? 'Aucun moniteur dispo — saisir manuellement' : 'Nom du moniteur'}
-                  />
+                  <p className="mt-1 text-xs text-slate-400 bg-slate-50 rounded-2xl p-3">
+                    Saisis une date et une heure pour voir les créneaux disponibles.
+                  </p>
                 )}
               </div>
               <button
@@ -1232,7 +1255,9 @@ export default function StandbyPage() {
               </button>
               <div className="flex gap-3">
                 <button onClick={() => setScheduleModal(null)} className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Annuler</button>
-                <button onClick={saveSchedule} className="flex-1 py-3 rounded-2xl bg-orange-500 text-white text-sm font-black hover:bg-orange-600 transition-colors">Enregistrer</button>
+                {schedForm.monitor_id && (
+                  <button onClick={saveSchedule} className="flex-1 py-3 rounded-2xl bg-orange-500 text-white text-sm font-black hover:bg-orange-600 transition-colors">Réserver</button>
+                )}
               </div>
             </div>
           </div>
