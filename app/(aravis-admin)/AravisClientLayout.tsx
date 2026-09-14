@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { apiFetch } from '@/lib/api';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import AutoLogout from '@/components/AutoLogout';
 import { ToastProvider } from '@/components/ui/ToastProvider';
@@ -23,10 +24,25 @@ export default function AravisClientLayout({ children }: { children: React.React
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [userName, setUserName] = useState('');
+  const [standbyCount, setStandbyCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
+
+  useEffect(() => {
+    if (!isAuthorized) return;
+    if (pathname.startsWith('/aravis/demandes')) {
+      localStorage.setItem('standby_last_visited', new Date().toISOString());
+      setStandbyCount(0);
+    } else {
+      const since = localStorage.getItem('standby_last_visited') || new Date(0).toISOString();
+      apiFetch(`/api/standby/new-count?since=${encodeURIComponent(since)}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => d && setStandbyCount(d.count ?? 0))
+        .catch(() => {});
+    }
+  }, [pathname, isAuthorized]);
 
   useEffect(() => {
     document.title = 'Planning · Aravis Parapente';
@@ -94,18 +110,28 @@ export default function AravisClientLayout({ children }: { children: React.React
           <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
             {MENU_ITEMS.map(item => {
               const isActive = pathname.startsWith(item.path);
+              const isDemandes = item.path === '/aravis/demandes';
               return (
                 <div key={item.name}>
                   <Link
                     href={item.path}
-                    className={`flex items-center gap-4 p-3 rounded-xl transition-all ${
+                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${
                       isActive
                         ? 'bg-[#4A8FBE] text-white'
                         : 'text-white/60 hover:bg-[#243860] hover:text-white'
                     }`}
                   >
-                    <item.icon size={18} strokeWidth={2} />
-                    {(!isCollapsed || isMobileMenuOpen) && <span className="font-bold text-sm">{item.name}</span>}
+                    <div className="flex items-center gap-4">
+                      <item.icon size={18} strokeWidth={2} />
+                      {(!isCollapsed || isMobileMenuOpen) && <span className="font-bold text-sm">{item.name}</span>}
+                    </div>
+                    {(!isCollapsed || isMobileMenuOpen) && isDemandes && standbyCount > 0 && (
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                        isActive ? 'bg-white text-[#4A8FBE]' : 'bg-[#4A8FBE]/30 text-[#6CAED8]'
+                      }`}>
+                        {standbyCount}
+                      </span>
+                    )}
                   </Link>
                 </div>
               );

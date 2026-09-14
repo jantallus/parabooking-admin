@@ -10,6 +10,7 @@ import { Calendar, Wind, Users, User, Gift, Settings, ChevronRight, ChevronLeft,
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [clientCount, setClientCount] = useState(0);
+  const [standbyCount, setStandbyCount] = useState(0);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
   
@@ -65,6 +66,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
       };
       fetchCount();
+
+      // Compteur nouvelles demandes
+      if (pathname.startsWith('/fluide/standby')) {
+        localStorage.setItem('standby_last_visited', new Date().toISOString());
+        setStandbyCount(0);
+      } else {
+        const since = localStorage.getItem('standby_last_visited') || new Date(0).toISOString();
+        apiFetch(`/api/standby/new-count?since=${encodeURIComponent(since)}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(d => d && setStandbyCount(d.count ?? 0))
+          .catch(() => {});
+      }
     }
   }, [pathname, router]);
 
@@ -88,7 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Moniteurs', icon: Users, path: '/fluide/moniteurs', roles: ['admin', 'permanent'] },
     { name: 'Partenaires', icon: Handshake, path: '/fluide/partenaires', roles: ['admin'] },
     { name: 'Clients', icon: User, path: '/fluide/clients', badge: clientCount, roles: ['admin'] },
-    { name: 'Demandes', icon: Clock, path: '/fluide/standby', roles: ['admin'] },
+    { name: 'Demandes', icon: Clock, path: '/fluide/standby', badge: standbyCount, roles: ['admin'] },
     { name: 'Régularisation', icon: ArrowLeftRight, path: '/fluide/regularisation', roles: ['admin'] },
     { name: 'Bons Cadeaux', icon: Gift, path: '/fluide/gift-cards', roles: ['admin'] },
     { name: 'Configurations', icon: Settings, path: '/fluide/config', roles: ['admin'] },
