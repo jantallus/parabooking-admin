@@ -621,6 +621,16 @@ export default function StandbyPage() {
           {/* Dates en 3 colonnes */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
+              <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2">Date d&apos;arrivée</p>
+              <div className="flex gap-2 items-center">
+                <input type="date" value={filters.created_from} onChange={e => setFilters(f => ({ ...f, created_from: e.target.value }))}
+                  className="text-xs font-bold text-slate-700 bg-slate-50 border-2 border-slate-100 rounded-xl px-2 py-1.5 focus:outline-none focus:border-sky-300 w-full" />
+                <span className="text-slate-300 text-xs shrink-0">→</span>
+                <input type="date" value={filters.created_to} onChange={e => setFilters(f => ({ ...f, created_to: e.target.value }))}
+                  className="text-xs font-bold text-slate-700 bg-slate-50 border-2 border-slate-100 rounded-xl px-2 py-1.5 focus:outline-none focus:border-sky-300 w-full" />
+              </div>
+            </div>
+            <div>
               <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2">Disponibilité</p>
               <div className="flex gap-2 items-center">
                 <input type="date" value={filters.avail_from} onChange={e => setFilters(f => ({ ...f, avail_from: e.target.value }))}
@@ -637,16 +647,6 @@ export default function StandbyPage() {
                   className="text-xs font-bold text-slate-700 bg-slate-50 border-2 border-slate-100 rounded-xl px-2 py-1.5 focus:outline-none focus:border-sky-300 w-full" />
                 <span className="text-slate-300 text-xs shrink-0">→</span>
                 <input type="date" value={filters.booked_to} onChange={e => setFilters(f => ({ ...f, booked_to: e.target.value }))}
-                  className="text-xs font-bold text-slate-700 bg-slate-50 border-2 border-slate-100 rounded-xl px-2 py-1.5 focus:outline-none focus:border-sky-300 w-full" />
-              </div>
-            </div>
-            <div>
-              <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2">Date d&apos;arrivée</p>
-              <div className="flex gap-2 items-center">
-                <input type="date" value={filters.created_from} onChange={e => setFilters(f => ({ ...f, created_from: e.target.value }))}
-                  className="text-xs font-bold text-slate-700 bg-slate-50 border-2 border-slate-100 rounded-xl px-2 py-1.5 focus:outline-none focus:border-sky-300 w-full" />
-                <span className="text-slate-300 text-xs shrink-0">→</span>
-                <input type="date" value={filters.created_to} onChange={e => setFilters(f => ({ ...f, created_to: e.target.value }))}
                   className="text-xs font-bold text-slate-700 bg-slate-50 border-2 border-slate-100 rounded-xl px-2 py-1.5 focus:outline-none focus:border-sky-300 w-full" />
               </div>
             </div>
