@@ -550,7 +550,7 @@ export default function StandbyPage() {
       const slotPatch: Record<string, unknown> = {
         status: 'booked',
         // Slot i>0 : "2/N (Nom)" pour déclencher la couleur de groupe et afficher la position
-        title: i === 0 ? scheduleModal.name : `${i + 1}/${nbPass} (${scheduleModal.name})`,
+        title: i === 0 ? scheduleModal.name : `${i + 1}/${nbPass} ${scheduleModal.name} (${scheduleModal.name})`,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
         flight_type_id: resolvedFlightTypeId,
