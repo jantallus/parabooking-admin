@@ -387,14 +387,17 @@ export default function PlanningAdmin() {
               <>
                 {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
                 <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sb.title}</span>
+                {sb.phone && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>📞</span>}
+                {ep.flight_name && subSpan(ep.flight_name)}
                 {sb.weight && subSpan(`${sb.weight} kg`)}
                 {subSpan(sbPayShort ? sbPayShort : (!sb.payment_type && ep.price_cents ? `À enc. ${(ep.price_cents / 100).toFixed(0)} €` : '⚠️ non enc.'))}
               </>
             ) : (
               <>
                 <span style={{ fontSize: '9px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {sb.title?.split(' ')[0] || 'Client 2'}{sb.phone ? ' 📞' : ''}
+                  {sb.title?.split(' ')[0] || 'Client 2'}
                 </span>
+                {sb.phone && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>📞</span>}
                 {ep.flight_name && <span style={{ fontSize: '8px', opacity: 0.75, lineHeight: '1.1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{ep.flight_name}</span>}
                 {!sb.payment_type && ep.price_cents
                   ? <span style={{ fontSize: '8px', opacity: 0.8, lineHeight: '1.1', flexShrink: 0 }}>À enc. {(ep.price_cents / 100).toFixed(0)} €</span>
