@@ -1310,12 +1310,17 @@ export default function StandbyPage() {
                 </label>
                 {freeMonitors.length > 0 ? (
                   Array.from({ length: scheduleModal.nb_passengers || 1 }).map((_, i) => {
+                    const total = scheduleModal.nb_passengers || 1;
                     const otherIds = schedForm.monitor_ids.filter((id, j) => j !== i && id !== '');
                     const opts = freeMonitors.filter(m => !otherIds.includes(m.id));
+                    const selectedMonitorName = freeMonitors.find(m => m.id === schedForm.monitor_ids[i])?.first_name;
+                    const labelParts = [`${i + 1}/${total}`];
+                    if (i === 0 && scheduleModal.name) labelParts.push(scheduleModal.name);
+                    else if (selectedMonitorName) labelParts.push(`avec ${selectedMonitorName}`);
                     return (
                       <div key={i} className="mt-1">
-                        {(scheduleModal.nb_passengers || 1) > 1 && (
-                          <p className="text-[10px] font-black text-slate-400 ml-1 mb-0.5">Passager {i + 1}</p>
+                        {total > 1 && (
+                          <p className="text-[10px] font-black text-slate-400 ml-1 mb-0.5">{labelParts.join(' · ')}</p>
                         )}
                         {opts.length > 0 ? (
                           <select
@@ -1336,7 +1341,7 @@ export default function StandbyPage() {
                           </select>
                         ) : (
                           <p className="text-xs font-bold text-amber-600 bg-amber-50 rounded-2xl p-3">
-                            Aucun moniteur dispo pour le passager {i + 1} — compléter depuis le calendrier.
+                            Aucun moniteur dispo pour {i + 1}/{total} — compléter depuis le calendrier.
                           </p>
                         )}
                       </div>
