@@ -895,7 +895,14 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
         if (!alreadyUpdating.has(slot.id)) {
           const slotPd = { ...((slot.payment_data || {}) as Record<string, unknown>) };
           if (tentative) { slotPd.tentative = true; } else { delete slotPd.tentative; }
-          updatesToApply.push({ id: slot.id, data: { payment_data: slotPd } });
+          // Inclure tous les champs existants pour ne pas les effacer via le PATCH
+          updatesToApply.push({ id: slot.id, data: {
+            title: slot.title, status: slot.status, phone: slot.phone || null,
+            email: slot.email || null, notes: slot.notes || null, weight: slot.weight || null,
+            flight_type_id: slot.flight_type_id || null, weightChecked: slot.weight_checked || false,
+            booking_options: slot.booking_options || null, client_message: slot.client_message || null,
+            payment_data: slotPd,
+          } });
         }
       });
     }
