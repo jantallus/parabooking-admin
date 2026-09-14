@@ -1143,7 +1143,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                     if ((pd.payment_type === 'online' || pd.online) && pd.stripe_net_cents != null) return Number(pd.stripe_net_cents);
                     return baseCents;
                   })();
-                  const euros = (netCents / 100).toFixed(0);
+                  const euros = (netCents / 100).toFixed(2);
                   return (
                     <span className={`text-xs font-black px-2.5 py-1 rounded-xl ${needsCollection ? 'bg-amber-100 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
                       {needsCollection ? `À enc. ${euros} €` : `${euros} €`}

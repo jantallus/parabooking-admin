@@ -301,8 +301,8 @@ export default function PlanningAdmin() {
         if ((pd.payment_type === 'online' || pd.online) && pd.stripe_net_cents != null) return Number(pd.stripe_net_cents);
         return ep.price_cents!;
       })();
-      const euros = (netCents / 100).toFixed(0);
-      if (isUnpaid || isNP) priceStr = `À enc. ${(ep.price_cents / 100).toFixed(0)} €`;
+      const euros = (netCents / 100).toFixed(2);
+      if (isUnpaid || isNP) priceStr = `À enc. ${(ep.price_cents / 100).toFixed(2)} €`;
       else if (isGiftCard) priceStr = `🎁 ${pd!.code}${pd?.online ? ' + Stripe' : ''}`;
       else if (pd?.payment_type === 'online' || pd?.online) priceStr = `${euros} € · Stripe`;
       else if (pd?.payment_type && TYPE_SHORT[pd.payment_type]) priceStr = `${TYPE_SHORT[pd.payment_type]} · ${euros} €`;
