@@ -854,7 +854,11 @@ export default function StandbyPage() {
                         {c.availability_text && <p className="text-[10px] text-slate-400 truncate max-w-[120px]">{c.availability_text}</p>}
                       </td>
                       <td className="p-3">
-                        {c.booked_date ? <p className="text-xs font-bold text-orange-700">{fmtDate(c.booked_date)} {c.booked_time}</p> : <span className="text-slate-300">—</span>}
+                        {c.booked_date ? (
+                          <button onClick={() => { const d = toInputDate(c.booked_date); const base = isAravisContext ? '/aravis/planning' : '/fluide/planning'; if (d) router.push(`${base}?date=${d}`); }} className="text-left hover:underline">
+                            <p className="text-xs font-bold text-orange-700">{fmtDate(c.booked_date)} {c.booked_time}</p>
+                          </button>
+                        ) : <span className="text-slate-300">—</span>}
                         {c.pilot_name && <p className="text-[10px] text-slate-400">{c.pilot_name}</p>}
                       </td>
                       <td className="p-3 max-w-[160px]"><p className="text-[10px] text-slate-400 line-clamp-2">{c.notes}</p></td>
@@ -993,7 +997,9 @@ export default function StandbyPage() {
                   <td className="p-3">
                     {c.status === 'scheduled' && (c.booked_date || c.pilot_name) ? (
                       <div>
-                        <p className="text-xs font-bold text-orange-700">{fmtDate(c.booked_date)} {c.booked_time}</p>
+                        <button onClick={() => { const d = toInputDate(c.booked_date); const base = isAravisContext ? '/aravis/planning' : '/fluide/planning'; if (d) router.push(`${base}?date=${d}`); }} className="text-left hover:underline">
+                          <p className="text-xs font-bold text-orange-700">{fmtDate(c.booked_date)} {c.booked_time}</p>
+                        </button>
                         {c.pilot_name && <p className="text-[10px] text-slate-400">{c.pilot_name}</p>}
                       </div>
                     ) : (
@@ -1036,7 +1042,11 @@ export default function StandbyPage() {
                       <tr key={c.id} className="bg-emerald-50/60">
                         <td className="p-3 pl-4 w-24">
                           <span className="text-[10px] font-black text-emerald-600 uppercase">✓ Effectué</span>
-                          {c.booked_date && <p className="text-[10px] text-slate-400 mt-0.5">{fmtDate(c.booked_date)}{c.booked_time ? ` · ${c.booked_time}` : ''}</p>}
+                          {c.booked_date && (
+                            <button onClick={() => { const d = toInputDate(c.booked_date); const base = isAravisContext ? '/aravis/planning' : '/fluide/planning'; if (d) router.push(`${base}?date=${d}`); }} className="text-left hover:underline">
+                              <p className="text-[10px] text-slate-400 mt-0.5">{fmtDate(c.booked_date)}{c.booked_time ? ` · ${c.booked_time}` : ''}</p>
+                            </button>
+                          )}
                         </td>
                         <td className="p-3">
                           <p className="font-bold text-slate-700">{c.name}</p>
