@@ -18,6 +18,8 @@ export interface User {
   phone?: string;
   color?: string;
   google_calendar_id?: string;
+  notify_on_request?: boolean;
+  request_notification_sms?: string | null;
 }
 
 export interface CurrentUser {

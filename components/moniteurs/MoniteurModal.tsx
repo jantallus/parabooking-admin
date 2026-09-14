@@ -11,6 +11,8 @@ const EMPTY_USER = {
   commission_type: 'none',
   commission_value: 0,
   available_start_date: '', available_end_date: '', daily_start_time: '', daily_end_time: '',
+  notify_on_request: false,
+  request_notification_sms: '',
 };
 
 interface Props {
@@ -39,6 +41,8 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
         commission_type: userToEdit.commission_type || 'none',
         commission_value: parseFloat(String(userToEdit.commission_value ?? 0)) || 0,
         available_start_date: '', available_end_date: '', daily_start_time: '', daily_end_time: '',
+        notify_on_request: userToEdit.notify_on_request ?? false,
+        request_notification_sms: userToEdit.request_notification_sms || '',
       });
       apiFetch(`/api/users/${userToEdit.id}/availabilities`)
         .then(res => res.ok ? res.json() : [])
@@ -161,6 +165,36 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
                 <p className="text-[10px] text-slate-400 mt-0.5">Importe les créneaux depuis Google Calendar via le Apps Script</p>
               </div>
             </label>
+          )}
+
+          {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && (
+            <div className="bg-sky-50 p-4 rounded-3xl border border-sky-100 space-y-3">
+              <p className="text-[10px] font-black uppercase text-sky-600 tracking-widest px-2">🔔 Notifications demandes de vol</p>
+              <label className="flex items-center gap-3 p-3 bg-white border border-sky-200 rounded-2xl cursor-pointer hover:border-sky-400 transition-colors">
+                <input
+                  type="checkbox"
+                  className="w-5 h-5 accent-sky-500"
+                  checked={newUser.notify_on_request}
+                  onChange={e => setNewUser({ ...newUser, notify_on_request: e.target.checked })}
+                />
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-700">Recevoir un SMS à chaque demande</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Envoie un SMS sur le téléphone de ce compte dès qu&apos;une demande de vol Aravis est soumise.</p>
+                </div>
+              </label>
+              {newUser.notify_on_request && (
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-400 ml-1 block mb-1">Message personnalisé <span className="font-normal normal-case">(optionnel — variables : [NOM] [TELE] [VOL] [DATE])</span></label>
+                  <textarea
+                    className="w-full border border-sky-200 rounded-2xl p-3 text-sm font-medium bg-white focus:border-sky-400 outline-none resize-none"
+                    rows={3}
+                    placeholder={`Nouvelle demande Aravis : [NOM] ([TELE]) — [VOL] le [DATE].`}
+                    value={newUser.request_notification_sms}
+                    onChange={e => setNewUser({ ...newUser, request_notification_sms: e.target.value })}
+                  />
+                </div>
+              )}
+            </div>
           )}
 
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && (
