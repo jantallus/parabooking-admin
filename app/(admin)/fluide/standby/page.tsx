@@ -465,6 +465,21 @@ export default function StandbyPage() {
     }),
   [clients]);
 
+  const archiveStats = useMemo(() => {
+    const byType = new Map<string, number>();
+    const byPilot = new Map<string, number>();
+    for (const c of sortedArchived) {
+      const t = c.flight_type || 'Non défini';
+      byType.set(t, (byType.get(t) ?? 0) + 1);
+      const p = c.pilot_name || 'Non assigné';
+      byPilot.set(p, (byPilot.get(p) ?? 0) + 1);
+    }
+    return {
+      byType: [...byType.entries()].sort((a, b) => b[1] - a[1]),
+      byPilot: [...byPilot.entries()].sort((a, b) => b[1] - a[1]),
+    };
+  }, [sortedArchived]);
+
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return null;
@@ -760,6 +775,18 @@ export default function StandbyPage() {
           <button onClick={() => setShowArchive(a => !a)} className="flex items-center gap-2 text-[11px] font-black uppercase text-slate-400 hover:text-slate-700 tracking-widest transition-colors">
             <span>{showArchive ? '▼' : '▶'}</span> Archive — effectués ({sortedArchived.length})
           </button>
+          <div className="flex flex-wrap gap-1.5 mt-1.5 ml-4">
+            {archiveStats.byType.map(([type, count]) => (
+              <span key={type} className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-0.5">
+                {type}{count > 1 ? <span className="text-emerald-400"> ×{count}</span> : ''}
+              </span>
+            ))}
+            {archiveStats.byPilot.map(([pilot, count]) => (
+              <span key={pilot} className="text-[10px] font-black text-slate-500 bg-slate-100 rounded-lg px-2 py-0.5">
+                🧑‍✈️ {pilot}{count > 1 ? <span className="text-slate-400"> ×{count}</span> : ''}
+              </span>
+            ))}
+          </div>
           {showArchive && (
             <div className="mt-3">
               {/* Table */}
