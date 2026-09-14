@@ -453,7 +453,9 @@ export default function StandbyPage() {
     try {
       const r = await apiFetch(`/api/standby/free-monitors?date=${date}&time=${encodeURIComponent(time)}&enseigne=${enseigne}`);
       if (!r.ok) return;
-      const monitors: Array<{ id: string; first_name: string }> = await r.json();
+      const monitors: Array<{ id: string; first_name: string }> = (await r.json()).map(
+        (m: { id: number | string; first_name: string }) => ({ ...m, id: String(m.id) })
+      );
       setFreeMonitors(monitors);
       if (monitors.length > 0) {
         const pick = monitors[Math.floor(Math.random() * monitors.length)];
@@ -464,7 +466,8 @@ export default function StandbyPage() {
 
   const openSchedule = (c: StandbyClient) => {
     setScheduleModal(c);
-    const date = toInputDate(c.booked_date) || '';
+    // pré-remplir depuis booked_date si déjà calé, sinon depuis availability_start si date précise
+    const date = toInputDate(c.booked_date) || toInputDate(c.availability_start) || '';
     const time = c.booked_time || '';
     setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: time, monitor_id: '' });
     setFreeMonitors([]);
