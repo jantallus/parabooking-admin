@@ -510,10 +510,20 @@ export default function StandbyPage() {
         flight_type_id: (() => {
           const ftName = scheduleModal.flight_type;
           if (ftName) {
-            const matched = allFlightTypes.find(ft => ft.name === ftName);
+            // Le champ peut être "Plaisir - 90 €" : on compare le nom seul (avant " - ")
+            const ftBaseName = ftName.split(' - ')[0].trim().toLowerCase();
+            const matched = allFlightTypes.find(ft =>
+              ft.name.toLowerCase() === ftBaseName || ft.name.toLowerCase() === ftName.toLowerCase()
+            );
             if (matched) return matched.id;
           }
           return selectedMonitor?.flight_type_id ?? null;
+        })(),
+        weight: (() => {
+          const w = scheduleModal.weight_info;
+          if (!w) return undefined;
+          const m = String(w).match(/\d+/);
+          return m ? parseInt(m[0]) : undefined;
         })(),
       };
       if (isAravis && aravisPartner) {
