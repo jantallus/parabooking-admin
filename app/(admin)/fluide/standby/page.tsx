@@ -29,7 +29,7 @@ interface StandbyClient {
 const emptyClient = (): Omit<StandbyClient, 'id' | 'created_at' | 'status'> => ({
   name: '', phone: '', email: '', nb_passengers: 1, flight_type: '',
   weight_info: '', availability_text: '', availability_start: null, availability_end: null,
-  notes: '', pilot_name: null, booked_date: null, booked_time: null, slot_id: null, processing_by: null,
+  notes: '', pilot_name: null, monitor_name: null, booked_date: null, booked_time: null, slot_id: null, processing_by: null,
 });
 
 const cap = (s: string) =>
