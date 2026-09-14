@@ -541,21 +541,19 @@ export default function StandbyPage() {
       return selectedMonitors[0]?.flight_type_id ?? null;
     })();
 
-    const resolvedWeight = (() => {
-      const w = scheduleModal.weight_info;
-      if (!w) return undefined;
-      const m = String(w).match(/\d+/);
-      return m ? parseInt(m[0]) : undefined;
-    })();
+    // Tous les poids renseignés (ex: "65/70" → [65, 70])
+    const allWeights = String(scheduleModal.weight_info || '').match(/\d+/g)?.map(Number) || [];
 
-    for (const mon of selectedMonitors) {
+    for (let i = 0; i < selectedMonitors.length; i++) {
+      const mon = selectedMonitors[i];
+      const weight = allWeights[i] ?? allWeights[0] ?? undefined;
       const slotPatch: Record<string, unknown> = {
         status: 'booked',
         title: scheduleModal.name,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
         flight_type_id: resolvedFlightTypeId,
-        weight: resolvedWeight,
+        weight,
       };
       if (isAravis && aravisPartner) {
         slotPatch.payment_data = {
