@@ -18,6 +18,7 @@ interface StandbyClient {
   notes: string | null;
   pilot_name: string | null;
   monitor_name: string | null;
+  related_flights: Array<{ flight_type: string | null; monitor: string | null }> | null;
   booked_date: string | null;
   booked_time: string | null;
   slot_id: number | null;
@@ -29,7 +30,7 @@ interface StandbyClient {
 const emptyClient = (): Omit<StandbyClient, 'id' | 'created_at' | 'status'> => ({
   name: '', phone: '', email: '', nb_passengers: 1, flight_type: '',
   weight_info: '', availability_text: '', availability_start: null, availability_end: null,
-  notes: '', pilot_name: null, monitor_name: null, booked_date: null, booked_time: null, slot_id: null, processing_by: null,
+  notes: '', pilot_name: null, monitor_name: null, related_flights: null, booked_date: null, booked_time: null, slot_id: null, processing_by: null,
 });
 
 const cap = (s: string) =>
@@ -371,7 +372,7 @@ export default function StandbyPage() {
       flight_type: c.flight_type||'', weight_info: c.weight_info||'', availability_text: c.availability_text||'',
       availability_start: toInputDate(c.availability_start),
       availability_end: toInputDate(c.availability_end),
-      notes: c.notes||'', pilot_name: c.pilot_name, monitor_name: c.monitor_name,
+      notes: c.notes||'', pilot_name: c.pilot_name, monitor_name: c.monitor_name, related_flights: c.related_flights,
       booked_date: toInputDate(c.booked_date),
       booked_time: c.booked_time, slot_id: c.slot_id, processing_by: c.processing_by });
     setImportOpen(false);
@@ -782,11 +783,46 @@ export default function StandbyPage() {
                             {c.email && <a href={`mailto:${c.email}`} className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-[10px]">📧</a>}
                           </div>
                         </td>
-                        <td className="p-3 min-w-[140px]">
-                          {c.flight_type && <p className="text-xs font-bold text-slate-700">{c.flight_type}</p>}
-                          {c.monitor_name && (
-                            <span className="inline-block mt-1 text-[10px] font-black text-emerald-700 bg-emerald-100 rounded-lg px-2 py-0.5">🧑‍✈️ {c.monitor_name}</span>
-                          )}
+                        <td className="p-3 min-w-[160px]">
+                          {(() => {
+                            const flights = c.related_flights;
+                            if (flights && flights.length > 1) {
+                              const typeCount = new Map<string, number>();
+                              const pilotCount = new Map<string, number>();
+                              flights.forEach(f => {
+                                const t = f.flight_type || '—';
+                                typeCount.set(t, (typeCount.get(t) ?? 0) + 1);
+                                if (f.monitor) pilotCount.set(f.monitor, (pilotCount.get(f.monitor) ?? 0) + 1);
+                              });
+                              return (
+                                <>
+                                  <p className="text-[11px] font-black text-emerald-700 mb-1">{flights.length} vols</p>
+                                  <div className="flex flex-wrap gap-1 mb-1">
+                                    {[...typeCount.entries()].map(([t, n]) => (
+                                      <span key={t} className="text-[10px] font-bold text-slate-600 bg-white border border-emerald-200 rounded-lg px-1.5 py-0.5">
+                                        {t}{n > 1 ? <span className="text-emerald-500"> ×{n}</span> : ''}
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {[...pilotCount.entries()].map(([p, n]) => (
+                                      <span key={p} className="text-[10px] font-black text-emerald-700 bg-emerald-100 rounded-lg px-1.5 py-0.5">
+                                        🧑‍✈️ {p}{n > 1 ? <span className="text-emerald-400"> ×{n}</span> : ''}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </>
+                              );
+                            }
+                            return (
+                              <>
+                                {c.flight_type && <p className="text-xs font-bold text-slate-700">{c.flight_type}</p>}
+                                {c.monitor_name && (
+                                  <span className="inline-block mt-1 text-[10px] font-black text-emerald-700 bg-emerald-100 rounded-lg px-2 py-0.5">🧑‍✈️ {c.monitor_name}</span>
+                                )}
+                              </>
+                            );
+                          })()}
                         </td>
                         <td className="p-3 w-24">
                           <div className="flex gap-1">
