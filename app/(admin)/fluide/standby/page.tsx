@@ -328,7 +328,7 @@ export default function StandbyPage() {
   const [importText, setImportText] = useState('');
   const [parsed, setParsed] = useState<ReturnType<typeof parseStandbyMessage> | null>(null);
   const [scheduleModal, setScheduleModal] = useState<StandbyClient | null>(null);
-  const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '', monitor_id: '' });
+  const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '', monitor_ids: [''] });
   const [freeMonitors, setFreeMonitors] = useState<Array<{ id: string; first_name: string; slot_id?: number; flight_type_id?: number | null }>>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [loadingTimes, setLoadingTimes] = useState(false);
@@ -477,7 +477,7 @@ export default function StandbyPage() {
       const times: string[] = await r.json();
       setAvailableTimes(times);
       if (preferredTime && times.includes(preferredTime)) {
-        setSchedForm(s => ({ ...s, booked_time: preferredTime, monitor_id: '' }));
+        setSchedForm(s => ({ ...s, booked_time: preferredTime, monitor_ids: s.monitor_ids.map(() => '') }));
         fetchFreeMonitors(date, preferredTime, source);
       }
     } catch { /* ignore */ } finally { setLoadingTimes(false); }
@@ -494,8 +494,11 @@ export default function StandbyPage() {
       );
       setFreeMonitors(monitors);
       if (monitors.length > 0) {
-        const pick = monitors[Math.floor(Math.random() * monitors.length)];
-        setSchedForm(s => ({ ...s, pilot_name: pick.first_name, monitor_id: pick.id }));
+        setSchedForm(s => {
+          const ids = [...s.monitor_ids];
+          monitors.slice(0, ids.length).forEach((m, i) => { ids[i] = m.id; });
+          return { ...s, pilot_name: monitors[0].first_name, monitor_ids: ids };
+        });
       }
     } catch { /* ignore */ } finally { setLoadingMonitors(false); }
   };
@@ -509,7 +512,7 @@ export default function StandbyPage() {
     const availTimeMatch = availTimeRaw.match(/^(\d{1,2})[h:H](\d{2})$/);
     const availTime = availTimeMatch ? `${availTimeMatch[1].padStart(2, '0')}:${availTimeMatch[2]}` : '';
     const preferredTime = hasBookedDate ? (c.booked_time || '') : availTime;
-    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: preferredTime, monitor_id: '' });
+    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: preferredTime, monitor_ids: Array(Math.max(1, c.nb_passengers || 1)).fill('') });
     setFreeMonitors([]);
     setAvailableTimes([]);
     if (date) fetchAvailableTimes(date, preferredTime, c.source);
@@ -517,33 +520,42 @@ export default function StandbyPage() {
 
   const saveSchedule = async () => {
     if (!scheduleModal) return;
-    const selectedMonitor = freeMonitors.find(m => m.id === schedForm.monitor_id);
-    const slotId = selectedMonitor?.slot_id ?? null;
-    if (slotId) {
-      const isAravis = isAravisContext || scheduleModal.source === 'aravis';
+    const nbPass = scheduleModal.nb_passengers || 1;
+    const selectedMonitors = schedForm.monitor_ids
+      .slice(0, nbPass)
+      .map(id => freeMonitors.find(m => m.id === id))
+      .filter((m): m is typeof freeMonitors[number] => !!m && !!(m.slot_id));
+    if (selectedMonitors.length === 0) return;
+
+    const isAravis = isAravisContext || scheduleModal.source === 'aravis';
+
+    const resolvedFlightTypeId = (() => {
+      const ftName = scheduleModal.flight_type;
+      if (ftName) {
+        const ftBaseName = ftName.split(' - ')[0].trim().toLowerCase();
+        const matched = allFlightTypes.find(ft =>
+          ft.name.toLowerCase() === ftBaseName || ft.name.toLowerCase() === ftName.toLowerCase()
+        );
+        if (matched) return matched.id;
+      }
+      return selectedMonitors[0]?.flight_type_id ?? null;
+    })();
+
+    const resolvedWeight = (() => {
+      const w = scheduleModal.weight_info;
+      if (!w) return undefined;
+      const m = String(w).match(/\d+/);
+      return m ? parseInt(m[0]) : undefined;
+    })();
+
+    for (const mon of selectedMonitors) {
       const slotPatch: Record<string, unknown> = {
         status: 'booked',
         title: scheduleModal.name,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
-        flight_type_id: (() => {
-          const ftName = scheduleModal.flight_type;
-          if (ftName) {
-            // Le champ peut être "Plaisir - 90 €" : on compare le nom seul (avant " - ")
-            const ftBaseName = ftName.split(' - ')[0].trim().toLowerCase();
-            const matched = allFlightTypes.find(ft =>
-              ft.name.toLowerCase() === ftBaseName || ft.name.toLowerCase() === ftName.toLowerCase()
-            );
-            if (matched) return matched.id;
-          }
-          return selectedMonitor?.flight_type_id ?? null;
-        })(),
-        weight: (() => {
-          const w = scheduleModal.weight_info;
-          if (!w) return undefined;
-          const m = String(w).match(/\d+/);
-          return m ? parseInt(m[0]) : undefined;
-        })(),
+        flight_type_id: resolvedFlightTypeId,
+        weight: resolvedWeight,
       };
       if (isAravis && aravisPartner) {
         slotPatch.payment_data = {
@@ -553,20 +565,27 @@ export default function StandbyPage() {
           partner_color: aravisPartner.color_code ?? '#6CAED8',
         };
       }
-      const slotRes = await apiFetch(`/api/slots/${slotId}`, {
+      const slotRes = await apiFetch(`/api/slots/${mon.slot_id}`, {
         method: 'PATCH',
         body: JSON.stringify(slotPatch),
       });
-      if (!slotRes.ok) { toast.error('Impossible de réserver le créneau'); return; }
+      if (!slotRes.ok) { toast.error('Impossible de réserver un créneau'); return; }
     }
+
+    const primarySlotId = selectedMonitors[0].slot_id ?? null;
     const updated = {
       ...scheduleModal, ...schedForm,
       status: 'scheduled' as const,
-      slot_id: slotId,
+      slot_id: primarySlotId,
     };
     const res = await apiFetch(`/api/standby/${scheduleModal.id}`, { method: 'PUT', body: JSON.stringify(updated) });
     if (res.ok) {
-      toast.success(slotId ? 'Créneau réservé dans le planning' : 'Créneau mémorisé — à confirmer dans le planning');
+      const n = selectedMonitors.length;
+      toast.success(
+        n >= nbPass
+          ? `${n > 1 ? n + ' créneaux réservés' : 'Créneau réservé'} dans le planning`
+          : `${n}/${nbPass} créneau${n > 1 ? 'x' : ''} réservé — complète le planning manuellement`
+      );
       setScheduleModal(null);
       load();
     }
@@ -1241,7 +1260,7 @@ export default function StandbyPage() {
                   value={schedForm.booked_date}
                   onChange={e => {
                     const d = e.target.value;
-                    setSchedForm(s => ({ ...s, booked_date: d, booked_time: '', pilot_name: '', monitor_id: '' }));
+                    setSchedForm(s => ({ ...s, booked_date: d, booked_time: '', pilot_name: '', monitor_ids: s.monitor_ids.map(() => '') }));
                     fetchAvailableTimes(d, '', scheduleModal.source);
                   }}
                   type="date"
@@ -1257,7 +1276,7 @@ export default function StandbyPage() {
                     value={schedForm.booked_time}
                     onChange={e => {
                       const t = e.target.value;
-                      setSchedForm(s => ({ ...s, booked_time: t, pilot_name: '', monitor_id: '' }));
+                      setSchedForm(s => ({ ...s, booked_time: t, pilot_name: '', monitor_ids: s.monitor_ids.map(() => '') }));
                       setFreeMonitors([]);
                       if (t && schedForm.booked_date) fetchFreeMonitors(schedForm.booked_date, t, scheduleModal.source);
                     }}
@@ -1277,20 +1296,43 @@ export default function StandbyPage() {
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                  Créneau disponible {loadingMonitors && <span className="text-sky-400 normal-case font-normal">Recherche...</span>}
+                  {(scheduleModal.nb_passengers || 1) > 1 ? `Créneaux — ${scheduleModal.nb_passengers} passagers` : 'Créneau disponible'}
+                  {loadingMonitors && <span className="text-sky-400 normal-case font-normal"> Recherche...</span>}
                 </label>
                 {freeMonitors.length > 0 ? (
-                  <select
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1 focus:outline-none focus:border-sky-300"
-                    value={schedForm.monitor_id}
-                    onChange={e => {
-                      const m = freeMonitors.find(x => x.id === e.target.value);
-                      setSchedForm(s => ({ ...s, monitor_id: e.target.value, pilot_name: m?.first_name || '' }));
-                    }}
-                  >
-                    <option value="">— Choisir un moniteur —</option>
-                    {freeMonitors.map(m => <option key={m.id} value={m.id}>{m.first_name}</option>)}
-                  </select>
+                  Array.from({ length: scheduleModal.nb_passengers || 1 }).map((_, i) => {
+                    const otherIds = schedForm.monitor_ids.filter((id, j) => j !== i && id !== '');
+                    const opts = freeMonitors.filter(m => !otherIds.includes(m.id));
+                    return (
+                      <div key={i} className="mt-1">
+                        {(scheduleModal.nb_passengers || 1) > 1 && (
+                          <p className="text-[10px] font-black text-slate-400 ml-1 mb-0.5">Passager {i + 1}</p>
+                        )}
+                        {opts.length > 0 ? (
+                          <select
+                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm focus:outline-none focus:border-sky-300"
+                            value={schedForm.monitor_ids[i] || ''}
+                            onChange={e => {
+                              const val = e.target.value;
+                              const m = freeMonitors.find(x => x.id === val);
+                              setSchedForm(s => {
+                                const ids = [...s.monitor_ids];
+                                ids[i] = val;
+                                return { ...s, monitor_ids: ids, pilot_name: i === 0 ? (m?.first_name || '') : s.pilot_name };
+                              });
+                            }}
+                          >
+                            <option value="">— Choisir un moniteur —</option>
+                            {opts.map(m => <option key={m.id} value={m.id}>{m.first_name}</option>)}
+                          </select>
+                        ) : (
+                          <p className="text-xs font-bold text-amber-600 bg-amber-50 rounded-2xl p-3">
+                            Aucun moniteur dispo pour le passager {i + 1} — compléter depuis le calendrier.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })
                 ) : schedForm.booked_date && schedForm.booked_time && !loadingMonitors ? (
                   <p className="mt-1 text-xs font-bold text-amber-600 bg-amber-50 rounded-2xl p-3">
                     Aucun créneau généré à cette heure — utilise «&nbsp;Ouvrir le calendrier&nbsp;» pour créer le vol manuellement.
@@ -1325,7 +1367,7 @@ export default function StandbyPage() {
               </button>
               <div className="flex gap-3">
                 <button onClick={() => setScheduleModal(null)} className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors">Annuler</button>
-                {schedForm.monitor_id && (
+                {schedForm.monitor_ids.some(id => id !== '') && (
                   <button onClick={saveSchedule} className="flex-1 py-3 rounded-2xl bg-orange-500 text-white text-sm font-black hover:bg-orange-600 transition-colors">Réserver</button>
                 )}
               </div>
