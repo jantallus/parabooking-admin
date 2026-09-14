@@ -392,8 +392,10 @@ export default function PlanningAdmin() {
               </>
             ) : (
               <>
-                <span style={{ fontSize: '8px', opacity: 0.65, lineHeight: '1.1', flexShrink: 0 }}>Pax 2</span>
-                <span style={{ fontSize: '9px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sb.title}{!sb.payment_type ? ' ⚠️' : ''}</span>
+                <span style={{ fontSize: '9px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sb.title?.split(' ')[0] || 'Client 2'}</span>
+                {!sb.payment_type && ep.price_cents
+                  ? <span style={{ fontSize: '8px', opacity: 0.8, lineHeight: '1.1', flexShrink: 0 }}>À enc. {(ep.price_cents / 100).toFixed(0)} €</span>
+                  : sbPayShort ? <span style={{ fontSize: '8px', opacity: 0.8, lineHeight: '1.1', flexShrink: 0 }}>{sbPayShort}</span> : null}
               </>
             )}
           </NativeStopDiv>
