@@ -472,20 +472,6 @@ export default function StandbyPage() {
       .some(f => f?.toLowerCase().includes(q)));
   }, [clients, searchQuery]);
 
-  const archiveStats = useMemo(() => {
-    const byType = new Map<string, number>();
-    const byPilot = new Map<string, number>();
-    for (const c of sortedArchived) {
-      const t = c.flight_type || 'Non défini';
-      byType.set(t, (byType.get(t) ?? 0) + 1);
-      const p = c.pilot_name || 'Non assigné';
-      byPilot.set(p, (byPilot.get(p) ?? 0) + 1);
-    }
-    return {
-      byType: [...byType.entries()].sort((a, b) => b[1] - a[1]),
-      byPilot: [...byPilot.entries()].sort((a, b) => b[1] - a[1]),
-    };
-  }, [sortedArchived]);
 
   const rowBg = (c: StandbyClient, isMultiW = false, isDup = false) => {
     const bg = c.status === 'done' ? 'bg-emerald-50'
@@ -775,31 +761,7 @@ export default function StandbyPage() {
             <span>{showArchive ? '▼' : '▶'}</span> Archive — effectués ({sortedArchived.length})
           </button>
           {showArchive && (
-            <div className="mt-3 space-y-3">
-              {/* Stats */}
-              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 space-y-3">
-                <div>
-                  <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest mb-2">Vols par type</p>
-                  <div className="flex flex-wrap gap-2">
-                    {archiveStats.byType.map(([type, count]) => (
-                      <span key={type} className="text-[11px] font-black text-emerald-700 bg-white border border-emerald-200 rounded-xl px-3 py-1">
-                        {type} <span className="text-emerald-400 font-black">×{count}</span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest mb-2">Par moniteur</p>
-                  <div className="flex flex-wrap gap-2">
-                    {archiveStats.byPilot.map(([pilot, count]) => (
-                      <span key={pilot} className="text-[11px] font-black text-slate-600 bg-white border border-emerald-200 rounded-xl px-3 py-1">
-                        🧑‍✈️ {pilot} <span className="text-emerald-400 font-black">×{count}</span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
+            <div className="mt-3">
               {/* Table */}
               <div className="overflow-x-auto rounded-3xl border border-emerald-100">
                 <table className="w-full text-sm min-w-[600px]">
