@@ -1259,8 +1259,8 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
           )}
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && isShortFlightType && !showGroupSelector && (
             <>
-              <button onClick={() => setActiveTab('client')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'client' ? 'bg-white text-sky-500 shadow-sm' : 'text-slate-400'}`}>{selectedEvent?.second_booking?.title ? '👤 Pax 1' : '👤 Client'}</button>
-              {selectedEvent?.second_booking?.title && (
+              <button onClick={() => setActiveTab('client')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'client' ? 'bg-white text-sky-500 shadow-sm' : 'text-slate-400'}`}>{(selectedEvent?.second_booking?.title || isEditing) ? '👤 Pax 1' : '👤 Client'}</button>
+              {(selectedEvent?.second_booking?.title || isEditing) && (
                 <button onClick={() => setActiveTab('client2')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'client2' ? 'bg-white text-sky-500 shadow-sm' : 'text-slate-400'}`}>👤 Pax 2</button>
               )}
             </>
