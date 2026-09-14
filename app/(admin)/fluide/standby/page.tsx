@@ -371,7 +371,7 @@ export default function StandbyPage() {
       flight_type: c.flight_type||'', weight_info: c.weight_info||'', availability_text: c.availability_text||'',
       availability_start: toInputDate(c.availability_start),
       availability_end: toInputDate(c.availability_end),
-      notes: c.notes||'', pilot_name: c.pilot_name,
+      notes: c.notes||'', pilot_name: c.pilot_name, monitor_name: c.monitor_name,
       booked_date: toInputDate(c.booked_date),
       booked_time: c.booked_time, slot_id: c.slot_id, processing_by: c.processing_by });
     setImportOpen(false);
