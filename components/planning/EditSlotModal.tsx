@@ -2113,12 +2113,18 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       </div>
                     ) : isShortFlightType ? (
                       <div className="space-y-2 pt-2">
-                        <p className="text-[9px] font-black uppercase text-slate-400 text-center">Libérer</p>
-                        <div className="flex gap-2">
-                          <button onClick={handleReleasePax1} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Pax 1</button>
-                          <button onClick={handleReleasePax2} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Pax 2</button>
-                          <button onClick={handleRelease} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Les 2</button>
-                        </div>
+                        {selectedEvent?.second_booking?.title ? (
+                          <>
+                            <p className="text-[9px] font-black uppercase text-slate-400 text-center">Libérer</p>
+                            <div className="flex gap-2">
+                              <button onClick={handleReleasePax1} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Pax 1</button>
+                              <button onClick={handleReleasePax2} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Pax 2</button>
+                              <button onClick={handleRelease} className="flex-1 text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Les 2</button>
+                            </div>
+                          </>
+                        ) : (
+                          <button onClick={handleRelease} className="w-full text-rose-500 font-black uppercase italic text-[9px] tracking-widest hover:text-rose-600 hover:bg-rose-50 border border-rose-100 rounded-xl transition-colors py-2 shadow-sm">🗑️ Libérer ce créneau</button>
+                        )}
                         {groupRootSlots.length > 1 && (
                           <button onClick={handleReleaseGroup} className="w-full bg-rose-50 border border-rose-200 text-rose-600 rounded-xl font-black uppercase italic text-[9px] tracking-widest hover:bg-rose-500 hover:text-white transition-colors py-2 shadow-sm">🧹 Libérer groupe ({groupTotalPax})</button>
                         )}
@@ -2158,7 +2164,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
               </div>
             ) : (
               <>
-                {isShortFlightType && (
+                {isShortFlightType && selectedEvent?.second_booking?.title && (
                   <div className="mb-4 bg-sky-50 rounded-2xl p-3 border border-sky-100 space-y-2">
                     <label className="text-[10px] font-black uppercase text-sky-600 block">Quel passager déplacer ?</label>
                     <div className="flex gap-2">
