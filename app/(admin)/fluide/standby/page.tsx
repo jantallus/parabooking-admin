@@ -465,19 +465,14 @@ export default function StandbyPage() {
     }),
   [clients]);
 
-  const archiveStats = useMemo(() => {
-    const byType = new Map<string, number>();
-    const byPilot = new Map<string, number>();
+  const archivedByPerson = useMemo(() => {
+    const map = new Map<string, StandbyClient[]>();
     for (const c of sortedArchived) {
-      const t = c.flight_type || 'Non défini';
-      byType.set(t, (byType.get(t) ?? 0) + 1);
-      const p = c.pilot_name || 'Non assigné';
-      byPilot.set(p, (byPilot.get(p) ?? 0) + 1);
+      const key = `${c.name || ''}||${c.phone || ''}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(c);
     }
-    return {
-      byType: [...byType.entries()].sort((a, b) => b[1] - a[1]),
-      byPilot: [...byPilot.entries()].sort((a, b) => b[1] - a[1]),
-    };
+    return [...map.values()];
   }, [sortedArchived]);
 
   const searchResults = useMemo(() => {
@@ -773,58 +768,67 @@ export default function StandbyPage() {
       {sortedArchived.length > 0 && (
         <div>
           <button onClick={() => setShowArchive(a => !a)} className="flex items-center gap-2 text-[11px] font-black uppercase text-slate-400 hover:text-slate-700 tracking-widest transition-colors">
-            <span>{showArchive ? '▼' : '▶'}</span> Archive — effectués ({sortedArchived.length})
+            <span>{showArchive ? '▼' : '▶'}</span> Archive — effectués ({sortedArchived.length} vol{sortedArchived.length > 1 ? 's' : ''} · {archivedByPerson.length} contact{archivedByPerson.length > 1 ? 's' : ''})
           </button>
-          <div className="flex flex-wrap gap-1.5 mt-1.5 ml-4">
-            {archiveStats.byType.map(([type, count]) => (
-              <span key={type} className="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-0.5">
-                {type}{count > 1 ? <span className="text-emerald-400"> ×{count}</span> : ''}
-              </span>
-            ))}
-            {archiveStats.byPilot.map(([pilot, count]) => (
-              <span key={pilot} className="text-[10px] font-black text-slate-500 bg-slate-100 rounded-lg px-2 py-0.5">
-                🧑‍✈️ {pilot}{count > 1 ? <span className="text-slate-400"> ×{count}</span> : ''}
-              </span>
-            ))}
-          </div>
           {showArchive && (
             <div className="mt-3">
-              {/* Table */}
               <div className="overflow-x-auto rounded-3xl border border-emerald-100">
                 <table className="w-full text-sm min-w-[600px]">
                   <tbody className="divide-y divide-emerald-50">
-                    {sortedArchived.map(c => (
-                      <tr key={c.id} className="bg-emerald-50/60">
-                        <td className="p-3 pl-4 w-24">
-                          <span className="text-[10px] font-black text-emerald-600 uppercase">✓ Effectué</span>
-                          {c.booked_date && <p className="text-[10px] text-slate-400 mt-0.5">{fmtDate(c.booked_date)}{c.booked_time ? ` · ${c.booked_time}` : ''}</p>}
-                        </td>
-                        <td className="p-3">
-                          <p className="font-bold text-slate-700">{c.name}</p>
-                          {c.phone && <p className="text-xs text-slate-400">{c.phone}</p>}
-                          <div className="flex gap-1.5 mt-1">
-                            {c.phone && <a href={`tel:${c.phone}`} className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[10px]">📞</a>}
-                            {c.phone && <a href={`sms:${c.phone}`} className="w-5 h-5 rounded-full bg-sky-100 flex items-center justify-center text-[10px]">💬</a>}
-                            {c.email && <a href={`mailto:${c.email}`} className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-[10px]">📧</a>}
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          <span className="text-xs font-bold text-slate-600">{c.flight_type || <span className="text-slate-300">—</span>}</span>
-                        </td>
-                        <td className="p-3">
-                          {c.pilot_name
-                            ? <span className="text-[11px] font-black text-emerald-700 bg-emerald-100 rounded-lg px-2 py-1 whitespace-nowrap">🧑‍✈️ {c.pilot_name}</span>
-                            : <span className="text-slate-300 text-xs">—</span>
-                          }
-                        </td>
-                        <td className="p-3">
-                          <div className="flex gap-1">
-                            <button onClick={() => handleStatusChange(c, 'pending')} className="text-[10px] text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-white transition-colors">↩ Remettre</button>
-                            <button onClick={() => handleDelete(c.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-300 hover:text-rose-400 transition-colors">🗑️</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {archivedByPerson.map(group => {
+                      const main = group[0];
+                      const totalFlights = group.length;
+                      const typeCount = new Map<string, number>();
+                      const pilotCount = new Map<string, number>();
+                      group.forEach(c => {
+                        const t = c.flight_type || '—';
+                        typeCount.set(t, (typeCount.get(t) ?? 0) + 1);
+                        if (c.pilot_name) pilotCount.set(c.pilot_name, (pilotCount.get(c.pilot_name) ?? 0) + 1);
+                      });
+                      const latestDate = main.booked_date;
+                      return (
+                        <tr key={main.id} className="bg-emerald-50/60">
+                          <td className="p-3 pl-4 w-24">
+                            <span className="text-[10px] font-black text-emerald-600 uppercase">✓ Effectué</span>
+                            {latestDate && <p className="text-[10px] text-slate-400 mt-0.5">{fmtDate(latestDate)}{main.booked_time ? ` · ${main.booked_time}` : ''}</p>}
+                          </td>
+                          <td className="p-3">
+                            <p className="font-bold text-slate-700">{main.name}</p>
+                            {main.phone && <p className="text-xs text-slate-400">{main.phone}</p>}
+                            <div className="flex gap-1.5 mt-1">
+                              {main.phone && <a href={`tel:${main.phone}`} className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[10px]">📞</a>}
+                              {main.phone && <a href={`sms:${main.phone}`} className="w-5 h-5 rounded-full bg-sky-100 flex items-center justify-center text-[10px]">💬</a>}
+                              {main.email && <a href={`mailto:${main.email}`} className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-[10px]">📧</a>}
+                            </div>
+                          </td>
+                          <td className="p-3">
+                            <p className="text-[11px] font-black text-emerald-700 mb-1">{totalFlights} vol{totalFlights > 1 ? 's' : ''}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {[...typeCount.entries()].map(([type, n]) => (
+                                <span key={type} className="text-[10px] font-bold text-slate-600 bg-white border border-emerald-200 rounded-lg px-1.5 py-0.5">
+                                  {type}{n > 1 ? <span className="text-emerald-500"> ×{n}</span> : ''}
+                                </span>
+                              ))}
+                            </div>
+                            {pilotCount.size > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {[...pilotCount.entries()].map(([pilot, n]) => (
+                                  <span key={pilot} className="text-[10px] font-bold text-emerald-700 bg-emerald-100 rounded-lg px-1.5 py-0.5">
+                                    🧑‍✈️ {pilot}{n > 1 ? <span className="text-emerald-400"> ×{n}</span> : ''}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            <div className="flex gap-1">
+                              <button onClick={() => handleStatusChange(main, 'pending')} className="text-[10px] text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-white transition-colors">↩ Remettre</button>
+                              <button onClick={() => handleDelete(main.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-300 hover:text-rose-400 transition-colors">🗑️</button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
