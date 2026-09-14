@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -247,6 +247,73 @@ function fmtDate(d: string | null) {
   return `${day}/${m}/${y.slice(2)}`; // "DD/MM/YY"
 }
 
+// Retourne le samedi qui débute la semaine (sam→ven) contenant la date
+function getWeekSat(dateStr: string | null | undefined): Date | null {
+  if (!dateStr) return null;
+  const d = new Date(dateStr.slice(0, 10) + 'T00:00:00');
+  if (isNaN(d.getTime())) return null;
+  const back = (d.getDay() + 1) % 7; // 0 si sam, 6 si ven
+  d.setDate(d.getDate() - back);
+  return d;
+}
+
+function fmtWeekHeader(sat: Date): string {
+  const fri = new Date(sat);
+  fri.setDate(fri.getDate() + 6);
+  const mo = ['jan','fév','mar','avr','mai','juin','juil','aoû','sep','oct','nov','déc'];
+  const fmt = (d: Date) => `${d.getDate()} ${mo[d.getMonth()]}`;
+  return `Sam ${fmt(sat)} — Ven ${fmt(fri)}`;
+}
+
+function getRefSat(c: StandbyClient): Date | null {
+  if (c.status === 'scheduled' && c.booked_date) return getWeekSat(c.booked_date);
+  return getWeekSat(c.availability_start);
+}
+
+function isMultiWeek(c: StandbyClient): boolean {
+  if (!c.availability_start || !c.availability_end) return false;
+  if (c.availability_start.slice(0,10) === c.availability_end.slice(0,10)) return false;
+  const s = getWeekSat(c.availability_start);
+  const e = getWeekSat(c.availability_end);
+  return !!s && !!e && s.getTime() !== e.getTime();
+}
+
+function findDuplicateIds(clients: StandbyClient[]): Set<number> {
+  const seen = new Map<string, number[]>();
+  for (const c of clients) {
+    const name = (c.name || '').toLowerCase().trim();
+    const phone = (c.phone || '').replace(/\s/g, '');
+    if (name && phone) {
+      const key = `${name}|${phone}`;
+      const arr = seen.get(key) ?? [];
+      arr.push(c.id);
+      seen.set(key, arr);
+    }
+  }
+  const ids = new Set<number>();
+  for (const arr of seen.values()) if (arr.length > 1) arr.forEach(id => ids.add(id));
+  return ids;
+}
+
+function sortActive(clients: StandbyClient[]): StandbyClient[] {
+  return [...clients].sort((a, b) => {
+    const wa = getRefSat(a), wb = getRefSat(b);
+    if (!wa && !wb) {
+      if (a.status !== b.status) return a.status === 'pending' ? -1 : 1;
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    }
+    if (!wa) return 1;
+    if (!wb) return -1;
+    const wDiff = wa.getTime() - wb.getTime();
+    if (wDiff !== 0) return wDiff;
+    if (a.status !== b.status) return a.status === 'pending' ? -1 : 1;
+    if (a.status === 'pending')
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (a.booked_date && b.booked_date) return a.booked_date.localeCompare(b.booked_date);
+    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  });
+}
+
 export default function StandbyPage() {
   const [clients, setClients] = useState<StandbyClient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -286,9 +353,6 @@ export default function StandbyPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
-
-  const active = clients.filter(c => c.status !== 'done');
-  const archived = clients.filter(c => c.status === 'done');
 
   const openCreate = () => {
     setEditClient(null);
@@ -377,11 +441,41 @@ export default function StandbyPage() {
     if (res.ok) { toast.success('Créneau enregistré — ligne passée en orange'); setScheduleModal(null); load(); }
   };
 
-  const rowBg = (c: StandbyClient) => {
-    if (c.status === 'done') return 'bg-emerald-50 border-l-4 border-l-emerald-400';
-    if (c.status === 'scheduled') return 'bg-orange-100 border-l-4 border-l-orange-500';
-    if (c.processing_by) return 'bg-amber-50 border-l-4 border-l-amber-400';
-    return 'bg-white border-l-4 border-l-slate-200';
+  const active = useMemo(() => clients.filter(c => c.status !== 'done'), [clients]);
+  const sortedActive = useMemo(() => sortActive(active), [active]);
+  const duplicateIds = useMemo(() => findDuplicateIds(active), [active]);
+  const weekGroups = useMemo(() => {
+    const groups: { weekKey: string; weekLabel: string; entries: StandbyClient[] }[] = [];
+    for (const c of sortedActive) {
+      const sat = getRefSat(c);
+      const weekKey = sat ? sat.toISOString().slice(0, 10) : '__no_date__';
+      const weekLabel = sat ? fmtWeekHeader(sat) : 'Sans date définie';
+      const last = groups[groups.length - 1];
+      if (!last || last.weekKey !== weekKey) groups.push({ weekKey, weekLabel, entries: [c] });
+      else last.entries.push(c);
+    }
+    return groups;
+  }, [sortedActive]);
+  const sortedArchived = useMemo(() =>
+    [...clients.filter(c => c.status === 'done')].sort((a, b) => {
+      const aRef = a.booked_date || a.created_at || '';
+      const bRef = b.booked_date || b.created_at || '';
+      return bRef.localeCompare(aRef);
+    }),
+  [clients]);
+
+  const rowBg = (c: StandbyClient, isMultiW = false, isDup = false) => {
+    const bg = c.status === 'done' ? 'bg-emerald-50'
+      : c.status === 'scheduled' ? 'bg-orange-100'
+      : c.processing_by ? 'bg-amber-50'
+      : 'bg-white';
+    if (isDup && isMultiW) return `${bg} border-l-4 border-l-purple-500`;
+    if (isDup)    return `${bg} border-l-4 border-l-rose-500`;
+    if (isMultiW) return `${bg} border-l-4 border-l-indigo-400`;
+    if (c.status === 'done')      return `${bg} border-l-4 border-l-emerald-400`;
+    if (c.status === 'scheduled') return `${bg} border-l-4 border-l-orange-500`;
+    if (c.processing_by)          return `${bg} border-l-4 border-l-amber-400`;
+    return `${bg} border-l-4 border-l-slate-200`;
   };
 
   const statusDot = (s: StandbyClient['status']) => {
@@ -396,11 +490,14 @@ export default function StandbyPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">Liste d&apos;attente</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Contacts sans créneau défini · <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-300 inline-block" /> En attente</span>
-            {' '}<span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-400 inline-block" /> Programmé</span>
-            {' '}<span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" /> Effectué</span>
-          </p>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[10px] text-slate-400">
+            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-slate-200 inline-block border-l-2 border-l-slate-400" /> En attente</span>
+            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-amber-100 inline-block border-l-2 border-l-amber-400" /> En traitement</span>
+            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-100 inline-block border-l-2 border-l-orange-500" /> Programmé</span>
+            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-50 inline-block border-l-2 border-l-emerald-400" /> Effectué</span>
+            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-white inline-block border-l-2 border-l-indigo-400" /> Pluri-semaines</span>
+            <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-white inline-block border-l-2 border-l-rose-500" /> Doublon possible</span>
+          </div>
         </div>
         <button onClick={openCreate} className="bg-slate-900 text-white px-5 py-3 rounded-2xl font-black text-sm hover:bg-sky-600 transition-colors whitespace-nowrap">
           + Ajouter
@@ -432,10 +529,27 @@ export default function StandbyPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {active.map(c => (
-                <tr key={c.id} className={`${rowBg(c)} transition-colors`}>
+              {weekGroups.map(group => (
+                <React.Fragment key={group.weekKey}>
+                  <tr className="bg-slate-100/80">
+                    <td colSpan={8} className="px-4 py-1.5">
+                      <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest">{group.weekLabel}</span>
+                      <span className="ml-2 text-[9px] text-slate-400">{group.entries.length} demande{group.entries.length > 1 ? 's' : ''}</span>
+                    </td>
+                  </tr>
+                  {group.entries.map(c => {
+                    const isMultiW = isMultiWeek(c);
+                    const isDup = duplicateIds.has(c.id);
+                    return (
+                  <tr key={c.id} className={`${rowBg(c, isMultiW, isDup)} transition-colors`}>
                   <td className="p-3 pl-4">
                     <div className="space-y-1.5">
+                      {(isMultiW || isDup) && (
+                        <div className="flex gap-1 flex-wrap mb-0.5">
+                          {isMultiW && <span className="text-[8px] font-black text-indigo-500 bg-indigo-50 border border-indigo-200 rounded px-1 py-0.5 whitespace-nowrap">↔ pluri-sem.</span>}
+                          {isDup && <span className="text-[8px] font-black text-rose-500 bg-rose-50 border border-rose-200 rounded px-1 py-0.5">⚠ doublon</span>}
+                        </div>
+                      )}
                       <select
                         value={c.status}
                         onChange={e => handleStatusChange(c, e.target.value as StandbyClient['status'])}
@@ -529,6 +643,9 @@ export default function StandbyPage() {
                     </div>
                   </td>
                 </tr>
+                    );
+                  })}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -536,16 +653,16 @@ export default function StandbyPage() {
       )}
 
       {/* Archive */}
-      {archived.length > 0 && (
+      {sortedArchived.length > 0 && (
         <div>
           <button onClick={() => setShowArchive(a => !a)} className="flex items-center gap-2 text-[11px] font-black uppercase text-slate-400 hover:text-slate-700 tracking-widest transition-colors">
-            <span>{showArchive ? '▼' : '▶'}</span> Archive — effectués ({archived.length})
+            <span>{showArchive ? '▼' : '▶'}</span> Archive — effectués ({sortedArchived.length})
           </button>
           {showArchive && (
             <div className="mt-3 overflow-x-auto rounded-3xl border border-emerald-100">
               <table className="w-full text-sm min-w-[600px]">
                 <tbody className="divide-y divide-emerald-50">
-                  {archived.map(c => (
+                  {sortedArchived.map(c => (
                     <tr key={c.id} className="bg-emerald-50 opacity-70">
                       <td className="p-3 pl-4"><span className="text-[10px] font-black text-emerald-600 uppercase">✓ Effectué</span></td>
                       <td className="p-3">
