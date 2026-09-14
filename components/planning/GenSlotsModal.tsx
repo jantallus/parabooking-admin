@@ -74,6 +74,12 @@ export default function GenSlotsModal({ availablePlans, monitors, loadAppointmen
         body: JSON.stringify(payload),
       });
       const data = await res.json();
+      if (res.status === 409 && data.planConflict) {
+        toast.error(data.message);
+        if (data.existingPlan) setGenConfig(prev => ({ ...prev, plan_name: data.existingPlan }));
+        setIsGenerating(false);
+        return;
+      }
       if (res.status === 409 && data.warning) {
         const confirmed = await confirm(data.message);
         if (confirmed) return sendGenerationRequest(true, generateForIds, blockedIds);
