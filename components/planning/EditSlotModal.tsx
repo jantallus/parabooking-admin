@@ -80,7 +80,7 @@ export default function EditSlotModal({
   const [flightPriceOverride, setFlightPriceOverride] = useState('');
   const [complementPriceOverride, setComplementPriceOverride] = useState('');
   const [cbNetAmount, setCbNetAmount] = useState('');
-  const [secondBooking, setSecondBooking] = useState<{ title: string; phone: string; weight: string; payment_type: string; encaisseur_id: string }>({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '' });
+  const [secondBooking, setSecondBooking] = useState<{ title: string; phone: string; weight: string; payment_type: string; encaisseur_id: string; price_override: string }>({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' });
   const [standbyPrefill, setStandbyPrefill] = useState<{ standby_id: number; name: string; phone: string; email: string; flight_type: string; weight_info: string; nb_passengers: number; source?: string | null } | null>(null);
   const standbyIdRef = React.useRef<number | null>(null);
   const [standbyActionModal, setStandbyActionModal] = useState<{
@@ -333,7 +333,7 @@ export default function EditSlotModal({
     setIsEditing(selectedEvent.status !== 'booked');
     setPassengerWeights([selectedEvent.weight?.toString() || '']);
     const sb = selectedEvent.second_booking;
-    setSecondBooking(sb ? { title: sb.title || '', phone: sb.phone || '', weight: sb.weight?.toString() || '', payment_type: sb.payment_type || '', encaisseur_id: sb.encaisseur_id || '' } : { title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '' });
+    setSecondBooking(sb ? { title: sb.title || '', phone: sb.phone || '', weight: sb.weight?.toString() || '', payment_type: sb.payment_type || '', encaisseur_id: sb.encaisseur_id || '', price_override: sb.price_override_cents != null ? (Number(sb.price_override_cents) / 100).toFixed(2) : '' } : { title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' });
     setManualCounts({});
     const pd = selectedEvent.status === 'booked' ? selectedEvent.payment_data : null;
     setSelectedPartnerId(pd?.partner_id?.toString() ?? '');
@@ -870,7 +870,8 @@ export default function EditSlotModal({
         if (nextSlot) updatesToApply.push({ id: nextSlot.id, data: { title: `↪️ Suite ${finalEffectiveTitle || 'Vol'}`, flight_type_id: formData.flight_type_id, status: 'booked', notes: 'Extension auto' } });
       }
     } else {
-      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
+      const sb2PriceOverrideCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : null;
+      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
 updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: finalEffectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
     }
     // Chef de groupe : si le nom a changé, mettre à jour le suffixe dans les slots membres
@@ -1952,13 +1953,28 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       {row2('Passager', sb.title)}
                       {sb.weight && row2('Poids', `${sb.weight} kg`)}
                     </div>
-                    {sb.payment_type && (
+                    {(sb.payment_type || sb.price_override_cents != null) && (
                       <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-2">
                         <p className="text-[9px] font-black uppercase text-slate-400">Encaissement</p>
-                        <p className="text-sm font-bold text-slate-800">
-                          {payTypeLabel[sb.payment_type] ?? sb.payment_type}
-                          {sbEncaisseurName && ` · ✓ ${sbEncaisseurName}`}
-                        </p>
+                        {sb.payment_type && (
+                          <p className="text-sm font-bold text-slate-800">
+                            {payTypeLabel[sb.payment_type] ?? sb.payment_type}
+                            {sbEncaisseurName && ` · ✓ ${sbEncaisseurName}`}
+                          </p>
+                        )}
+                        {(() => {
+                          const sbFlight = flightTypes.find(f => f.id.toString() === selectedEvent?.flight_type_id?.toString());
+                          const catalogCents = sbFlight?.price_cents ?? 0;
+                          const totalCents = sb.price_override_cents != null ? Number(sb.price_override_cents) : catalogCents;
+                          const isCustom = sb.price_override_cents != null;
+                          if (!sbFlight) return null;
+                          return (
+                            <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                              <span className="text-[10px] font-black uppercase text-slate-400">Prix à encaisser</span>
+                              <span className={`text-lg font-black ${isCustom ? 'text-amber-600' : 'text-slate-900'}`}>{(totalCents / 100).toFixed(2)} €</span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                     {sb.phone && (
@@ -2027,10 +2043,32 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                           {fullMonitors.map(m => <option key={m.id} value={m.id}>{m.first_name}</option>)}
                         </select>
                       )}
+                      {(() => {
+                        const selFlight = flightTypes.find(f => f.id.toString() === formData.flight_type_id);
+                        if (!selFlight) return null;
+                        const catalogCents = selFlight.price_cents ?? 0;
+                        const totalCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : catalogCents;
+                        const isCustom = !!secondBooking.price_override;
+                        return (
+                          <div className="bg-white rounded-xl border border-slate-100 p-3 space-y-2">
+                            <label className="text-[10px] font-black uppercase text-slate-400 block">Prix à encaisser</label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] font-bold text-slate-500 w-16 shrink-0">Vol</span>
+                              <input type="number" min={0} step={0.5} placeholder={(catalogCents / 100).toFixed(0)} value={secondBooking.price_override} onChange={e => setSecondBooking(p => ({ ...p, price_override: e.target.value }))} className="no-spinner min-w-0 flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-sm font-bold text-right" />
+                              <span className="text-[11px] text-slate-400 shrink-0">€</span>
+                              {secondBooking.price_override && <button type="button" onClick={() => setSecondBooking(p => ({ ...p, price_override: '' }))} className="shrink-0 text-slate-300 hover:text-rose-400 text-sm font-bold">↺</button>}
+                            </div>
+                            <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                              <span className="text-[10px] font-black uppercase text-slate-400">Total</span>
+                              <span className={`text-lg font-black ${isCustom ? 'text-amber-600' : 'text-slate-900'}`}>{(totalCents / 100).toFixed(2)} €</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                   {secondBooking.title && (
-                    <button onClick={() => setSecondBooking({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '' })} className="text-rose-400 text-[10px] font-black uppercase hover:text-rose-600">🗑️ Effacer le 2ème passager</button>
+                    <button onClick={() => setSecondBooking({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' })} className="text-rose-400 text-[10px] font-black uppercase hover:text-rose-600">🗑️ Effacer le 2ème passager</button>
                   )}
                 </div>
               </div>
