@@ -464,6 +464,21 @@ export default function StandbyPage() {
     }),
   [clients]);
 
+  const archiveStats = useMemo(() => {
+    const byType = new Map<string, number>();
+    const byPilot = new Map<string, number>();
+    for (const c of sortedArchived) {
+      const t = c.flight_type || 'Non défini';
+      byType.set(t, (byType.get(t) ?? 0) + 1);
+      const p = c.pilot_name || 'Non assigné';
+      byPilot.set(p, (byPilot.get(p) ?? 0) + 1);
+    }
+    return {
+      byType: [...byType.entries()].sort((a, b) => b[1] - a[1]),
+      byPilot: [...byPilot.entries()].sort((a, b) => b[1] - a[1]),
+    };
+  }, [sortedArchived]);
+
   const rowBg = (c: StandbyClient, isMultiW = false, isDup = false) => {
     const bg = c.status === 'done' ? 'bg-emerald-50'
       : c.status === 'scheduled' ? 'bg-orange-100'
@@ -659,34 +674,70 @@ export default function StandbyPage() {
             <span>{showArchive ? '▼' : '▶'}</span> Archive — effectués ({sortedArchived.length})
           </button>
           {showArchive && (
-            <div className="mt-3 overflow-x-auto rounded-3xl border border-emerald-100">
-              <table className="w-full text-sm min-w-[600px]">
-                <tbody className="divide-y divide-emerald-50">
-                  {sortedArchived.map(c => (
-                    <tr key={c.id} className="bg-emerald-50 opacity-70">
-                      <td className="p-3 pl-4"><span className="text-[10px] font-black text-emerald-600 uppercase">✓ Effectué</span></td>
-                      <td className="p-3">
-                        <p className="font-bold text-slate-700">{c.name}</p>
-                        {c.phone && <p className="text-xs text-slate-400">{c.phone}</p>}
-                        <div className="flex gap-1.5 mt-1">
-                          {c.phone && <a href={`tel:${c.phone}`} className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[10px]">📞</a>}
-                          {c.phone && <a href={`sms:${c.phone}`} className="w-5 h-5 rounded-full bg-sky-100 flex items-center justify-center text-[10px]">💬</a>}
-                          {c.email && <a href={`mailto:${c.email}`} className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-[10px]">📧</a>}
-                        </div>
-                      </td>
-                      <td className="p-3 text-xs text-slate-500">{c.flight_type}</td>
-                      <td className="p-3 text-xs text-slate-500">{fmtDate(c.booked_date)} {c.booked_time}</td>
-                      <td className="p-3 text-xs text-slate-400">{c.pilot_name}</td>
-                      <td className="p-3">
-                        <div className="flex gap-1">
-                          <button onClick={() => handleStatusChange(c, 'pending')} className="text-[10px] text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-white transition-colors">↩ Remettre</button>
-                          <button onClick={() => handleDelete(c.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-300 hover:text-rose-400 transition-colors">🗑️</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3 space-y-3">
+              {/* Stats */}
+              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 space-y-3">
+                <div>
+                  <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest mb-2">Vols par type</p>
+                  <div className="flex flex-wrap gap-2">
+                    {archiveStats.byType.map(([type, count]) => (
+                      <span key={type} className="text-[11px] font-black text-emerald-700 bg-white border border-emerald-200 rounded-xl px-3 py-1">
+                        {type} <span className="text-emerald-400 font-black">×{count}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[9px] font-black uppercase text-emerald-600 tracking-widest mb-2">Par moniteur</p>
+                  <div className="flex flex-wrap gap-2">
+                    {archiveStats.byPilot.map(([pilot, count]) => (
+                      <span key={pilot} className="text-[11px] font-black text-slate-600 bg-white border border-emerald-200 rounded-xl px-3 py-1">
+                        🧑‍✈️ {pilot} <span className="text-emerald-400 font-black">×{count}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto rounded-3xl border border-emerald-100">
+                <table className="w-full text-sm min-w-[600px]">
+                  <tbody className="divide-y divide-emerald-50">
+                    {sortedArchived.map(c => (
+                      <tr key={c.id} className="bg-emerald-50/60">
+                        <td className="p-3 pl-4 w-24">
+                          <span className="text-[10px] font-black text-emerald-600 uppercase">✓ Effectué</span>
+                          {c.booked_date && <p className="text-[10px] text-slate-400 mt-0.5">{fmtDate(c.booked_date)}{c.booked_time ? ` · ${c.booked_time}` : ''}</p>}
+                        </td>
+                        <td className="p-3">
+                          <p className="font-bold text-slate-700">{c.name}</p>
+                          {c.phone && <p className="text-xs text-slate-400">{c.phone}</p>}
+                          <div className="flex gap-1.5 mt-1">
+                            {c.phone && <a href={`tel:${c.phone}`} className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[10px]">📞</a>}
+                            {c.phone && <a href={`sms:${c.phone}`} className="w-5 h-5 rounded-full bg-sky-100 flex items-center justify-center text-[10px]">💬</a>}
+                            {c.email && <a href={`mailto:${c.email}`} className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-[10px]">📧</a>}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-xs font-bold text-slate-600">{c.flight_type || <span className="text-slate-300">—</span>}</span>
+                        </td>
+                        <td className="p-3">
+                          {c.pilot_name
+                            ? <span className="text-[11px] font-black text-emerald-700 bg-emerald-100 rounded-lg px-2 py-1 whitespace-nowrap">🧑‍✈️ {c.pilot_name}</span>
+                            : <span className="text-slate-300 text-xs">—</span>
+                          }
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-1">
+                            <button onClick={() => handleStatusChange(c, 'pending')} className="text-[10px] text-slate-400 hover:text-slate-700 px-2 py-1 rounded-lg hover:bg-white transition-colors">↩ Remettre</button>
+                            <button onClick={() => handleDelete(c.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-300 hover:text-rose-400 transition-colors">🗑️</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
