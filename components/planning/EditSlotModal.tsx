@@ -888,6 +888,18 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
       }
     }
 
+    // Propager le flag provisoire/définitif à tous les membres du groupe
+    if (groupRootSlots.length > 1) {
+      const alreadyUpdating = new Set(updatesToApply.map(u => u.id));
+      groupRootSlots.forEach(slot => {
+        if (!alreadyUpdating.has(slot.id)) {
+          const slotPd = { ...((slot.payment_data || {}) as Record<string, unknown>) };
+          if (tentative) { slotPd.tentative = true; } else { delete slotPd.tentative; }
+          updatesToApply.push({ id: slot.id, data: { payment_data: slotPd } });
+        }
+      });
+    }
+
     applyAll(updatesToApply);
 
     // Appliquer le payment_data aux autres slots du groupe via /quick (ne touche pas aux autres champs)
