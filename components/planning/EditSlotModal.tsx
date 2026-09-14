@@ -56,6 +56,8 @@ export default function EditSlotModal({
   const [groupSize, setGroupSize] = useState(1);
   const [groupLocked, setGroupLocked] = useState(false);
   const [showGroupSelector, setShowGroupSelector] = useState(false);
+  const [groupLeaderRef, setGroupLeaderRef] = useState<string | null>(null);
+  const [groupFollowerIds, setGroupFollowerIds] = useState<number[]>([]);
   const [showEncaissement, setShowEncaissement] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [manualCounts, setManualCounts] = useState<Record<string, number>>({});
@@ -266,8 +268,17 @@ export default function EditSlotModal({
   useEffect(() => {
     if (!selectedEvent) return;
     const realTitle = selectedEvent.title;
+    // Détecter le groupe AVANT de remplir le formulaire pour pouvoir strippper le suffixe
+    const rawTitleEarly = selectedEvent.title || '';
+    const parentheticalEarly = rawTitleEarly.match(/\(([^)]+)\)$/);
+    const leaderNameEarly = (parentheticalEarly && !parentheticalEarly[1].toLowerCase().startsWith('client '))
+      ? parentheticalEarly[1] : null;
+    const strippedTitle = leaderNameEarly
+      ? rawTitleEarly.replace(/\s*\([^)]+\)$/, '').trim()
+      : (realTitle === 'NOTE' ? '' : (realTitle || ''));
+    setGroupLeaderRef(leaderNameEarly);
     setFormData({
-      title: realTitle === 'NOTE' ? '' : (realTitle || ''),
+      title: strippedTitle,
       flight_type_id: selectedEvent.flight_type_id?.toString() ?? '',
       weightChecked: selectedEvent.weight_checked || false,
       phone: selectedEvent.phone || '',
@@ -300,10 +311,18 @@ export default function EditSlotModal({
       const esc = leaderName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const members = sameDaySlots.filter(a => a.title === leaderName || new RegExp(`\\(${esc}\\)$`).test(a.title || ''));
       if (members.length > 0) detectedGroupSize = members.length;
+      setGroupFollowerIds([]);
     } else if (rawTitle && selectedEvent.status === 'booked') {
       const esc = rawTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const followers = sameDaySlots.filter(a => new RegExp(`\\(${esc}\\)$`).test(a.title || ''));
-      if (followers.length > 0) detectedGroupSize = followers.length + 1;
+      if (followers.length > 0) {
+        detectedGroupSize = followers.length + 1;
+        setGroupFollowerIds(followers.map(f => f.id));
+      } else {
+        setGroupFollowerIds([]);
+      }
+    } else {
+      setGroupFollowerIds([]);
     }
     // Détection groupe aiglon sur 1 seul créneau (is_group_booking stocké en base)
     const isAiglonGroupSlot = !!(selectedEvent.second_booking as { is_group_booking?: boolean } | null | undefined)?.is_group_booking;
@@ -719,6 +738,10 @@ export default function EditSlotModal({
     const effectiveTitle = (selectedPartner && pf?.name === false && !formData.title.trim())
       ? `Client ${selectedPartner.name}`
       : formData.title;
+    // Membre d'un groupe : réappliquer le suffixe "(Chef)" pour préserver la couleur de groupe
+    const finalEffectiveTitle = groupLeaderRef
+      ? `${effectiveTitle.replace(/\s*\([^)]+\)$/, '').trim()} (${groupLeaderRef})`
+      : effectiveTitle;
     const partnerPaymentData = selectedPartner
       ? { partner: true, partner_id: selectedPartner.id, partner_name: selectedPartner.name, code: selectedPartner.code, partner_color: selectedPartner.color_code }
       : {};
@@ -833,16 +856,30 @@ export default function EditSlotModal({
         }
       });
     } else if (slotsNeeded > 1) {
-      updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: effectiveTitle, status: 'booked', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData } });
+      updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: 'booked', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData } });
       const startMs = new Date(selectedEvent.start as Date | string).getTime();
       for (let i = 1; i < slotsNeeded; i++) {
         const nextMs = startMs + i * slotDuration * 60000;
         const nextSlot = appointments.find(a => a.monitor_id?.toString() === selectedEvent.monitor_id?.toString() && new Date(a.start_time).getTime() === nextMs && a.status === 'available');
-        if (nextSlot) updatesToApply.push({ id: nextSlot.id, data: { title: `↪️ Suite ${effectiveTitle || 'Vol'}`, flight_type_id: formData.flight_type_id, status: 'booked', notes: 'Extension auto' } });
+        if (nextSlot) updatesToApply.push({ id: nextSlot.id, data: { title: `↪️ Suite ${finalEffectiveTitle || 'Vol'}`, flight_type_id: formData.flight_type_id, status: 'booked', notes: 'Extension auto' } });
       }
     } else {
       const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
-updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: effectiveTitle, status: effectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
+updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: finalEffectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
+    }
+    // Chef de groupe : si le nom a changé, mettre à jour le suffixe dans les slots membres
+    if (!groupLeaderRef && groupFollowerIds.length > 0) {
+      const oldLeaderName = (selectedEvent.title || '').replace(/\s*\([^)]+\)$/, '').trim();
+      const newLeaderName = effectiveTitle.trim();
+      if (oldLeaderName && newLeaderName && oldLeaderName !== newLeaderName) {
+        groupFollowerIds.forEach(fid => {
+          const follower = appointments.find(a => a.id === fid);
+          if (follower?.title) {
+            const newFollowerTitle = follower.title.replace(/\s*\([^)]+\)$/, '').trim() + ` (${newLeaderName})`;
+            updatesToApply.push({ id: fid, data: { title: newFollowerTitle } });
+          }
+        });
+      }
     }
 
     applyAll(updatesToApply);
