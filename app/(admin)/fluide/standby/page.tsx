@@ -330,6 +330,8 @@ export default function StandbyPage() {
   const [scheduleModal, setScheduleModal] = useState<StandbyClient | null>(null);
   const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '', monitor_id: '' });
   const [freeMonitors, setFreeMonitors] = useState<Array<{ id: string; first_name: string; slot_id?: number; flight_type_id?: number | null }>>([]);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [loadingTimes, setLoadingTimes] = useState(false);
   const [aravisPartner, setAravisPartner] = useState<{ id: number; name: string; color_code?: string } | null>(null);
   const [loadingMonitors, setLoadingMonitors] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -464,6 +466,23 @@ export default function StandbyPage() {
     setImportText('');
   };
 
+  const fetchAvailableTimes = async (date: string, preferredTime: string, source: string | null) => {
+    if (!date) { setAvailableTimes([]); return; }
+    setLoadingTimes(true);
+    setAvailableTimes([]);
+    setFreeMonitors([]);
+    try {
+      const r = await apiFetch(`/api/standby/available-times?date=${encodeURIComponent(date)}`);
+      if (!r.ok) return;
+      const times: string[] = await r.json();
+      setAvailableTimes(times);
+      if (preferredTime && times.includes(preferredTime)) {
+        setSchedForm(s => ({ ...s, booked_time: preferredTime, monitor_id: '' }));
+        fetchFreeMonitors(date, preferredTime, source);
+      }
+    } catch { /* ignore */ } finally { setLoadingTimes(false); }
+  };
+
   const fetchFreeMonitors = async (date: string, time: string, source: string | null) => {
     if (!date || !time) { setFreeMonitors([]); return; }
     setLoadingMonitors(true);
@@ -485,15 +504,15 @@ export default function StandbyPage() {
     setScheduleModal(c);
     const hasBookedDate = !!(c.booked_date && toInputDate(c.booked_date));
     const date = toInputDate(c.booked_date) || toInputDate(c.availability_start) || '';
-    // Si déjà calé une fois, reprendre booked_time.
-    // Sinon, extraire l'heure depuis availability_text (champ dédié envoyé par le formulaire Aravis).
+    // Heure préférée : booked_time si déjà calé, sinon heure Aravis depuis availability_text
     const availTimeRaw = (!hasBookedDate && c.availability_text) ? c.availability_text.trim() : '';
     const availTimeMatch = availTimeRaw.match(/^(\d{1,2})[h:H](\d{2})$/);
     const availTime = availTimeMatch ? `${availTimeMatch[1].padStart(2, '0')}:${availTimeMatch[2]}` : '';
-    const time = hasBookedDate ? (c.booked_time || '') : availTime;
-    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: time, monitor_id: '' });
+    const preferredTime = hasBookedDate ? (c.booked_time || '') : availTime;
+    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: preferredTime, monitor_id: '' });
     setFreeMonitors([]);
-    if (date) fetchFreeMonitors(date, time, c.source);
+    setAvailableTimes([]);
+    if (date) fetchAvailableTimes(date, preferredTime, c.source);
   };
 
   const saveSchedule = async () => {
@@ -1222,24 +1241,39 @@ export default function StandbyPage() {
                   value={schedForm.booked_date}
                   onChange={e => {
                     const d = e.target.value;
-                    setSchedForm(s => ({ ...s, booked_date: d, pilot_name: '', monitor_id: '' }));
-                    fetchFreeMonitors(d, schedForm.booked_time, scheduleModal.source);
+                    setSchedForm(s => ({ ...s, booked_date: d, booked_time: '', pilot_name: '', monitor_id: '' }));
+                    fetchAvailableTimes(d, '', scheduleModal.source);
                   }}
                   type="date"
                 />
               </div>
               <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Heure</label>
-                <input
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1"
-                  value={schedForm.booked_time}
-                  onChange={e => {
-                    const t = e.target.value;
-                    setSchedForm(s => ({ ...s, booked_time: t, pilot_name: '', monitor_id: '' }));
-                    if (schedForm.booked_date) fetchFreeMonitors(schedForm.booked_date, t, scheduleModal.source);
-                  }}
-                  placeholder="11:05"
-                />
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
+                  Heure {loadingTimes && <span className="text-sky-400 normal-case font-normal">Chargement...</span>}
+                </label>
+                {availableTimes.length > 0 ? (
+                  <select
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1 focus:outline-none focus:border-sky-300"
+                    value={schedForm.booked_time}
+                    onChange={e => {
+                      const t = e.target.value;
+                      setSchedForm(s => ({ ...s, booked_time: t, pilot_name: '', monitor_id: '' }));
+                      setFreeMonitors([]);
+                      if (t && schedForm.booked_date) fetchFreeMonitors(schedForm.booked_date, t, scheduleModal.source);
+                    }}
+                  >
+                    <option value="">— Choisir une heure —</option>
+                    {availableTimes.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                ) : schedForm.booked_date && !loadingTimes ? (
+                  <p className="mt-1 text-xs font-bold text-amber-600 bg-amber-50 rounded-2xl p-3">
+                    Aucun créneau disponible ce jour-là.
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-slate-400 bg-slate-50 rounded-2xl p-3">
+                    {schedForm.booked_date ? 'Chargement des horaires…' : 'Choisis une date.'}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
@@ -1263,7 +1297,7 @@ export default function StandbyPage() {
                   </p>
                 ) : (
                   <p className="mt-1 text-xs text-slate-400 bg-slate-50 rounded-2xl p-3">
-                    Saisis une date et une heure pour voir les créneaux disponibles.
+                    Choisis une date et une heure pour voir les moniteurs disponibles.
                   </p>
                 )}
               </div>
