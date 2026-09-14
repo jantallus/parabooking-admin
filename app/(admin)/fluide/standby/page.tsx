@@ -466,9 +466,14 @@ export default function StandbyPage() {
 
   const openSchedule = (c: StandbyClient) => {
     setScheduleModal(c);
-    // pré-remplir depuis booked_date si déjà calé, sinon depuis availability_start si date précise
+    const hasBookedDate = !!(c.booked_date && toInputDate(c.booked_date));
     const date = toInputDate(c.booked_date) || toInputDate(c.availability_start) || '';
-    const time = c.booked_time || '';
+    // Si on utilise booked_date (déjà calé), prendre booked_time.
+    // Sinon, extraire l'heure depuis le timestamp availability_start s'il en a une.
+    const availTime = c.availability_start && c.availability_start.length > 10
+      ? c.availability_start.slice(11, 16).replace('T', '')
+      : '';
+    const time = hasBookedDate ? (c.booked_time || '') : (availTime || '');
     setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: time, monitor_id: '' });
     setFreeMonitors([]);
     if (date) fetchFreeMonitors(date, time, c.source);
