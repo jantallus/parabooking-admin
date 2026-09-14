@@ -273,11 +273,9 @@ export default function PlanningAdmin() {
       : (groupColors.has(rawTitle.split('(')[0].trim()) ? rawTitle.split('(')[0].trim() : null);
     const groupColor = groupLeader ? (groupColors.get(groupLeader) ?? null) : null;
 
-    // Supprime la parenthèse du chef dans l'affichage — la bordure colorée identifie le groupe
     const escapedLeader = groupLeader ? groupLeader.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
-    const finalDisplayName = groupLeader
-      ? partnerDisplayName.replace(new RegExp(`\\s*\\(${escapedLeader}\\)$`), '').trim() || partnerDisplayName
-      : partnerDisplayName;
+    // Garde "(Chef)" visible — identifie le groupe dans la cellule
+    const finalDisplayName = partnerDisplayName;
 
     const badges = [ep.phone && '📞', ep.booking_options && '📸', ep.client_message && '💬', ep.notes?.trim() && '📝'].filter(Boolean).join('');
 
