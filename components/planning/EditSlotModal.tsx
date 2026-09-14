@@ -79,7 +79,7 @@ export default function EditSlotModal({
   const [complementPriceOverride, setComplementPriceOverride] = useState('');
   const [cbNetAmount, setCbNetAmount] = useState('');
   const [secondBooking, setSecondBooking] = useState<{ title: string; phone: string; weight: string; payment_type: string; encaisseur_id: string }>({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '' });
-  const [standbyPrefill, setStandbyPrefill] = useState<{ standby_id: number; name: string; phone: string; email: string; flight_type: string; weight_info: string; nb_passengers: number } | null>(null);
+  const [standbyPrefill, setStandbyPrefill] = useState<{ standby_id: number; name: string; phone: string; email: string; flight_type: string; weight_info: string; nb_passengers: number; source?: string | null } | null>(null);
   const standbyIdRef = React.useRef<number | null>(null);
   const [standbyActionModal, setStandbyActionModal] = useState<{
     entries: Array<{ id: number; name: string; phone: string; status: string }>;
@@ -122,6 +122,16 @@ export default function EditSlotModal({
       }
     } catch { setStandbyPrefill(null); standbyIdRef.current = null; }
   }, [selectedEvent]);
+
+  // ── Auto-sélection partenaire Aravis depuis standby d'origine aravis ────────
+  useEffect(() => {
+    if (!isAravisContext && standbyPrefill?.source === 'aravis' && partners.length > 0) {
+      const aravisPartner = partners.find(p =>
+        p.name?.toLowerCase().includes('aravis') || p.code?.toLowerCase().includes('aravis')
+      );
+      if (aravisPartner) setSelectedPartnerId(aravisPartner.id.toString());
+    }
+  }, [standbyPrefill, partners, isAravisContext]);
 
   // ── Parsing message collé ─────────────────────────────────────────────────
   const parseMessage = () => {

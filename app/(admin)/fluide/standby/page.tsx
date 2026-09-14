@@ -19,6 +19,7 @@ interface StandbyClient {
   pilot_name: string | null;
   monitor_name: string | null;
   related_flights: Array<{ flight_type: string | null; monitor: string | null }> | null;
+  source: string | null;
   booked_date: string | null;
   booked_time: string | null;
   slot_id: number | null;
@@ -30,7 +31,7 @@ interface StandbyClient {
 const emptyClient = (): Omit<StandbyClient, 'id' | 'created_at' | 'status'> => ({
   name: '', phone: '', email: '', nb_passengers: 1, flight_type: '',
   weight_info: '', availability_text: '', availability_start: null, availability_end: null,
-  notes: '', pilot_name: null, monitor_name: null, related_flights: null, booked_date: null, booked_time: null, slot_id: null, processing_by: null,
+  notes: '', pilot_name: null, monitor_name: null, related_flights: null, source: null, booked_date: null, booked_time: null, slot_id: null, processing_by: null,
 });
 
 const cap = (s: string) =>
@@ -327,7 +328,9 @@ export default function StandbyPage() {
   const [importText, setImportText] = useState('');
   const [parsed, setParsed] = useState<ReturnType<typeof parseStandbyMessage> | null>(null);
   const [scheduleModal, setScheduleModal] = useState<StandbyClient | null>(null);
-  const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '' });
+  const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '', monitor_id: '' });
+  const [freeMonitors, setFreeMonitors] = useState<Array<{ id: string; first_name: string }>>([]);
+  const [loadingMonitors, setLoadingMonitors] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [currentUserName, setCurrentUserName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -370,7 +373,7 @@ export default function StandbyPage() {
 
   const openCreate = () => {
     setEditClient(null);
-    setForm(emptyClient());
+    setForm({ ...emptyClient(), source: isAravisContext ? 'aravis' : null });
     setImportOpen(false);
     setImportText('');
     setParsed(null);
@@ -383,7 +386,7 @@ export default function StandbyPage() {
       flight_type: c.flight_type||'', weight_info: c.weight_info||'', availability_text: c.availability_text||'',
       availability_start: toInputDate(c.availability_start),
       availability_end: toInputDate(c.availability_end),
-      notes: c.notes||'', pilot_name: c.pilot_name, monitor_name: c.monitor_name, related_flights: c.related_flights,
+      notes: c.notes||'', pilot_name: c.pilot_name, monitor_name: c.monitor_name, related_flights: c.related_flights, source: c.source,
       booked_date: toInputDate(c.booked_date),
       booked_time: c.booked_time, slot_id: c.slot_id, processing_by: c.processing_by });
     setImportOpen(false);
@@ -443,9 +446,29 @@ export default function StandbyPage() {
     setImportText('');
   };
 
+  const fetchFreeMonitors = async (date: string, time: string, source: string | null) => {
+    if (!date) { setFreeMonitors([]); return; }
+    setLoadingMonitors(true);
+    const enseigne = (isAravisContext || source === 'aravis') ? 'aravis' : 'fluide';
+    try {
+      const r = await apiFetch(`/api/standby/free-monitors?date=${date}&time=${encodeURIComponent(time)}&enseigne=${enseigne}`);
+      if (!r.ok) return;
+      const monitors: Array<{ id: string; first_name: string }> = await r.json();
+      setFreeMonitors(monitors);
+      if (monitors.length > 0) {
+        const pick = monitors[Math.floor(Math.random() * monitors.length)];
+        setSchedForm(s => ({ ...s, pilot_name: pick.first_name, monitor_id: pick.id }));
+      }
+    } catch { /* ignore */ } finally { setLoadingMonitors(false); }
+  };
+
   const openSchedule = (c: StandbyClient) => {
     setScheduleModal(c);
-    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: toInputDate(c.booked_date)||'', booked_time: c.booked_time||'' });
+    const date = toInputDate(c.booked_date) || '';
+    const time = c.booked_time || '';
+    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: time, monitor_id: '' });
+    setFreeMonitors([]);
+    if (date) fetchFreeMonitors(date, time, c.source);
   };
 
   const saveSchedule = async () => {
@@ -1083,18 +1106,62 @@ export default function StandbyPage() {
               <button onClick={() => setScheduleModal(null)} className="text-slate-400 hover:text-slate-700 font-black">✕</button>
             </div>
             <div className="p-5 space-y-3">
-              <p className="text-sm font-bold text-slate-600">{scheduleModal.name}</p>
-              <div>
-                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Pilote</label>
-                <input className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1" value={schedForm.pilot_name} onChange={e => setSchedForm(s => ({...s, pilot_name: e.target.value}))} placeholder="Nom du pilote" />
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold text-slate-700">{scheduleModal.name}</p>
+                {(isAravisContext || scheduleModal.source === 'aravis') && (
+                  <span className="text-[10px] font-black text-sky-700 bg-sky-100 rounded-lg px-2 py-0.5">Aravis Parapente</span>
+                )}
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Date</label>
-                <input className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1" value={schedForm.booked_date} onChange={e => setSchedForm(s => ({...s, booked_date: e.target.value}))} type="date" />
+                <input
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1"
+                  value={schedForm.booked_date}
+                  onChange={e => {
+                    const d = e.target.value;
+                    setSchedForm(s => ({ ...s, booked_date: d, pilot_name: '', monitor_id: '' }));
+                    fetchFreeMonitors(d, schedForm.booked_time, scheduleModal.source);
+                  }}
+                  type="date"
+                />
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Heure</label>
-                <input className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1" value={schedForm.booked_time} onChange={e => setSchedForm(s => ({...s, booked_time: e.target.value}))} placeholder="11:05" />
+                <input
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1"
+                  value={schedForm.booked_time}
+                  onChange={e => {
+                    const t = e.target.value;
+                    setSchedForm(s => ({ ...s, booked_time: t, pilot_name: '', monitor_id: '' }));
+                    if (schedForm.booked_date) fetchFreeMonitors(schedForm.booked_date, t, scheduleModal.source);
+                  }}
+                  placeholder="11:05"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
+                  Moniteur {loadingMonitors && <span className="text-sky-400 normal-case font-normal">Chargement...</span>}
+                </label>
+                {freeMonitors.length > 0 ? (
+                  <select
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1 focus:outline-none focus:border-sky-300"
+                    value={schedForm.monitor_id}
+                    onChange={e => {
+                      const m = freeMonitors.find(x => x.id === e.target.value);
+                      setSchedForm(s => ({ ...s, monitor_id: e.target.value, pilot_name: m?.first_name || '' }));
+                    }}
+                  >
+                    <option value="">— Choisir —</option>
+                    {freeMonitors.map(m => <option key={m.id} value={m.id}>{m.first_name}</option>)}
+                  </select>
+                ) : (
+                  <input
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1"
+                    value={schedForm.pilot_name}
+                    onChange={e => setSchedForm(s => ({ ...s, pilot_name: e.target.value }))}
+                    placeholder={schedForm.booked_date ? 'Aucun moniteur dispo — saisir manuellement' : 'Nom du moniteur'}
+                  />
+                )}
               </div>
               <button
                 onClick={() => {
@@ -1107,6 +1174,7 @@ export default function StandbyPage() {
                     flight_type: scheduleModal.flight_type || '',
                     weight_info: scheduleModal.weight_info || '',
                     nb_passengers: scheduleModal.nb_passengers || 1,
+                    source: scheduleModal.source || null,
                   };
                   try { localStorage.setItem('standby_prefill', JSON.stringify(prefill)); } catch { /* ignore */ }
                   const date = schedForm.booked_date || toInputDate(scheduleModal.availability_start) || '';
