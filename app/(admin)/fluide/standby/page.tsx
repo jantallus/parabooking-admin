@@ -345,8 +345,7 @@ export default function StandbyPage() {
     created_from: '',
     created_to: '',
   });
-  const [allFlightTypes, setAllFlightTypes] = useState<Array<{ id: number; name: string }>>([]);
-  const [formFlightTypes, setFormFlightTypes] = useState<Array<{ id: number; name: string }>>([]);
+  const [allFlightTypes, setAllFlightTypes] = useState<Array<{ id: number; name: string; season?: string }>>([]);
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -378,26 +377,9 @@ export default function StandbyPage() {
     const tenant = isAravisContext ? 'aravis' : 'fluide';
     apiFetch(`/api/flight-types?tenant=${tenant}`)
       .then(r => r.ok ? r.json() : [])
-      .then((data: Array<{ id: number; name: string }>) => {
-        setAllFlightTypes(data);
-        setFormFlightTypes(data);
-      })
+      .then((data: Array<{ id: number; name: string; season?: string }>) => setAllFlightTypes(data))
       .catch(() => {});
   }, [isAravisContext]);
-
-  // Quand la date de dispo change dans le formulaire, filtrer les vols disponibles ce jour
-  const updateFormFlightTypes = useCallback(async (date: string | null) => {
-    if (!date) { setFormFlightTypes(allFlightTypes); return; }
-    try {
-      const r = await apiFetch(`/api/slots?start=${date}&end=${date}`);
-      if (!r.ok) { setFormFlightTypes(allFlightTypes); return; }
-      const slots: Array<{ flight_type_id?: number | null }> = await r.json();
-      const ids = new Set(slots.map(s => s.flight_type_id).filter(Boolean));
-      if (ids.size === 0) { setFormFlightTypes(allFlightTypes); return; }
-      const filtered = allFlightTypes.filter(ft => ids.has(ft.id));
-      setFormFlightTypes(filtered.length > 0 ? filtered : allFlightTypes);
-    } catch { setFormFlightTypes(allFlightTypes); }
-  }, [allFlightTypes]);
 
   const openCreate = () => {
     setEditClient(null);
@@ -418,7 +400,6 @@ export default function StandbyPage() {
       notes: c.notes||'', pilot_name: c.pilot_name, monitor_name: c.monitor_name, related_flights: c.related_flights, source: c.source,
       booked_date: toInputDate(c.booked_date),
       booked_time: c.booked_time, slot_id: c.slot_id, processing_by: c.processing_by });
-    updateFormFlightTypes(startDate);
     setImportOpen(false);
     setParsed(null);
     setModalOpen(true);
@@ -1104,16 +1085,28 @@ export default function StandbyPage() {
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Type de vol</label>
-                  {formFlightTypes.length > 0 ? (
-                    <select
-                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1 focus:outline-none focus:border-sky-300"
-                      value={form.flight_type||''}
-                      onChange={e => setForm(f => ({ ...f, flight_type: e.target.value }))}
-                    >
-                      <option value="">— Choisir —</option>
-                      {formFlightTypes.map(ft => <option key={ft.id} value={ft.name}>{ft.name}</option>)}
-                    </select>
-                  ) : (
+                  {allFlightTypes.length > 0 ? (() => {
+                    const seasons = Array.from(new Set(allFlightTypes.map(ft => ft.season || ''))).sort();
+                    const grouped = seasons.length > 1;
+                    return (
+                      <select
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1 focus:outline-none focus:border-sky-300"
+                        value={form.flight_type||''}
+                        onChange={e => setForm(f => ({ ...f, flight_type: e.target.value }))}
+                      >
+                        <option value="">— Choisir —</option>
+                        {grouped ? seasons.map(s => (
+                          <optgroup key={s} label={s || 'Autres'}>
+                            {allFlightTypes.filter(ft => (ft.season || '') === s).map(ft => (
+                              <option key={ft.id} value={ft.name}>{ft.name}</option>
+                            ))}
+                          </optgroup>
+                        )) : allFlightTypes.map(ft => (
+                          <option key={ft.id} value={ft.name}>{ft.name}</option>
+                        ))}
+                      </select>
+                    );
+                  })() : (
                     <input className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1" value={form.flight_type||''} onChange={e => setForm(f => ({...f, flight_type: e.target.value}))} placeholder="Plaisir, Performance..." />
                   )}
                 </div>
@@ -1123,16 +1116,7 @@ export default function StandbyPage() {
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Dispo du</label>
-                  <input
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1"
-                    value={form.availability_start||''}
-                    onChange={e => {
-                      const d = e.target.value || null;
-                      setForm(f => ({ ...f, availability_start: d }));
-                      updateFormFlightTypes(d);
-                    }}
-                    type="date"
-                  />
+                  <input className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 font-bold text-sm mt-1" value={form.availability_start||''} onChange={e => setForm(f => ({...f, availability_start: e.target.value||null}))} type="date" />
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Dispo au</label>
