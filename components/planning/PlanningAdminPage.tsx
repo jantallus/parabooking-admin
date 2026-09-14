@@ -331,7 +331,8 @@ export default function PlanningAdmin() {
           {/* Contenu Pax 1 (2/3 gauche) */}
           <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: '33%', padding: '1px 3px', paddingLeft: effectiveBorderColor ? '6px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', zIndex: 0 }}>
             {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
-            <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}{badges && ` ${badges}`}</span>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}</span>
+            {badges && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>{badges}</span>}
             {infoLine && subSpan(infoLine)}
             {payLine && subSpan(payLine)}
           </div>
@@ -360,7 +361,8 @@ export default function PlanningAdmin() {
           ) : (
             <div style={{ flex: 2, padding: '1px 3px', paddingLeft: effectiveBorderColor ? '6px' : '3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden' }}>
               {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
-              <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}{badges && ` ${badges}`}</span>
+              <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}</span>
+              {badges && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>{badges}</span>}
               {infoLine && subSpan(infoLine)}
               {payLine && subSpan(payLine)}
             </div>
@@ -393,9 +395,8 @@ export default function PlanningAdmin() {
     return (
       <div style={{ padding: '1px 3px', paddingLeft: effectiveBorderColor ? '2px' : '3px', borderLeft: effectiveBorderColor ? `4px solid ${effectiveBorderColor}` : undefined, overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column', gap: '1px' }}>
         {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
-        <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {finalDisplayName}{badges && ` ${badges}`}
-        </span>
+        <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}</span>
+        {badges && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>{badges}</span>}
         {infoLine && subSpan(infoLine)}
         {payLine && subSpan(payLine)}
       </div>
