@@ -549,7 +549,8 @@ export default function StandbyPage() {
       const weight = allWeights[i] ?? allWeights[0] ?? undefined;
       const slotPatch: Record<string, unknown> = {
         status: 'booked',
-        title: scheduleModal.name,
+        // Slot i>0 : titre "Nom (Nom)" pour déclencher la couleur de groupe dans le planning
+        title: i === 0 ? scheduleModal.name : `${scheduleModal.name} (${scheduleModal.name})`,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
         flight_type_id: resolvedFlightTypeId,
