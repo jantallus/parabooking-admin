@@ -373,12 +373,11 @@ export default function StandbyPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Charger tous les types de vol une seule fois
+  // Charger tous les types de vol (les deux tenants) une seule fois
   useEffect(() => {
-    const tenant = isAravisContext ? 'aravis' : 'fluide';
-    apiFetch(`/api/flight-types?tenant=${tenant}`)
+    apiFetch(`/api/flight-types?tenant=all`)
       .then(r => r.ok ? r.json() : [])
-      .then((data: Array<{ id: number; name: string; season?: string }>) => setAllFlightTypes(data))
+      .then((data: Array<{ id: number; name: string; season?: string; tenant?: string }>) => setAllFlightTypes(data))
       .catch(() => {});
     apiFetch('/api/partners')
       .then(r => r.ok ? r.json() : [])
@@ -508,7 +507,14 @@ export default function StandbyPage() {
         title: scheduleModal.name,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
-        flight_type_id: selectedMonitor?.flight_type_id ?? null,
+        flight_type_id: (() => {
+          const ftName = scheduleModal.flight_type;
+          if (ftName) {
+            const matched = allFlightTypes.find(ft => ft.name === ftName);
+            if (matched) return matched.id;
+          }
+          return selectedMonitor?.flight_type_id ?? null;
+        })(),
       };
       if (isAravis && aravisPartner) {
         slotPatch.payment_data = {
@@ -1126,7 +1132,9 @@ export default function StandbyPage() {
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Type de vol</label>
                   {allFlightTypes.length > 0 ? (() => {
-                    const seasons = Array.from(new Set(allFlightTypes.map(ft => ft.season || ''))).sort();
+                    const formTenant = form.source === 'aravis' ? 'aravis' : 'fluide';
+                    const tenantTypes = allFlightTypes.filter((ft: { id: number; name: string; season?: string; tenant?: string }) => (ft.tenant || 'fluide') === formTenant);
+                    const seasons = Array.from(new Set(tenantTypes.map(ft => ft.season || ''))).sort();
                     const grouped = seasons.length > 1;
                     return (
                       <select
@@ -1139,12 +1147,12 @@ export default function StandbyPage() {
                           const sl = s.toLowerCase(); const label = sl === 'summer' ? 'Été' : sl === 'winter' ? 'Hiver' : s || 'Autres';
                           return (
                             <optgroup key={s} label={label}>
-                              {allFlightTypes.filter(ft => (ft.season || '') === s).map(ft => (
+                              {tenantTypes.filter(ft => (ft.season || '') === s).map(ft => (
                                 <option key={ft.id} value={ft.name}>{ft.name}</option>
                               ))}
                             </optgroup>
                           );
-                        }) : allFlightTypes.map(ft => (
+                        }) : tenantTypes.map(ft => (
                           <option key={ft.id} value={ft.name}>{ft.name}</option>
                         ))}
                       </select>
