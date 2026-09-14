@@ -1096,7 +1096,7 @@ export default function StandbyPage() {
                       >
                         <option value="">— Choisir —</option>
                         {grouped ? seasons.map(s => {
-                          const label = s === 'summer' ? 'Été' : s === 'winter' ? 'Hiver' : s || 'Autres';
+                          const sl = s.toLowerCase(); const label = sl === 'summer' ? 'Été' : sl === 'winter' ? 'Hiver' : s || 'Autres';
                           return (
                             <optgroup key={s} label={label}>
                               {allFlightTypes.filter(ft => (ft.season || '') === s).map(ft => (
