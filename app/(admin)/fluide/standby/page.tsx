@@ -329,7 +329,8 @@ export default function StandbyPage() {
   const [parsed, setParsed] = useState<ReturnType<typeof parseStandbyMessage> | null>(null);
   const [scheduleModal, setScheduleModal] = useState<StandbyClient | null>(null);
   const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '', monitor_id: '' });
-  const [freeMonitors, setFreeMonitors] = useState<Array<{ id: string; first_name: string; slot_id?: number }>>([]);
+  const [freeMonitors, setFreeMonitors] = useState<Array<{ id: string; first_name: string; slot_id?: number; flight_type_id?: number | null }>>([]);
+  const [aravisPartner, setAravisPartner] = useState<{ id: number; name: string; color_code?: string } | null>(null);
   const [loadingMonitors, setLoadingMonitors] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [currentUserName, setCurrentUserName] = useState('');
@@ -378,6 +379,13 @@ export default function StandbyPage() {
     apiFetch(`/api/flight-types?tenant=${tenant}`)
       .then(r => r.ok ? r.json() : [])
       .then((data: Array<{ id: number; name: string; season?: string }>) => setAllFlightTypes(data))
+      .catch(() => {});
+    apiFetch('/api/partners')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: Array<{ id: number; name: string; color_code?: string; code?: string }>) => {
+        const p = data.find(p => p.name?.toLowerCase().includes('aravis') || p.code?.toLowerCase().includes('aravis'));
+        if (p) setAravisPartner(p);
+      })
       .catch(() => {});
   }, [isAravisContext]);
 
@@ -463,8 +471,8 @@ export default function StandbyPage() {
     try {
       const r = await apiFetch(`/api/standby/free-monitors?date=${date}&time=${encodeURIComponent(time)}`);
       if (!r.ok) return;
-      const monitors: Array<{ id: string; first_name: string; slot_id?: number }> = (await r.json()).map(
-        (m: { id: number | string; first_name: string; slot_id?: number }) => ({ ...m, id: String(m.id) })
+      const monitors: Array<{ id: string; first_name: string; slot_id?: number; flight_type_id?: number | null }> = (await r.json()).map(
+        (m: { id: number | string; first_name: string; slot_id?: number; flight_type_id?: number | null }) => ({ ...m, id: String(m.id) })
       );
       setFreeMonitors(monitors);
       if (monitors.length > 0) {
@@ -493,16 +501,26 @@ export default function StandbyPage() {
     if (!scheduleModal) return;
     const selectedMonitor = freeMonitors.find(m => m.id === schedForm.monitor_id);
     const slotId = selectedMonitor?.slot_id ?? null;
-    // Si un créneau disponible est identifié, on le réserve dans le planning
     if (slotId) {
+      const isAravis = isAravisContext || scheduleModal.source === 'aravis';
+      const slotPatch: Record<string, unknown> = {
+        status: 'booked',
+        title: scheduleModal.name,
+        phone: scheduleModal.phone || '',
+        email: scheduleModal.email || '',
+        flight_type_id: selectedMonitor?.flight_type_id ?? null,
+      };
+      if (isAravis && aravisPartner) {
+        slotPatch.payment_data = {
+          partner: true,
+          partner_id: aravisPartner.id,
+          partner_name: aravisPartner.name,
+          partner_color: aravisPartner.color_code ?? '#6CAED8',
+        };
+      }
       const slotRes = await apiFetch(`/api/slots/${slotId}`, {
         method: 'PATCH',
-        body: JSON.stringify({
-          status: 'booked',
-          title: scheduleModal.name,
-          phone: scheduleModal.phone || '',
-          email: scheduleModal.email || '',
-        }),
+        body: JSON.stringify(slotPatch),
       });
       if (!slotRes.ok) { toast.error('Impossible de réserver le créneau'); return; }
     }
