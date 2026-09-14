@@ -701,7 +701,7 @@ export default function EditSlotModal({
     } catch { toast.error('❌ Erreur réseau lors de la sauvegarde.'); }
   };
 
-  const handleSaveNote = async () => {
+  const handleSaveNote = async (tentative = false) => {
     if (!selectedEvent) return;
     let slotsNeeded = 1;
     let targetMonitors: string[] = [];
@@ -803,6 +803,12 @@ export default function EditSlotModal({
       } else {
         delete finalPaymentData.cb_net_cents;
       }
+    }
+
+    if (tentative) {
+      finalPaymentData.tentative = true;
+    } else {
+      delete finalPaymentData.tentative;
     }
 
     const complementNames = !isStripePd
@@ -2061,7 +2067,14 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                   {(activeTab === 'client' || activeTab === 'client2') && isEditing && selectedEvent?.status === 'booked' && (
                     <button onClick={() => setIsEditing(false)} className="w-full bg-slate-100 text-slate-500 py-2.5 rounded-2xl font-black uppercase text-xs hover:bg-slate-200 transition-colors">↩ Annuler les modifications</button>
                   )}
-                  <button onClick={handleSaveNote} className="w-full bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors">Enregistrer la modification</button>
+                  {(activeTab === 'client' || activeTab === 'client2') ? (
+                    <div className="flex gap-2">
+                      <button onClick={() => handleSaveNote(true)} className="flex-1 bg-slate-100 text-slate-600 py-4 rounded-3xl font-black uppercase italic shadow-sm hover:bg-slate-200 transition-colors text-sm border border-slate-300">◌ Provisoire</button>
+                      <button onClick={() => handleSaveNote(false)} className="flex-1 bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors text-sm">● Définitif</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => handleSaveNote(false)} className="w-full bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors">Enregistrer la modification</button>
+                  )}
                   {activeTab !== 'client2' && (selectedEvent?.title || selectedEvent?.notes || selectedEvent?.status !== 'available') && (
                     activeTab === 'note' ? (
                       <div className="pt-2">

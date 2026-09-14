@@ -135,6 +135,7 @@ export default function PlanningAdmin() {
       const flightColor = partnerColor || (isAravis ? flight?.color_code : null) || '#d946ef';
       const isPause = a.title?.includes('☕') || a.title?.toUpperCase().includes('PAUSE');
       const isAlert = a.title?.includes('❌') || a.title?.toUpperCase().includes('NON DISPO');
+      const isTentative = !!(a.payment_data as { tentative?: boolean } | null)?.tentative;
       let displayTitle = a.title || (a.status === 'available' ? 'LIBRE' : '');
       if (a.phone) displayTitle += ' 📞';
       if (a.booking_options) displayTitle += ' 📸';
@@ -146,9 +147,9 @@ export default function PlanningAdmin() {
         start: a.start_time,
         end: a.end_time,
         title: displayTitle,
-        backgroundColor: isPause ? '#f1f5f9' : isAlert ? '#fee2e2' : (a.status === 'available' ? '#ffffff' : flightColor),
-        textColor: a.status === 'available' ? '#cbd5e1' : isPause ? '#94a3b8' : isAlert ? '#ef4444' : '#ffffff',
-        borderColor: a.status === 'available' ? '#e2e8f0' : isAlert ? '#fca5a5' : flightColor,
+        backgroundColor: isPause ? '#f1f5f9' : isAlert ? '#fee2e2' : (a.status === 'available' ? '#ffffff' : isTentative ? '#f8fafc' : flightColor),
+        textColor: a.status === 'available' ? '#cbd5e1' : isPause ? '#94a3b8' : isAlert ? '#ef4444' : isTentative ? '#374151' : '#ffffff',
+        borderColor: a.status === 'available' ? '#e2e8f0' : isAlert ? '#fca5a5' : isTentative ? '#94a3b8' : flightColor,
         classNames: [],
         interactive: !isPause,
         extendedProps: (() => {
@@ -400,8 +401,10 @@ export default function PlanningAdmin() {
       );
     }
 
+    const isTentative = !!((pd as Record<string, unknown> | null)?.tentative);
     return (
       <div style={{ padding: '1px 3px', paddingLeft: effectiveBorderColor ? '2px' : '3px', borderLeft: effectiveBorderColor ? `4px solid ${effectiveBorderColor}` : undefined, overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+        {isTentative && <span style={{ fontSize: '8px', fontStyle: 'italic', opacity: 0.6, lineHeight: '1', flexShrink: 0 }}>provisoire</span>}
         {arg.timeText && <span style={{ fontSize: '9px', opacity: 0.75, lineHeight: '1.1', flexShrink: 0 }}>{arg.timeText}</span>}
         <span style={{ fontSize: '11px', fontWeight: 'bold', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{finalDisplayName}</span>
         {badges && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>{badges}</span>}
