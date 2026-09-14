@@ -930,7 +930,7 @@ export default function StandbyPage() {
                             onClick={() => handleProcessing(c)}
                             className="block text-[9px] font-black uppercase text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg px-2 py-1 transition-colors whitespace-nowrap"
                           >
-                            ▶ Traiter
+                            ▶ Je traite
                           </button>
                         )
                       )}
