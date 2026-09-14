@@ -828,7 +828,7 @@ export default function EditSlotModal({
         const namesList = effectiveTitle.split(',').map((n: string) => n.trim()).filter((n: string) => n);
         let passengerTitle = '';
         if (namesList.length === groupSize + 1) { const booker = namesList[0]; passengerTitle = `${namesList[index + 1]} (${booker})`; }
-        else if (namesList.length > 0) { const booker = namesList[0]; passengerTitle = index === 0 ? booker : (namesList[index] ? `${namesList[index]} (${booker})` : `${index + 1}/${groupSize} (${booker})`); }
+        else if (namesList.length > 0) { const booker = namesList[0]; passengerTitle = index === 0 ? booker : `${namesList[index] ? namesList[index] + ' ' : ''}${index + 1}/${groupSize} (${booker})`; }
         else { passengerTitle = groupSize > 1 ? `${index + 1}/${groupSize} (${effectiveTitle})` : (effectiveTitle || ''); }
         // If this slot was already added (passengers_per_slot > 1), add as second_booking instead
         const existingIdx = updatesToApply.findIndex(u => u.id === baseSlot.id && u.data.status === 'booked');
