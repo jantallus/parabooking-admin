@@ -59,6 +59,7 @@ export default function EditSlotModal({
   const [groupLeaderRef, setGroupLeaderRef] = useState<string | null>(null);
   const [groupFollowerIds, setGroupFollowerIds] = useState<number[]>([]);
   const [showEncaissement, setShowEncaissement] = useState(false);
+  const [showEncaissement2, setShowEncaissement2] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [manualCounts, setManualCounts] = useState<Record<string, number>>({});
   const [isManual, setIsManual] = useState(false);
@@ -355,6 +356,7 @@ export default function EditSlotModal({
     setIsManual(false);
     setMoveGroup(false);
     setShowEncaissement(false);
+    setShowEncaissement2(false);
     setPaymentScope('slot');
     setSelectedComplementIds(Array.isArray(pd?.selected_complements) ? (pd.selected_complements as { id: number }[]).map(c => Number(c.id)) : []);
     setFlightPriceOverride(pd?.price_override_cents != null ? (Number(pd.price_override_cents) / 100).toFixed(2) : '');
@@ -2019,52 +2021,66 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                   </div>
                   {secondBooking.title.trim() && (
                     <div className="pt-2 space-y-2 border-t border-sky-200">
-                      <label className="text-[10px] font-black uppercase text-sky-600 block">Encaissement 2ème passager</label>
-                      <select
-                        value={secondBooking.payment_type}
-                        onChange={e => setSecondBooking(p => ({ ...p, payment_type: e.target.value, encaisseur_id: '' }))}
-                        className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
-                      >
-                        <option value="">— Non renseigné —</option>
-                        <option value="esp">Espèces</option>
-                        <option value="cb">CB</option>
-                        <option value="ancv">ANCV</option>
-                        <option value="ancv_connect">ANCV Connect</option>
-                        <option value="chq">Chèque</option>
-                        <option value="np">Non payé</option>
-                      </select>
-                      {secondBooking.payment_type && secondBooking.payment_type !== 'np' && (
-                        <select
-                          value={secondBooking.encaisseur_id}
-                          onChange={e => setSecondBooking(p => ({ ...p, encaisseur_id: e.target.value }))}
-                          className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
-                        >
-                          <option value="">— Encaissé par —</option>
-                          {fullMonitors.map(m => <option key={m.id} value={m.id}>{m.first_name}</option>)}
-                        </select>
-                      )}
                       {(() => {
-                        const selFlight = flightTypes.find(f => f.id.toString() === formData.flight_type_id);
-                        if (!selFlight) return null;
-                        const catalogCents = selFlight.price_cents ?? 0;
-                        const totalCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : catalogCents;
-                        const isCustom = !!secondBooking.price_override;
+                        const ENC_SHORT: Record<string, string> = { esp: 'Esp', cb: 'CB', chq: 'Chq', ancv: 'ANCV', ancv_connect: 'ANCV+', np: 'NP' };
+                        const badge2 = secondBooking.payment_type ? (ENC_SHORT[secondBooking.payment_type] ?? secondBooking.payment_type) : 'NP';
+                        const badgeColor2 = !secondBooking.payment_type || secondBooking.payment_type === 'np' ? 'text-slate-400 bg-slate-100' : 'text-emerald-700 bg-emerald-50 border border-emerald-200';
                         return (
-                          <div className="bg-white rounded-xl border border-slate-100 p-3 space-y-2">
-                            <label className="text-[10px] font-black uppercase text-slate-400 block">Prix à encaisser</label>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[11px] font-bold text-slate-500 w-16 shrink-0">Vol</span>
-                              <input type="number" min={0} step={0.5} placeholder={(catalogCents / 100).toFixed(0)} value={secondBooking.price_override} onChange={e => setSecondBooking(p => ({ ...p, price_override: e.target.value }))} className="no-spinner min-w-0 flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-sm font-bold text-right" />
-                              <span className="text-[11px] text-slate-400 shrink-0">€</span>
-                              {secondBooking.price_override && <button type="button" onClick={() => setSecondBooking(p => ({ ...p, price_override: '' }))} className="shrink-0 text-slate-300 hover:text-rose-400 text-sm font-bold">↺</button>}
-                            </div>
-                            <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                              <span className="text-[10px] font-black uppercase text-slate-400">Total</span>
-                              <span className={`text-lg font-black ${isCustom ? 'text-amber-600' : 'text-slate-900'}`}>{(totalCents / 100).toFixed(2)} €</span>
-                            </div>
-                          </div>
+                          <button type="button" onClick={() => setShowEncaissement2(v => !v)} className="w-full flex items-center justify-between text-left">
+                            <span className="text-[10px] font-black uppercase text-sky-600">Encaissement 2ème passager</span>
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg ${badgeColor2}`}>{badge2} {showEncaissement2 ? '▲' : '▼'}</span>
+                          </button>
                         );
                       })()}
+                      {showEncaissement2 && (
+                        <>
+                          <select
+                            value={secondBooking.payment_type}
+                            onChange={e => setSecondBooking(p => ({ ...p, payment_type: e.target.value, encaisseur_id: '' }))}
+                            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
+                          >
+                            <option value="">— Non renseigné —</option>
+                            <option value="esp">Espèces</option>
+                            <option value="cb">CB</option>
+                            <option value="ancv">ANCV</option>
+                            <option value="ancv_connect">ANCV Connect</option>
+                            <option value="chq">Chèque</option>
+                            <option value="np">Non payé</option>
+                          </select>
+                          {secondBooking.payment_type && secondBooking.payment_type !== 'np' && (
+                            <select
+                              value={secondBooking.encaisseur_id}
+                              onChange={e => setSecondBooking(p => ({ ...p, encaisseur_id: e.target.value }))}
+                              className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
+                            >
+                              <option value="">— Encaissé par —</option>
+                              {fullMonitors.map(m => <option key={m.id} value={m.id}>{m.first_name}</option>)}
+                            </select>
+                          )}
+                          {(() => {
+                            const selFlight = flightTypes.find(f => f.id.toString() === formData.flight_type_id);
+                            if (!selFlight) return null;
+                            const catalogCents = selFlight.price_cents ?? 0;
+                            const totalCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : catalogCents;
+                            const isCustom = !!secondBooking.price_override;
+                            return (
+                              <div className="bg-white rounded-xl border border-slate-100 p-3 space-y-2">
+                                <label className="text-[10px] font-black uppercase text-slate-400 block">Prix à encaisser</label>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[11px] font-bold text-slate-500 w-16 shrink-0">Vol</span>
+                                  <input type="number" min={0} step={0.5} placeholder={(catalogCents / 100).toFixed(0)} value={secondBooking.price_override} onChange={e => setSecondBooking(p => ({ ...p, price_override: e.target.value }))} className="no-spinner min-w-0 flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-sm font-bold text-right" />
+                                  <span className="text-[11px] text-slate-400 shrink-0">€</span>
+                                  {secondBooking.price_override && <button type="button" onClick={() => setSecondBooking(p => ({ ...p, price_override: '' }))} className="shrink-0 text-slate-300 hover:text-rose-400 text-sm font-bold">↺</button>}
+                                </div>
+                                <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                                  <span className="text-[10px] font-black uppercase text-slate-400">Total</span>
+                                  <span className={`text-lg font-black ${isCustom ? 'text-amber-600' : 'text-slate-900'}`}>{(totalCents / 100).toFixed(2)} €</span>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </>
+                      )}
                     </div>
                   )}
                   {secondBooking.title && (
