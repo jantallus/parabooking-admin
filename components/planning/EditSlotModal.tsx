@@ -81,6 +81,10 @@ export default function EditSlotModal({
   const [secondBooking, setSecondBooking] = useState<{ title: string; phone: string; weight: string; payment_type: string; encaisseur_id: string }>({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '' });
   const [standbyPrefill, setStandbyPrefill] = useState<{ standby_id: number; name: string; phone: string; email: string; flight_type: string; weight_info: string; nb_passengers: number } | null>(null);
   const standbyIdRef = React.useRef<number | null>(null);
+  const [standbyActionModal, setStandbyActionModal] = useState<{
+    entries: Array<{ id: number; name: string; phone: string; status: string }>;
+    updatesToApply: SlotUpdate[];
+  } | null>(null);
 
   // ── Fetch partenaires + moniteurs complets ────────────────────────────────────
   useEffect(() => {
@@ -871,6 +875,15 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
     }
   };
 
+  const fetchStandbyBySlotIds = async (slotIds: number[]) => {
+    if (slotIds.length === 0) return [];
+    try {
+      const r = await apiFetch(`/api/standby/by-slot-ids?ids=${slotIds.join(',')}`);
+      if (!r.ok) return [];
+      return await r.json() as Array<{ id: number; name: string; phone: string; status: string }>;
+    } catch { return []; }
+  };
+
   const handleRelease = async () => {
     const isNoteOnly = selectedEvent?.status === 'available' && selectedEvent?.title === 'NOTE';
     const isBlockedWithNote = !!(selectedEvent?.title?.toUpperCase().includes('NON DISPO') && selectedEvent?.notes);
@@ -894,7 +907,13 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
         updatesToApply.push({ id: slotToFree.id, data: { title: newTitle, flight_type_id: null, weight: null, notes: newNotes, status: 'available', phone: '', email: '', weightChecked: false, booking_options: '', client_message: '', second_booking: null } });
       }
     }
-    applyAll(updatesToApply);
+    const freedIds = updatesToApply.map(u => u.id);
+    const linkedStandby = await fetchStandbyBySlotIds(freedIds);
+    if (linkedStandby.length > 0) {
+      setStandbyActionModal({ entries: linkedStandby, updatesToApply });
+    } else {
+      applyAll(updatesToApply);
+    }
   };
 
   const handleReleaseGroup = async () => {
@@ -911,7 +930,13 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
         if (slotToFree) updatesToApply.push({ id: slotToFree.id, data: { title: '', flight_type_id: null, weight: null, notes: '', status: 'available', phone: '', email: '', weightChecked: false, booking_options: '', client_message: '', second_booking: null } });
       }
     });
-    applyAll(updatesToApply);
+    const freedIds = updatesToApply.map(u => u.id);
+    const linkedStandby = await fetchStandbyBySlotIds(freedIds);
+    if (linkedStandby.length > 0) {
+      setStandbyActionModal({ entries: linkedStandby, updatesToApply });
+    } else {
+      applyAll(updatesToApply);
+    }
   };
 
   const handleBulkRelease = async () => {
@@ -1103,7 +1128,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
   // ── JSX ────────────────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-      <div className="bg-white rounded-[40px] p-8 max-w-sm w-full shadow-2xl max-h-[95vh] overflow-y-auto custom-scrollbar">
+      <div className="relative bg-white rounded-[40px] p-8 max-w-sm w-full shadow-2xl max-h-[95vh] overflow-y-auto custom-scrollbar">
         <h2 className="text-xl font-black uppercase italic mb-3 text-slate-900">Gestion du Créneau</h2>
 
         {selectedEvent && IS_CLIENT_SLOT(selectedEvent) && (() => {
@@ -2124,6 +2149,53 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
           )}
         </div>
       </div>
+
+      {/* ── Popup : action sur la demande liée au créneau libéré ── */}
+      {standbyActionModal && (
+        <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm rounded-[40px] z-10 flex items-center justify-center p-6">
+          <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-xs space-y-4">
+            <div>
+              <p className="font-black text-slate-900 text-sm uppercase tracking-wide mb-1">Demande liée au créneau</p>
+              <p className="text-xs text-slate-500">Ce créneau est associé à {standbyActionModal.entries.length > 1 ? `${standbyActionModal.entries.length} demandes` : 'une demande'} en liste d&apos;attente :</p>
+              <ul className="mt-2 space-y-1">
+                {standbyActionModal.entries.map(e => (
+                  <li key={e.id} className="text-xs font-bold text-slate-700">· {e.name}{e.phone ? ` — ${e.phone}` : ''}</li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-xs text-slate-600">Que souhaitez-vous faire avec {standbyActionModal.entries.length > 1 ? 'ces demandes' : 'cette demande'} ?</p>
+            <div className="space-y-2">
+              <button
+                className="w-full py-3 rounded-2xl bg-amber-500 text-white font-black text-sm uppercase hover:bg-amber-600 transition-colors"
+                onClick={() => {
+                  applyAll(standbyActionModal.updatesToApply);
+                  standbyActionModal.entries.forEach(e => {
+                    apiFetch(`/api/standby/${e.id}`, { method: 'PATCH', body: JSON.stringify({ status: 'pending', slot_id: null, booked_date: null, processing_by: null }) }).catch(() => {});
+                  });
+                  setStandbyActionModal(null);
+                }}
+              >Remettre en attente</button>
+              <button
+                className="w-full py-3 rounded-2xl bg-rose-500 text-white font-black text-sm uppercase hover:bg-rose-600 transition-colors"
+                onClick={() => {
+                  applyAll(standbyActionModal.updatesToApply);
+                  standbyActionModal.entries.forEach(e => {
+                    apiFetch(`/api/standby/${e.id}`, { method: 'DELETE' }).catch(() => {});
+                  });
+                  setStandbyActionModal(null);
+                }}
+              >Supprimer la demande</button>
+              <button
+                className="w-full py-3 rounded-2xl bg-slate-100 text-slate-600 font-bold text-sm uppercase hover:bg-slate-200 transition-colors"
+                onClick={() => {
+                  applyAll(standbyActionModal.updatesToApply);
+                  setStandbyActionModal(null);
+                }}
+              >Ignorer</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
