@@ -21,13 +21,14 @@ interface StandbyClient {
   booked_time: string | null;
   slot_id: number | null;
   status: 'pending' | 'scheduled' | 'done';
+  processing_by: string | null;
   created_at: string;
 }
 
 const emptyClient = (): Omit<StandbyClient, 'id' | 'created_at' | 'status'> => ({
   name: '', phone: '', email: '', nb_passengers: 1, flight_type: '',
   weight_info: '', availability_text: '', availability_start: null, availability_end: null,
-  notes: '', pilot_name: null, booked_date: null, booked_time: null, slot_id: null,
+  notes: '', pilot_name: null, booked_date: null, booked_time: null, slot_id: null, processing_by: null,
 });
 
 const cap = (s: string) =>
@@ -259,10 +260,22 @@ export default function StandbyPage() {
   const [scheduleModal, setScheduleModal] = useState<StandbyClient | null>(null);
   const [schedForm, setSchedForm] = useState({ pilot_name: '', booked_date: '', booked_time: '' });
   const [showArchive, setShowArchive] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState('');
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
   const isAravisContext = pathname?.startsWith('/aravis');
+
+  useEffect(() => {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const parsed = JSON.parse(userData);
+        const name = parsed.first_name || parsed.firstName || parsed.email?.split('@')[0] || '';
+        setCurrentUserName(name ? name.charAt(0).toUpperCase() + name.slice(1) : '');
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -294,7 +307,7 @@ export default function StandbyPage() {
       availability_end: toInputDate(c.availability_end),
       notes: c.notes||'', pilot_name: c.pilot_name,
       booked_date: toInputDate(c.booked_date),
-      booked_time: c.booked_time, slot_id: c.slot_id });
+      booked_time: c.booked_time, slot_id: c.slot_id, processing_by: c.processing_by });
     setImportOpen(false);
     setParsed(null);
     setModalOpen(true);
@@ -322,8 +335,15 @@ export default function StandbyPage() {
   };
 
   const handleStatusChange = async (c: StandbyClient, status: StandbyClient['status']) => {
-    const res = await apiFetch(`/api/standby/${c.id}`, { method: 'PUT', body: JSON.stringify({ ...c, status }) });
+    const res = await apiFetch(`/api/standby/${c.id}`, { method: 'PUT', body: JSON.stringify({ ...c, status, processing_by: null }) });
     if (res.ok) { toast.success('Statut mis à jour'); load(); }
+  };
+
+  const handleProcessing = async (c: StandbyClient) => {
+    const isMe = c.processing_by === currentUserName;
+    const newValue = isMe ? null : currentUserName;
+    const res = await apiFetch(`/api/standby/${c.id}`, { method: 'PATCH', body: JSON.stringify({ processing_by: newValue }) });
+    if (res.ok) load();
   };
 
   const applyParsed = () => {
@@ -360,6 +380,7 @@ export default function StandbyPage() {
   const rowBg = (c: StandbyClient) => {
     if (c.status === 'done') return 'bg-emerald-50 border-l-4 border-l-emerald-400';
     if (c.status === 'scheduled') return 'bg-orange-100 border-l-4 border-l-orange-500';
+    if (c.processing_by) return 'bg-amber-50 border-l-4 border-l-amber-400';
     return 'bg-white border-l-4 border-l-slate-200';
   };
 
@@ -414,15 +435,41 @@ export default function StandbyPage() {
               {active.map(c => (
                 <tr key={c.id} className={`${rowBg(c)} transition-colors`}>
                   <td className="p-3 pl-4">
-                    <select
-                      value={c.status}
-                      onChange={e => handleStatusChange(c, e.target.value as StandbyClient['status'])}
-                      className="text-[10px] font-black uppercase rounded-lg px-2 py-1 border border-slate-200 bg-white cursor-pointer focus:outline-none"
-                    >
-                      <option value="pending">En attente</option>
-                      <option value="scheduled">Programmé</option>
-                      <option value="done">Effectué ✓</option>
-                    </select>
+                    <div className="space-y-1.5">
+                      <select
+                        value={c.status}
+                        onChange={e => handleStatusChange(c, e.target.value as StandbyClient['status'])}
+                        className="text-[10px] font-black uppercase rounded-lg px-2 py-1 border border-slate-200 bg-white cursor-pointer focus:outline-none"
+                      >
+                        <option value="pending">En attente</option>
+                        <option value="scheduled">Programmé</option>
+                        <option value="done">Effectué ✓</option>
+                      </select>
+                      {c.status === 'pending' && (
+                        c.processing_by ? (
+                          <div className="space-y-1">
+                            <span className="block text-[9px] font-black uppercase text-amber-600 bg-amber-100 rounded-lg px-2 py-1 leading-tight">
+                              ⚙️ {c.processing_by === currentUserName ? 'Vous traitez' : `En traitement (${c.processing_by})`}
+                            </span>
+                            {c.processing_by === currentUserName && (
+                              <button
+                                onClick={() => handleProcessing(c)}
+                                className="text-[9px] font-black text-slate-400 hover:text-slate-600 uppercase px-2 py-0.5"
+                              >
+                                Annuler
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleProcessing(c)}
+                            className="block text-[9px] font-black uppercase text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg px-2 py-1 transition-colors whitespace-nowrap"
+                          >
+                            ▶ Traiter
+                          </button>
+                        )
+                      )}
+                    </div>
                   </td>
                   <td className="p-3">
                     <p className="font-bold text-slate-800 truncate max-w-[140px]">{c.name || <span className="text-slate-300 italic">—</span>}</p>
