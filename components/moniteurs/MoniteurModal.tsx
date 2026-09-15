@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -28,6 +28,19 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
   const [newUser, setNewUser] = useState({ ...EMPTY_USER });
   const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [showPassword, setShowPassword] = useState(false);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  const handleTogglePassword = () => {
+    // Lire la valeur DOM avant le toggle : le navigateur peut avoir autofillé
+    // le champ sans déclencher d'onChange React (state resterait vide sinon)
+    if (!showPassword && passwordInputRef.current) {
+      const domVal = passwordInputRef.current.value;
+      if (domVal !== newUser.password) {
+        setNewUser(u => ({ ...u, password: domVal }));
+      }
+    }
+    setShowPassword(v => !v);
+  };
 
   // Comparaison id ET email pour couvrir les edge cases de type UUID sur mobile
   const isOwnProfile = !!(userToEdit && currentUser &&
@@ -142,6 +155,7 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
                 />
               ) : (
                 <input
+                  ref={passwordInputRef}
                   type="password"
                   placeholder={userToEdit ? "••••••••" : ""}
                   autoComplete="current-password"
@@ -153,7 +167,7 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
               {isOwnProfile && (
                 <button
                   type="button"
-                  onClick={() => setShowPassword(v => !v)}
+                  onClick={handleTogglePassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors rounded-xl hover:bg-orange-50"
                   title={showPassword ? "Masquer le mot de passe" : "Voir le mot de passe"}
                 >
