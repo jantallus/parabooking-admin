@@ -833,15 +833,12 @@ export default function EditSlotModal({
       }
     }
 
-    // Provisoire/définitif : ne touche à payment_data.tentative que pour pax1
-    if (activeTab !== 'client2') {
-      if (tentative) {
-        finalPaymentData.tentative = true;
-      } else {
-        delete finalPaymentData.tentative;
-      }
+    // Provisoire/définitif : toujours basé sur l'état actuel des cases (indépendantes)
+    if (!isDefinitive) {
+      finalPaymentData.tentative = true;
+    } else {
+      delete finalPaymentData.tentative;
     }
-    // Pour pax2, tentative est géré dans secondBookingData ci-dessous
 
     const complementNames = !isStripePd
       ? selectedComplementIds.map(id => availableComplements.find(c => c.id === id)?.name).filter(Boolean).join(', ')
@@ -903,7 +900,7 @@ export default function EditSlotModal({
       }
     } else {
       const sb2PriceOverrideCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : null;
-      const sb2Tentative = activeTab === 'client2' ? !isDefinitive2 : (selectedEvent?.second_booking?.tentative ?? false);
+      const sb2Tentative = !isDefinitive2;
       const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, email: secondBooking.email.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(sb2Tentative ? { tentative: true } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
 updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: finalEffectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
     }
@@ -928,7 +925,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
       groupRootSlots.forEach(slot => {
         if (!alreadyUpdating.has(slot.id)) {
           const slotPd = { ...((slot.payment_data || {}) as Record<string, unknown>) };
-          if (tentative) { slotPd.tentative = true; } else { delete slotPd.tentative; }
+          if (!isDefinitive) { slotPd.tentative = true; } else { delete slotPd.tentative; }
           // Inclure tous les champs existants pour ne pas les effacer via le PATCH
           updatesToApply.push({ id: slot.id, data: {
             title: slot.title, status: slot.status, phone: slot.phone || null,
