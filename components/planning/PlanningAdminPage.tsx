@@ -147,10 +147,11 @@ export default function PlanningAdmin() {
         start: a.start_time,
         end: a.end_time,
         title: displayTitle,
-        backgroundColor: isPause ? '#f1f5f9' : isAlert ? '#fee2e2' : (a.status === 'available' ? '#ffffff' : isTentative ? '#f8fafc' : flightColor),
+        backgroundColor: isPause ? '#e2e8f0' : isAlert ? '#fee2e2' : (a.status === 'available' ? '#ffffff' : isTentative ? '#f8fafc' : flightColor),
         textColor: a.status === 'available' ? '#cbd5e1' : isPause ? '#94a3b8' : isAlert ? '#ef4444' : isTentative ? '#374151' : '#ffffff',
         borderColor: a.status === 'available' ? '#e2e8f0' : isAlert ? '#fca5a5' : isTentative ? '#94a3b8' : flightColor,
         classNames: [],
+        display: isPause ? 'background' : undefined,
         interactive: !isPause,
         extendedProps: (() => {
           const fd = flight?.duration_minutes || 0;
