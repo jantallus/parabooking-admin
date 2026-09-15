@@ -95,15 +95,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Régularisation', icon: ArrowLeftRight, path: '/fluide/regularisation', roles: ['admin'] },
     { name: 'Clients', icon: User, path: '/fluide/clients', badge: clientCount, roles: ['admin'] },
     { name: 'Moniteurs', icon: Users, path: '/fluide/moniteurs', roles: ['admin', 'permanent'] },
+    {
+      name: 'Prestations',
+      icon: Wind,
+      path: '/fluide/prestations',
+      roles: ['admin'],
+      subItems: [{ name: 'Photos & Vidéos', path: '/fluide/prestations/complements' }]
+    },
     { name: 'Partenaires', icon: Handshake, path: '/fluide/partenaires', roles: ['admin'] },
     { name: 'Bons Cadeaux', icon: Gift, path: '/fluide/gift-cards', roles: ['admin'] },
-    {
-      name: 'Configurations',
-      icon: Settings,
-      path: '/fluide/config',
-      roles: ['admin'],
-      subItems: [{ name: 'Prestations', path: '/fluide/prestations' }, { name: 'Photos & Vidéos', path: '/fluide/prestations/complements' }]
-    },
+    { name: 'Configurations', icon: Settings, path: '/fluide/config', roles: ['admin'] },
   ];
 
   const authorizedMenus = allMenuItems.filter(item => 
