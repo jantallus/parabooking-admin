@@ -354,6 +354,17 @@ export default function PlanningAdmin() {
       const sb = ep.second_booking!;
       const isExp = expandedPax2.has(ep.id);
       const isSbTentative = !!(sb as { tentative?: boolean }).tentative;
+      const isSlotTentative = !!(ep.payment_data as { tentative?: boolean } | null)?.tentative;
+      // Quand pax2 est définitif mais pax1 est provisoire (slot blanc), afficher pax2 avec la couleur du vol
+      const pax2NaturalColor = (() => {
+        if (!isSlotTentative) return undefined;
+        const pc = (ep.payment_data as { partner_color?: string } | null)?.partner_color;
+        const ft = flightTypes.find(f => f.id === ep.flight_type_id);
+        return pc || (currentUser?.enseigne === 'aravis' ? (ft?.color_code ?? '#6CAED8') : null) || '#d946ef';
+      })();
+      const pax2BgColor = isSbTentative ? 'rgba(255,255,255,0.92)' : pax2NaturalColor;
+      const pax2TextColor = isSbTentative ? '#374151' : (pax2NaturalColor ? '#ffffff' : undefined);
+      const separatorBg = isSbTentative ? 'rgba(0,0,0,0.1)' : (isSlotTentative ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.35)');
       const sbPayShort = sb.payment_type ? (TYPE_SHORT[sb.payment_type] ?? null) : null;
       const sbPayLine = ep.price_cents
         ? (!sb.payment_type
@@ -385,10 +396,10 @@ export default function PlanningAdmin() {
             </div>
           )}
           {/* Séparateur */}
-          <div style={{ width: '1px', background: isSbTentative ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.35)', flexShrink: 0, margin: '2px 0' }} />
+          <div style={{ width: '1px', background: separatorBg, flexShrink: 0, margin: '2px 0' }} />
           {/* Pax 2 */}
           <NativeStopDiv
-            style={{ flex: isExp ? 2 : 1, padding: '1px 3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', cursor: 'pointer', opacity: isExp ? 1 : 0.85, backgroundColor: isSbTentative ? 'rgba(255,255,255,0.92)' : undefined, color: isSbTentative ? '#374151' : undefined }}
+            style={{ flex: isExp ? 2 : 1, padding: '1px 3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', cursor: 'pointer', opacity: isExp ? 1 : 0.85, backgroundColor: pax2BgColor, color: pax2TextColor }}
             onNativeClick={() => togglePax2(ep.id)}
           >
             {isExp ? (
