@@ -560,29 +560,17 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       let consumed = 0;
       for (const monId of Object.keys(monSchedules)) {
         if (consumed >= qty) break;
-        const chain: number[] = [];
-        let chainMs = targetMs;
+        let canBook = true;
         for (let i = 0; i < sNeededCart; i++) {
-          if (i > 0) {
-            // Entre deux créneaux : sauter les pauses (≤10 min, booked)
-            for (let p = 0; p < 5; p++) {
-              const s = monSchedules[monId][chainMs];
-              if (!s || s.status === 'available') break;
-              const dur = (new Date(s.end_time).getTime() - chainMs) / 60000;
-              if (dur <= 10) { chainMs = new Date(s.end_time).getTime(); } else { break; }
-            }
-          }
-          chain.push(chainMs);
-          const slot = monSchedules[monId][chainMs];
-          if (!slot) break;
-          chainMs = new Date(slot.end_time).getTime();
+          const ms = targetMs + (i * baseDur * 60000);
+          const slot = monSchedules[monId][ms];
+          if (!slot || slot.status !== 'available') { canBook = false; break; }
         }
-        const canBook = chain.length === sNeededCart && chain.every(ms => {
-          const s = monSchedules[monId][ms];
-          return s && s.status === 'available';
-        });
         if (canBook) {
-          chain.forEach(ms => { monSchedules[monId][ms].status = 'booked_by_cart'; });
+          for (let i = 0; i < sNeededCart; i++) {
+            const ms = targetMs + (i * baseDur * 60000);
+            monSchedules[monId][ms].status = 'booked_by_cart';
+          }
           consumed++;
         }
       }
@@ -600,10 +588,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
     weekDays.forEach(dateStr => {
       if (!uniqueTimesByDate[dateStr]) return;
-      const toMins = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
       Array.from(uniqueTimesByDate[dateStr]).forEach(timeStr => {
-        if (allowedSlots.length > 0 && !allowedSlots.some(a => Math.abs(toMins(timeStr) - toMins(a)) <= 10)) return;
-
+        if (allowedSlots.length > 0 && !allowedSlots.includes(timeStr)) return;
+        
         const targetMs = timeToMs[`${dateStr}|${timeStr}`];
         if (!targetMs) return;
 
@@ -612,20 +599,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         let capacity = 0;
         for (const monId of Object.keys(monSchedules)) {
           let isFree = true;
-          let chainMs = targetMs;
           for (let i = 0; i < slotsNeeded; i++) {
-            if (i > 0) {
-              // Entre deux créneaux : sauter les pauses (≤10 min, booked)
-              for (let p = 0; p < 5; p++) {
-                const s = monSchedules[monId][chainMs];
-                if (!s || s.status === 'available') break;
-                const dur = (new Date(s.end_time).getTime() - chainMs) / 60000;
-                if (dur <= 10) { chainMs = new Date(s.end_time).getTime(); } else { break; }
-              }
-            }
-            const slot = monSchedules[monId][chainMs];
+            const ms = targetMs + (i * baseDur * 60000);
+            const slot = monSchedules[monId][ms];
             if (!slot || slot.status !== 'available') { isFree = false; break; }
-            chainMs = new Date(slot.end_time).getTime();
           }
           if (isFree) capacity++;
         }
