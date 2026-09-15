@@ -900,7 +900,8 @@ export default function EditSlotModal({
       }
     } else {
       const sb2PriceOverrideCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : null;
-      const sb2Tentative = !isDefinitive2 || !isDefinitive;
+      // Groupe multi-slot : pax2 suit pax1 ; slot seul : indépendant (pax2 peut rester provisoire)
+      const sb2Tentative = groupRootSlots.length > 1 ? !isDefinitive : (!isDefinitive2 || !isDefinitive);
       const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, email: secondBooking.email.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(sb2Tentative ? { tentative: true } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
 updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: finalEffectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
     }
