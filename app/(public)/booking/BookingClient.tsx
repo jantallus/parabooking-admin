@@ -563,11 +563,14 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         const chain: number[] = [];
         let chainMs = targetMs;
         for (let i = 0; i < sNeededCart; i++) {
-          for (let p = 0; p < 5; p++) {
-            const s = monSchedules[monId][chainMs];
-            if (!s || s.status === 'available') break;
-            const dur = (new Date(s.end_time).getTime() - chainMs) / 60000;
-            if (dur <= 10) { chainMs = new Date(s.end_time).getTime(); } else { break; }
+          if (i > 0) {
+            // Entre deux créneaux : sauter les pauses (≤10 min, booked)
+            for (let p = 0; p < 5; p++) {
+              const s = monSchedules[monId][chainMs];
+              if (!s || s.status === 'available') break;
+              const dur = (new Date(s.end_time).getTime() - chainMs) / 60000;
+              if (dur <= 10) { chainMs = new Date(s.end_time).getTime(); } else { break; }
+            }
           }
           chain.push(chainMs);
           const slot = monSchedules[monId][chainMs];
@@ -611,11 +614,14 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
           let isFree = true;
           let chainMs = targetMs;
           for (let i = 0; i < slotsNeeded; i++) {
-            for (let p = 0; p < 5; p++) {
-              const s = monSchedules[monId][chainMs];
-              if (!s || s.status === 'available') break;
-              const dur = (new Date(s.end_time).getTime() - chainMs) / 60000;
-              if (dur <= 10) { chainMs = new Date(s.end_time).getTime(); } else { break; }
+            if (i > 0) {
+              // Entre deux créneaux : sauter les pauses (≤10 min, booked)
+              for (let p = 0; p < 5; p++) {
+                const s = monSchedules[monId][chainMs];
+                if (!s || s.status === 'available') break;
+                const dur = (new Date(s.end_time).getTime() - chainMs) / 60000;
+                if (dur <= 10) { chainMs = new Date(s.end_time).getTime(); } else { break; }
+              }
             }
             const slot = monSchedules[monId][chainMs];
             if (!slot || slot.status !== 'available') { isFree = false; break; }
