@@ -1342,7 +1342,12 @@ export default function StandbyPage() {
                     const otherIds = schedForm.monitor_ids.filter((id, j) => j !== i && id !== '');
                     const opts = freeMonitors.filter(m => !otherIds.includes(m.id));
                     const selectedMonitorName = freeMonitors.find(m => m.id === schedForm.monitor_ids[i])?.first_name;
-                    const labelParts = [`${i + 1}/${total}`];
+                    const _nbPass = scheduleModal.nb_passengers || 1;
+                    const _p1 = i * _paxPerSlot + 1;
+                    const paxLabel = _paxPerSlot >= 2
+                      ? `${_p1}/${_nbPass} · ${Math.min(_p1 + _paxPerSlot - 1, _nbPass)}/${_nbPass}`
+                      : `${i + 1}/${total}`;
+                    const labelParts = [paxLabel];
                     if (i === 0 && scheduleModal.name) labelParts.push(scheduleModal.name);
                     else if (selectedMonitorName) labelParts.push(`avec ${selectedMonitorName}`);
                     return (
