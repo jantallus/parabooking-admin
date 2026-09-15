@@ -2457,7 +2457,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                   <p className="text-[9px] text-slate-300 mt-1">Les modifications futures seront tracées</p>
                 </div>
               ) : slotHistory.map(entry => {
-                const snap = entry.snapshot as { title?: string; status?: string; phone?: string; email?: string; start_time?: string; flight_type_name?: string };
+                const snap = entry.snapshot as { title?: string; status?: string; phone?: string; email?: string; start_time?: string; flight_type_name?: string; flight_type_tenant?: string; payment_data?: { partner_name?: string } };
                 const isDelete = entry.action === 'delete';
                 const snapTitle = snap?.title || null;
                 const isClientBooking = snap?.status === 'booked' && snapTitle && !['NOTE', '☕ PAUSE', 'NON DISPO'].some(t => snapTitle.includes(t)) && !snapTitle.includes('❌');
@@ -2472,7 +2472,8 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                     <div className="text-[10px] text-slate-500 font-medium space-y-0.5">
                       {entry.changed_by_email && <div className="text-slate-400">par <span className="font-bold text-slate-600">{entry.changed_by_email.split('@')[0]}</span></div>}
                       {snapTitle && <div>Titre : <span className="font-bold text-slate-700">{snapTitle}</span></div>}
-                      {snap?.flight_type_name && <div>Vol : <span className="font-bold text-slate-600">{snap.flight_type_name}</span></div>}
+                      {snap?.flight_type_name && <div>Vol : <span className="font-bold text-slate-600">{snap.flight_type_name}{snap.flight_type_tenant ? ` · ${snap.flight_type_tenant}` : ''}</span></div>}
+                      {snap?.payment_data?.partner_name && <div>Partenaire : <span className="font-bold text-slate-600">{snap.payment_data.partner_name}</span></div>}
                       {snap?.phone && <div>Tél : {snap.phone}</div>}
                       {snap?.email && <div>Email : {snap.email}</div>}
                       {snap?.start_time && <div className="text-slate-400 text-[9px]">{snap.start_time}</div>}
