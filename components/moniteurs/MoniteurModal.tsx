@@ -31,12 +31,12 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
   const handleTogglePassword = () => {
-    // Le champ password est non-contrôlé (defaultValue) pour laisser le
-    // navigateur autofill écrire librement dans le DOM. On lit la valeur DOM
-    // au moment du toggle pour la synchroniser dans le state React.
     if (!showPassword && passwordInputRef.current) {
       const domVal = passwordInputRef.current.value;
-      setNewUser(u => ({ ...u, password: domVal }));
+      // Sur mobile Chrome le DOM autofillé retourne '' par sécurité ;
+      // on ne sync que si le DOM a vraiment une valeur pour ne pas écraser
+      // ce que onChange a pu capturer au moment de l'autofill.
+      if (domVal) setNewUser(u => ({ ...u, password: domVal }));
     }
     setShowPassword(v => !v);
   };
@@ -162,7 +162,8 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
                   autoComplete="current-password"
                   className="w-full border-2 border-slate-100 rounded-2xl p-3 md:p-4 font-bold bg-slate-50 focus:border-orange-300 outline-none pr-12"
                   defaultValue=""
-                  onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                  onChange={e => setNewUser(u => ({ ...u, password: e.target.value }))}
+                  onInput={e => setNewUser(u => ({ ...u, password: (e.target as HTMLInputElement).value }))}
                 />
               )}
               {isOwnProfile && (
