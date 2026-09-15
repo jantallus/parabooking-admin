@@ -31,13 +31,12 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
   const handleTogglePassword = () => {
-    // Lire la valeur DOM avant le toggle : le navigateur peut avoir autofillé
-    // le champ sans déclencher d'onChange React (state resterait vide sinon)
+    // Le champ password est non-contrôlé (defaultValue) pour laisser le
+    // navigateur autofill écrire librement dans le DOM. On lit la valeur DOM
+    // au moment du toggle pour la synchroniser dans le state React.
     if (!showPassword && passwordInputRef.current) {
       const domVal = passwordInputRef.current.value;
-      if (domVal !== newUser.password) {
-        setNewUser(u => ({ ...u, password: domVal }));
-      }
+      setNewUser(u => ({ ...u, password: domVal }));
     }
     setShowPassword(v => !v);
   };
@@ -78,14 +77,16 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
       toast.warning("Veuillez remplir le nom et l'email.");
       return;
     }
-    if (!userToEdit && !newUser.password) {
+    // Lire depuis le DOM si le state est vide (autofill non capturé par React)
+    const passwordToSave = newUser.password || passwordInputRef.current?.value || '';
+    if (!userToEdit && !passwordToSave) {
       toast.warning("Le mot de passe est obligatoire pour un nouveau compte.");
       return;
     }
 
     const url = userToEdit ? `/api/users/${userToEdit.id}` : '/api/users';
     const method = userToEdit ? 'PATCH' : 'POST';
-    const payload: Record<string, unknown> = { ...newUser, status: 'Actif' };
+    const payload: Record<string, unknown> = { ...newUser, password: passwordToSave, status: 'Actif' };
     if (userToEdit && !payload.password) delete payload.password;
 
     const res = await apiFetch(url, { method, body: JSON.stringify(payload) });
@@ -160,7 +161,7 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
                   placeholder={userToEdit ? "••••••••" : ""}
                   autoComplete="current-password"
                   className="w-full border-2 border-slate-100 rounded-2xl p-3 md:p-4 font-bold bg-slate-50 focus:border-orange-300 outline-none pr-12"
-                  value={newUser.password}
+                  defaultValue=""
                   onChange={e => setNewUser({ ...newUser, password: e.target.value })}
                 />
               )}
