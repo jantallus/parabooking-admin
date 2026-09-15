@@ -29,7 +29,9 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
   const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [showPassword, setShowPassword] = useState(false);
 
-  const isOwnProfile = !!(userToEdit && currentUser && userToEdit.id === currentUser.id);
+  // Comparaison id ET email pour couvrir les edge cases de type UUID sur mobile
+  const isOwnProfile = !!(userToEdit && currentUser &&
+    (String(userToEdit.id) === String(currentUser.id) || userToEdit.email === currentUser.email));
 
   useEffect(() => {
     if (userToEdit) {
@@ -128,11 +130,13 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
             </label>
             <div className="relative">
               <input
+                key={showPassword ? "pwd-text" : "pwd-hidden"}
                 type={showPassword ? "text" : "password"}
                 placeholder={userToEdit ? "••••••••" : ""}
                 className="w-full border-2 border-slate-100 rounded-2xl p-3 md:p-4 font-bold bg-slate-50 focus:border-orange-300 outline-none pr-12"
                 value={newUser.password}
                 onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+                autoComplete="current-password"
               />
               {isOwnProfile && (
                 <button
