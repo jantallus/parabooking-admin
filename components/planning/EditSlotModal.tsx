@@ -60,6 +60,7 @@ export default function EditSlotModal({
   const [groupFollowerIds, setGroupFollowerIds] = useState<number[]>([]);
   const [showEncaissement, setShowEncaissement] = useState(false);
   const [showEncaissement2, setShowEncaissement2] = useState(false);
+  const [isDefinitive, setIsDefinitive] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [manualCounts, setManualCounts] = useState<Record<string, number>>({});
   const [isManual, setIsManual] = useState(false);
@@ -357,6 +358,7 @@ export default function EditSlotModal({
     setMoveGroup(false);
     setShowEncaissement(false);
     setShowEncaissement2(false);
+    setIsDefinitive(!((selectedEvent?.payment_data as Record<string, unknown> | null)?.tentative));
     setPaymentScope('slot');
     setSelectedComplementIds(Array.isArray(pd?.selected_complements) ? (pd.selected_complements as { id: number }[]).map(c => Number(c.id)) : []);
     setFlightPriceOverride(pd?.price_override_cents != null ? (Number(pd.price_override_cents) / 100).toFixed(2) : '');
@@ -2156,9 +2158,28 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                     <button onClick={() => setIsEditing(false)} className="w-full bg-slate-100 text-slate-500 py-2.5 rounded-2xl font-black uppercase text-xs hover:bg-slate-200 transition-colors">↩ Annuler les modifications</button>
                   )}
                   {(activeTab === 'client' || activeTab === 'client2') ? (
-                    <div className="flex gap-2">
-                      <button onClick={() => handleSaveNote(true)} className="flex-1 bg-slate-100 text-slate-600 py-4 rounded-3xl font-black uppercase italic shadow-sm hover:bg-slate-200 transition-colors text-sm border border-slate-300">◌ Provisoire</button>
-                      <button onClick={() => handleSaveNote(false)} className="flex-1 bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors text-sm">● Définitif</button>
+                    <div className="flex items-center gap-3">
+                      {(() => {
+                        const selFlight = flightTypes.find(f => f.id.toString() === formData.flight_type_id?.toString());
+                        const slotColor = currentUser?.enseigne === 'aravis'
+                          ? (selFlight?.color_code ?? '#6CAED8')
+                          : '#d946ef';
+                        return (
+                          <label className="flex items-center gap-1.5 cursor-pointer shrink-0" title={isDefinitive ? 'Définitif' : 'Provisoire'}>
+                            <input
+                              type="checkbox"
+                              checked={isDefinitive}
+                              onChange={e => setIsDefinitive(e.target.checked)}
+                              className="w-3.5 h-3.5 cursor-pointer"
+                            />
+                            <span
+                              className="inline-block w-3.5 h-3.5 rounded-sm border"
+                              style={{ backgroundColor: isDefinitive ? slotColor : 'white', borderColor: isDefinitive ? slotColor : '#cbd5e1' }}
+                            />
+                          </label>
+                        );
+                      })()}
+                      <button onClick={() => handleSaveNote(!isDefinitive)} className="flex-1 bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors text-sm">Enregistrer les modifications</button>
                     </div>
                   ) : (
                     <button onClick={() => handleSaveNote(false)} className="w-full bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors">Enregistrer la modification</button>
