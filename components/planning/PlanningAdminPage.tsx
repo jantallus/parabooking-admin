@@ -368,7 +368,7 @@ export default function PlanningAdmin() {
       const sbPayShort = sb.payment_type ? (TYPE_SHORT[sb.payment_type] ?? null) : null;
       const sbPayLine = ep.price_cents
         ? (!sb.payment_type
-          ? `À enc. ${(ep.price_cents / 100).toFixed(0)} €`
+          ? `À enc. ${(ep.price_cents / 100).toFixed(2)} €`
           : sbPayShort
           ? `${sbPayShort} · ${(ep.price_cents / 100).toFixed(2)} €`
           : `${(ep.price_cents / 100).toFixed(2)} €`)
