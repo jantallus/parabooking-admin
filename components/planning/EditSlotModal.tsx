@@ -49,7 +49,7 @@ export default function EditSlotModal({
   const [formData, setFormData] = useState<FormData>({
     title: '', flight_type_id: '', weightChecked: false, phone: '', email: '', notes: '', booking_options: '', client_message: '',
   });
-  const [activeTab, setActiveTab] = useState<'client' | 'client2' | 'note' | 'move'>('client');
+  const [activeTab, setActiveTab] = useState<'client' | 'client2' | 'note' | 'move' | 'history'>('client');
   const [blockType, setBlockType] = useState<'none' | 'all' | 'specific'>('none');
   const [selectedMonitors, setSelectedMonitors] = useState<string[]>([]);
   const [blockUntilMs, setBlockUntilMs] = useState<number>(0);
@@ -65,6 +65,8 @@ export default function EditSlotModal({
   const [isEditing, setIsEditing] = useState(false);
   const [manualCounts, setManualCounts] = useState<Record<string, number>>({});
   const [isManual, setIsManual] = useState(false);
+  const [slotHistory, setSlotHistory] = useState<Array<{ id: number; action: string; changed_by_email: string | null; changed_at: string; snapshot: Record<string, unknown> }>>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [moveConfig, setMoveConfig] = useState({ date: '', time: '', monitorId: 'random' });
   const [moveGroup, setMoveGroup] = useState(false);
   const [movePax, setMovePax] = useState<'both' | 'pax1' | 'pax2'>('both');
@@ -388,6 +390,8 @@ export default function EditSlotModal({
     setFlightPriceOverride(pd?.price_override_cents != null ? (Number(pd.price_override_cents) / 100).toFixed(2) : '');
     setComplementPriceOverride(pd?.complement_total_cents ? (Number(pd.complement_total_cents) / 100).toFixed(2) : '');
     setCbNetAmount(pd?.cb_net_cents != null ? (Number(pd.cb_net_cents) / 100).toFixed(2) : '');
+    setSlotHistory([]);
+    setActiveTab(t => t === 'history' ? 'client' : t);
   }, [selectedEvent, currentUser]);
 
   // Auto-fill encaisseur for online/bon_cadeau once fullMonitors loads — runs
@@ -1321,6 +1325,21 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
           <button onClick={() => setActiveTab('note')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'note' ? 'bg-white text-amber-500 shadow-sm' : 'text-slate-400'}`}>📝 Note</button>
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && selectedEvent?.status !== 'available' && !isClientLocked && (
             <button onClick={() => setActiveTab('move')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'move' ? 'bg-white text-emerald-500 shadow-sm' : 'text-slate-400'}`}>🔄 Déplacer</button>
+          )}
+          {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && selectedEvent?.id && (
+            <button
+              onClick={async () => {
+                setActiveTab('history');
+                if (slotHistory.length === 0) {
+                  setHistoryLoading(true);
+                  try {
+                    const r = await apiFetch(`/api/slots/${selectedEvent.id}/history`);
+                    if (r.ok) setSlotHistory(await r.json());
+                  } finally { setHistoryLoading(false); }
+                }
+              }}
+              className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'history' ? 'bg-white text-violet-500 shadow-sm' : 'text-slate-400'}`}
+            >🕐 Historique</button>
           )}
         </div>
 
@@ -2425,6 +2444,43 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                 </div>
               </>
             )
+          )}
+          {/* ── Tab Historique ── */}
+          {activeTab === 'history' && (
+            <div className="mt-4 space-y-2">
+              {historyLoading ? (
+                <div className="text-center py-8 text-slate-400 font-bold uppercase text-[10px] animate-pulse">Chargement…</div>
+              ) : slotHistory.length === 0 ? (
+                <div className="text-center py-8 bg-slate-50 rounded-3xl border-2 border-slate-100">
+                  <span className="text-3xl block mb-2">📋</span>
+                  <p className="text-[10px] font-black uppercase text-slate-400">Aucun historique enregistré</p>
+                  <p className="text-[9px] text-slate-300 mt-1">Les modifications futures seront tracées</p>
+                </div>
+              ) : slotHistory.map(entry => {
+                const snap = entry.snapshot as { title?: string; status?: string; phone?: string; email?: string; start_time?: string };
+                const isDelete = entry.action === 'delete';
+                const snapTitle = snap?.title || null;
+                const isClientBooking = snap?.status === 'booked' && snapTitle && !['NOTE', '☕ PAUSE', 'NON DISPO'].some(t => snapTitle.includes(t)) && !snapTitle.includes('❌');
+                return (
+                  <div key={entry.id} className={`p-3 rounded-2xl border ${isDelete ? 'bg-rose-50 border-rose-100' : 'bg-slate-50 border-slate-100'}`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${isDelete ? 'bg-rose-100 text-rose-600' : 'bg-violet-100 text-violet-600'}`}>
+                        {isDelete ? '🗑️ Suppression' : '✏️ Modification'}
+                      </span>
+                      <span className="text-[9px] text-slate-400 font-bold">{entry.changed_at}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 font-medium space-y-0.5">
+                      {entry.changed_by_email && <div className="text-slate-400">par <span className="font-bold text-slate-600">{entry.changed_by_email.split('@')[0]}</span></div>}
+                      {snapTitle && <div>Titre : <span className="font-bold text-slate-700">{snapTitle}</span></div>}
+                      {snap?.phone && <div>Tél : {snap.phone}</div>}
+                      {snap?.email && <div>Email : {snap.email}</div>}
+                      {isClientBooking && snap?.start_time && <div className="text-slate-300 text-[9px]">Snapshot {snap.start_time}</div>}
+                    </div>
+                  </div>
+                );
+              })}
+              <button onClick={onClose} className="w-full text-slate-400 font-bold uppercase text-[10px] hover:text-slate-600 pt-2">Fermer</button>
+            </div>
           )}
         </div>
       </div>
