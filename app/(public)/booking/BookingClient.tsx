@@ -533,15 +533,17 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       const ms = dObj.getTime(); 
       
       if (!monSchedules[s.monitor_id]) monSchedules[s.monitor_id] = {};
-      monSchedules[s.monitor_id][ms] = { ...s }; 
+      monSchedules[s.monitor_id][ms] = { ...s };
+
+      if (s.status !== 'available') return; // pauses et créneaux pris ne s'affichent pas dans la grille
 
       const dStr = dObj.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
-      const tStr = dObj.toLocaleTimeString('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hour12: false }); 
-      
+      const tStr = dObj.toLocaleTimeString('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hour12: false });
+
       if (!uniqueTimesByDate[dStr]) uniqueTimesByDate[dStr] = new Set();
       uniqueTimesByDate[dStr].add(tStr);
 
-      timeToMs[`${dStr}|${tStr}`] = ms; 
+      timeToMs[`${dStr}|${tStr}`] = ms;
     });
 
     Object.entries(cart).forEach(([key, qty]) => {
