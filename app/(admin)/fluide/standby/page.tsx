@@ -514,7 +514,7 @@ export default function StandbyPage() {
     const preferredTime = hasBookedDate ? (c.booked_time || '') : availTime;
     const ftName = c.flight_type || '';
     const ftBaseName = ftName.split(' - ')[0].trim().toLowerCase();
-    const matchedFt = allFlightTypes.find(ft => ft.name.toLowerCase() === ftBaseName || ft.name.toLowerCase() === ftName.toLowerCase());
+    const matchedFt = allFlightTypes.find(ft => { const n = ft.name.toLowerCase(); return n === ftBaseName || n === ftName.toLowerCase() || ftBaseName.includes(n); });
     const paxPerSlot = matchedFt?.passengers_per_slot || 1;
     const slotsNeeded = Math.max(1, Math.ceil((c.nb_passengers || 1) / paxPerSlot));
     setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: preferredTime, monitor_ids: Array(slotsNeeded).fill('') });
@@ -528,7 +528,7 @@ export default function StandbyPage() {
     const nbPass = scheduleModal.nb_passengers || 1;
     const ftNameSave = scheduleModal.flight_type || '';
     const ftBaseNameSave = ftNameSave.split(' - ')[0].trim().toLowerCase();
-    const matchedFtSave = allFlightTypes.find(ft => ft.name.toLowerCase() === ftBaseNameSave || ft.name.toLowerCase() === ftNameSave.toLowerCase());
+    const matchedFtSave = allFlightTypes.find(ft => { const n = ft.name.toLowerCase(); return n === ftBaseNameSave || n === ftNameSave.toLowerCase() || ftBaseNameSave.includes(n); });
     const paxPerSlotSave = matchedFtSave?.passengers_per_slot || 1;
     const slotsNeededSave = Math.max(1, Math.ceil(nbPass / paxPerSlotSave));
     const selectedMonitors = schedForm.monitor_ids
@@ -1261,7 +1261,7 @@ export default function StandbyPage() {
       {scheduleModal && (() => {
         const _ftName = scheduleModal.flight_type || '';
         const _ftBase = _ftName.split(' - ')[0].trim().toLowerCase();
-        const _matchedFt = allFlightTypes.find(ft => ft.name.toLowerCase() === _ftBase || ft.name.toLowerCase() === _ftName.toLowerCase());
+        const _matchedFt = allFlightTypes.find(ft => { const n = ft.name.toLowerCase(); return n === _ftBase || n === _ftName.toLowerCase() || _ftBase.includes(n); });
         const _paxPerSlot = _matchedFt?.passengers_per_slot || 1;
         const _slotsNeeded = Math.max(1, Math.ceil((scheduleModal.nb_passengers || 1) / _paxPerSlot));
         console.log('[SCHED]', { _ftName, _ftBase, _matchedFt: _matchedFt?.name, _paxPerSlot, _slotsNeeded, nb_passengers: scheduleModal.nb_passengers, allFlightTypesCount: allFlightTypes.length });
