@@ -556,9 +556,12 @@ export default function StandbyPage() {
       const mon = selectedMonitors[i];
       const pax1Idx = i * paxPerSlotSave;
       const weight = allWeights[pax1Idx] ?? allWeights[0] ?? undefined;
+      // Numérotation par passager (comme le calendrier) : 1/4, 2/4, 3/4, 4/4
+      const pax1Num = pax1Idx + 1;
+      const pax1Title = nbPass > 1 ? `${pax1Num}/${nbPass} (${scheduleModal.name})` : scheduleModal.name;
       const slotPatch: Record<string, unknown> = {
         status: 'booked',
-        title: i === 0 ? scheduleModal.name : `${i + 1}/${slotsNeededSave} (${scheduleModal.name})`,
+        title: pax1Title,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
         flight_type_id: resolvedFlightTypeId,
@@ -566,9 +569,10 @@ export default function StandbyPage() {
       };
       // Pour les vols multi-passagers (ex: aiglon, 2 pax/slot) : renseigner second_booking
       if (paxPerSlotSave >= 2) {
+        const pax2Num = pax1Num + 1;
         const pax2Weight = allWeights[pax1Idx + 1] ?? undefined;
         slotPatch.second_booking = {
-          title: scheduleModal.name,
+          title: `${pax2Num}/${nbPass} (${scheduleModal.name})`,
           phone: scheduleModal.phone || null,
           email: scheduleModal.email || null,
           ...(pax2Weight !== undefined ? { weight: pax2Weight } : {}),

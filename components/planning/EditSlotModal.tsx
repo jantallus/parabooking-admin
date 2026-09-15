@@ -1310,7 +1310,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
             </>
           )}
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && isShortFlightType && showGroupSelector && (
-            <div className="flex-1 py-2 px-3 rounded-lg font-black text-[9px] uppercase bg-white text-sky-500 shadow-sm text-center">👥 Groupe {groupSize}</div>
+            <div className="flex-1 py-2 px-3 rounded-lg font-black text-[9px] uppercase bg-white text-sky-500 shadow-sm text-center">👥 Groupe {groupTotalPax}</div>
           )}
           <button onClick={() => setActiveTab('note')} className={`flex-1 py-2 rounded-lg font-black text-[9px] uppercase ${activeTab === 'note' ? 'bg-white text-amber-500 shadow-sm' : 'text-slate-400'}`}>📝 Note</button>
           {(currentUser?.role === 'admin' || currentUser?.role === 'aravis') && selectedEvent?.status !== 'available' && !isClientLocked && (
@@ -1383,7 +1383,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                         </div>
                       )}
                       {flight && row('Vol', `${flight.name} · ${(flight.price_cents / 100).toFixed(0)} €`)}
-                      {groupSize > 1 && row('Groupe', `${groupSize} passagers`)}
+                      {groupTotalPax > 1 && row('Groupe', `${groupTotalPax} passagers`)}
                       {ev.weight && row('Poids', `${ev.weight} kg`)}
                     </div>
                     {(pd?.payment_type || pd?.online) && (
