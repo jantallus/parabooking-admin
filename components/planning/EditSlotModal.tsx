@@ -900,7 +900,7 @@ export default function EditSlotModal({
       }
     } else {
       const sb2PriceOverrideCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : null;
-      const sb2Tentative = !isDefinitive2;
+      const sb2Tentative = !isDefinitive2 || !isDefinitive;
       const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, email: secondBooking.email.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(sb2Tentative ? { tentative: true } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
 updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: finalEffectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
     }
@@ -926,6 +926,10 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
         if (!alreadyUpdating.has(slot.id)) {
           const slotPd = { ...((slot.payment_data || {}) as Record<string, unknown>) };
           if (!isDefinitive) { slotPd.tentative = true; } else { delete slotPd.tentative; }
+          // Propager aussi à second_booking (pax2 aiglon) pour cohérence visuelle
+          const existingSb = slot.second_booking as Record<string, unknown> | null | undefined;
+          const slotSb = existingSb ? { ...existingSb } : null;
+          if (slotSb) { if (!isDefinitive) { slotSb.tentative = true; } else { delete slotSb.tentative; } }
           // Inclure tous les champs existants pour ne pas les effacer via le PATCH
           updatesToApply.push({ id: slot.id, data: {
             title: slot.title, status: slot.status, phone: slot.phone || null,
@@ -933,6 +937,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
             flight_type_id: slot.flight_type_id || null, weightChecked: slot.weight_checked || false,
             booking_options: slot.booking_options || null, client_message: slot.client_message || null,
             payment_data: slotPd,
+            ...(slotSb !== null ? { second_booking: slotSb } : {}),
           } });
         }
       });
