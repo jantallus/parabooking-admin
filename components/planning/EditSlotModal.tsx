@@ -70,6 +70,9 @@ export default function EditSlotModal({
   const [pasteZoneOpen, setPasteZoneOpen] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [parsed, setParsed] = useState<{ names: string[]; phone: string; email: string; weights: string[] } | null>(null);
+  const [pasteZoneOpen2, setPasteZoneOpen2] = useState(false);
+  const [pasteText2, setPasteText2] = useState('');
+  const [parsed2, setParsed2] = useState<{ names: string[]; phone: string; email: string; weights: string[] } | null>(null);
   const [passengerWeights, setPassengerWeights] = useState<string[]>(['']);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [selectedPartnerId, setSelectedPartnerId] = useState('');
@@ -82,7 +85,7 @@ export default function EditSlotModal({
   const [flightPriceOverride, setFlightPriceOverride] = useState('');
   const [complementPriceOverride, setComplementPriceOverride] = useState('');
   const [cbNetAmount, setCbNetAmount] = useState('');
-  const [secondBooking, setSecondBooking] = useState<{ title: string; phone: string; weight: string; payment_type: string; encaisseur_id: string; price_override: string }>({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' });
+  const [secondBooking, setSecondBooking] = useState<{ title: string; phone: string; email: string; weight: string; payment_type: string; encaisseur_id: string; price_override: string }>({ title: '', phone: '', email: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' });
   const [standbyPrefill, setStandbyPrefill] = useState<{ standby_id: number; name: string; phone: string; email: string; flight_type: string; weight_info: string; nb_passengers: number; source?: string | null } | null>(null);
   const standbyIdRef = React.useRef<number | null>(null);
   const [standbyActionModal, setStandbyActionModal] = useState<{
@@ -138,9 +141,7 @@ export default function EditSlotModal({
   }, [standbyPrefill, partners, isAravisContext]);
 
   // ── Parsing message collé ─────────────────────────────────────────────────
-  const parseMessage = () => {
-    const text = pasteText;
-
+  const doParseText = (text: string): { names: string[]; phone: string; email: string; weights: string[] } => {
     const emailMatch = text.match(/[\w.+\-]+@[\w.\-]+\.[a-zA-Z]{2,}/);
     const phoneMatch = text.match(/(?:\+33\s?|0033\s?|0)[1-9](?:[\s.\-]?\d{2}){4}/);
     const phone = phoneMatch ? phoneMatch[0].replace(/[\s.\-]/g, '').replace(/^0033/, '+33') : '';
@@ -246,8 +247,11 @@ export default function EditSlotModal({
 
     const names = [...new Set(found)].slice(0, 6);
     const weights = [...text.matchAll(/(\d+)\s*(?:kg|kgs?|kilos?)\b/gi)].map(m => m[1]);
-    setParsed({ names, phone, email, weights });
+    return { names, phone, email, weights };
   };
+
+  const parseMessage = () => { setParsed(doParseText(pasteText)); };
+  const parseMessage2 = () => { setParsed2(doParseText(pasteText2)); };
 
   const applyParsed = () => {
     if (!parsed) return;
@@ -264,6 +268,21 @@ export default function EditSlotModal({
     setPasteZoneOpen(false);
     setPasteText('');
     setParsed(null);
+  };
+
+  const applyParsed2 = () => {
+    if (!parsed2) return;
+    const name = parsed2.names[0] || '';
+    setSecondBooking(p => ({
+      ...p,
+      title: name || p.title,
+      phone: parsed2.phone || p.phone,
+      email: parsed2.email || p.email,
+      weight: (parsed2.weights[0] && !p.weight) ? parsed2.weights[0] : p.weight,
+    }));
+    setPasteZoneOpen2(false);
+    setPasteText2('');
+    setParsed2(null);
   };
 
   // ── Init depuis selectedEvent ──────────────────────────────────────────────
@@ -335,7 +354,7 @@ export default function EditSlotModal({
     setIsEditing(selectedEvent.status !== 'booked');
     setPassengerWeights([selectedEvent.weight?.toString() || '']);
     const sb = selectedEvent.second_booking;
-    setSecondBooking(sb ? { title: sb.title || '', phone: sb.phone || '', weight: sb.weight?.toString() || '', payment_type: sb.payment_type || '', encaisseur_id: sb.encaisseur_id || '', price_override: sb.price_override_cents != null ? (Number(sb.price_override_cents) / 100).toFixed(2) : '' } : { title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' });
+    setSecondBooking(sb ? { title: sb.title || '', phone: sb.phone || '', email: sb.email || '', weight: sb.weight?.toString() || '', payment_type: sb.payment_type || '', encaisseur_id: sb.encaisseur_id || '', price_override: sb.price_override_cents != null ? (Number(sb.price_override_cents) / 100).toFixed(2) : '' } : { title: '', phone: '', email: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' });
     setManualCounts({});
     const pd = selectedEvent.status === 'booked' ? selectedEvent.payment_data : null;
     setSelectedPartnerId(pd?.partner_id?.toString() ?? '');
@@ -359,6 +378,9 @@ export default function EditSlotModal({
     setShowEncaissement(false);
     setShowEncaissement2(false);
     setIsDefinitive(!((selectedEvent?.payment_data as Record<string, unknown> | null)?.tentative));
+    setPasteZoneOpen2(false);
+    setPasteText2('');
+    setParsed2(null);
     setPaymentScope('slot');
     setSelectedComplementIds(Array.isArray(pd?.selected_complements) ? (pd.selected_complements as { id: number }[]).map(c => Number(c.id)) : []);
     setFlightPriceOverride(pd?.price_override_cents != null ? (Number(pd.price_override_cents) / 100).toFixed(2) : '');
@@ -875,7 +897,7 @@ export default function EditSlotModal({
       }
     } else {
       const sb2PriceOverrideCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : null;
-      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
+      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, email: secondBooking.email.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
 updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: finalEffectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
     }
     // Chef de groupe : si le nom a changé, mettre à jour le suffixe dans les slots membres
@@ -1981,14 +2003,25 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                         })()}
                       </div>
                     )}
-                    {sb.phone && (
-                      <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-2">
-                        <p className="text-xs font-black uppercase text-slate-400">Téléphone</p>
-                        <p className="text-sm font-bold text-slate-700 mb-2">{sb.phone}</p>
-                        <div className="flex gap-2">
-                          <a href={`tel:${sb.phone.replace(/\s+/g, '')}`} className="flex-1 flex items-center justify-center text-[14px] bg-emerald-100 text-emerald-700 py-2 rounded-xl hover:bg-emerald-200 transition-colors shadow-sm">📞</a>
-                          <a href={`sms:${sb.phone.replace(/\s+/g, '')}`} className="flex-1 flex items-center justify-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 py-2 rounded-xl font-black uppercase hover:bg-emerald-200 transition-colors shadow-sm">💬 SMS</a>
-                        </div>
+                    {(sb.phone || sb.email) && (
+                      <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-3">
+                        {sb.phone && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-black uppercase text-slate-400">Téléphone</p>
+                            <p className="text-sm font-bold text-slate-700 mb-2">{sb.phone}</p>
+                            <div className="flex gap-2">
+                              <a href={`tel:${sb.phone.replace(/\s+/g, '')}`} className="flex-1 flex items-center justify-center text-[14px] bg-emerald-100 text-emerald-700 py-2 rounded-xl hover:bg-emerald-200 transition-colors shadow-sm">📞</a>
+                              <a href={`sms:${sb.phone.replace(/\s+/g, '')}`} className="flex-1 flex items-center justify-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 py-2 rounded-xl font-black uppercase hover:bg-emerald-200 transition-colors shadow-sm">💬 SMS</a>
+                            </div>
+                          </div>
+                        )}
+                        {sb.email && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-black uppercase text-slate-400">Email</p>
+                            <p className="text-sm font-bold text-slate-700 mb-2">{sb.email}</p>
+                            <a href={`mailto:${sb.email}`} className="w-full flex items-center justify-center gap-2 text-[10px] bg-sky-100 text-sky-700 py-2 rounded-xl font-black uppercase hover:bg-sky-200 transition-colors shadow-sm">✉️ Écrire</a>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1998,6 +2031,55 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
               /* ── Formulaire Pax 2 ── */
               <div className="space-y-4">
                 <div className="bg-sky-50 rounded-2xl p-4 space-y-2 border-2 border-sky-100">
+                  {/* ── Zone import message pax2 ── */}
+                  <div className="mb-2">
+                    <button
+                      onClick={() => { setPasteZoneOpen2(o => !o); setParsed2(null); }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[10px] font-black uppercase text-slate-400 hover:bg-slate-100 transition-colors"
+                    >
+                      <span>✨ Importer depuis un message</span>
+                      <span>{pasteZoneOpen2 ? '▲' : '▼'}</span>
+                    </button>
+                    {pasteZoneOpen2 && (
+                      <div className="mt-2 space-y-2">
+                        <textarea
+                          className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 text-sm font-medium text-slate-700 resize-none focus:outline-none focus:border-sky-200"
+                          rows={4}
+                          placeholder={"Collez ici un message, email, SMS...\nEx : Jean Dupont, 06 12 34 56 78, jean@mail.com, 75kg"}
+                          value={pasteText2}
+                          onChange={e => { setPasteText2(e.target.value); setParsed2(null); }}
+                        />
+                        <button
+                          onClick={parseMessage2}
+                          disabled={!pasteText2.trim()}
+                          className="w-full py-2 rounded-xl text-[11px] font-black uppercase text-white transition-colors disabled:opacity-40"
+                          style={{ backgroundColor: '#009FE3' }}
+                        >
+                          Analyser le message
+                        </button>
+                        {parsed2 && (
+                          <div className="bg-sky-50 border border-sky-100 rounded-2xl p-3 space-y-1.5">
+                            <p className="text-[10px] font-black uppercase text-sky-400 mb-2">Résultat détecté</p>
+                            {parsed2.names.length > 0 ? (
+                              <p className="text-xs text-slate-700"><span className="font-black text-slate-400 uppercase text-[9px]">Nom </span>{parsed2.names[0]}</p>
+                            ) : (
+                              <p className="text-[10px] text-slate-400 italic">Aucun nom détecté</p>
+                            )}
+                            {parsed2.phone && <p className="text-xs text-slate-700"><span className="font-black text-slate-400 uppercase text-[9px]">Tél </span>{parsed2.phone}</p>}
+                            {parsed2.email && <p className="text-xs text-slate-700"><span className="font-black text-slate-400 uppercase text-[9px]">Email </span>{parsed2.email}</p>}
+                            {parsed2.weights[0] && <p className="text-xs text-slate-700"><span className="font-black text-slate-400 uppercase text-[9px]">Poids </span>{parsed2.weights[0]} kg</p>}
+                            <button
+                              onClick={applyParsed2}
+                              className="w-full mt-1 py-1.5 rounded-xl text-[11px] font-black uppercase text-white"
+                              style={{ backgroundColor: '#E6007E' }}
+                            >
+                              Remplir le formulaire
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <label className="text-[10px] font-black uppercase text-sky-600 block mb-1">2ème Passager (créneau partagé)</label>
                   <input
                     className="w-full bg-white border-2 border-slate-100 rounded-xl p-3 font-bold text-sm"
@@ -2021,6 +2103,13 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       min="20" max="130"
                     />
                   </div>
+                  <input
+                    className="w-full bg-white border-2 border-slate-100 rounded-xl p-3 font-bold text-sm"
+                    value={secondBooking.email}
+                    onChange={e => setSecondBooking(p => ({ ...p, email: e.target.value }))}
+                    placeholder="Email"
+                    type="email"
+                  />
                   {secondBooking.title.trim() && (
                     <div className="pt-2 space-y-2 border-t border-sky-200">
                       {(() => {
@@ -2086,7 +2175,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                     </div>
                   )}
                   {secondBooking.title && (
-                    <button onClick={() => setSecondBooking({ title: '', phone: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' })} className="text-rose-400 text-[10px] font-black uppercase hover:text-rose-600">🗑️ Effacer le 2ème passager</button>
+                    <button onClick={() => setSecondBooking({ title: '', phone: '', email: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' })} className="text-rose-400 text-[10px] font-black uppercase hover:text-rose-600">🗑️ Effacer le 2ème passager</button>
                   )}
                 </div>
               </div>

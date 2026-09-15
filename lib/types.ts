@@ -50,7 +50,7 @@ export interface Slot {
   weightChecked?: boolean;
   payment_data?: PaymentData | null;
   billing_name?: string | null;
-  second_booking?: { title: string; phone?: string | null; weight?: number | null; payment_type?: string | null; encaisseur_id?: string | null; is_group_booking?: boolean; price_override_cents?: number | null } | null;
+  second_booking?: { title: string; phone?: string | null; email?: string | null; weight?: number | null; payment_type?: string | null; encaisseur_id?: string | null; is_group_booking?: boolean; price_override_cents?: number | null } | null;
   resourceId?: string;
   /** FullCalendar event.start (Date object) — populated when slot comes from calendar click */
   start?: Date | string;
