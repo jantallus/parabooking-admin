@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useToast } from '@/components/ui/ToastProvider';
 import type { User, CurrentUser, Availability } from '@/lib/types';
@@ -26,6 +27,9 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
   const { toast } = useToast();
   const [newUser, setNewUser] = useState({ ...EMPTY_USER });
   const [availabilities, setAvailabilities] = useState<Availability[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const isOwnProfile = !!(userToEdit && currentUser && userToEdit.id === currentUser.id);
 
   useEffect(() => {
     if (userToEdit) {
@@ -122,7 +126,25 @@ export function MoniteurModal({ userToEdit, currentUser, onClose, onSaved }: Pro
               Mot de passe
               {userToEdit && <span className="normal-case">(Laisser vide pour garder l'actuel)</span>}
             </label>
-            <input type="password" placeholder={userToEdit ? "••••••••" : ""} className="w-full border-2 border-slate-100 rounded-2xl p-3 md:p-4 font-bold bg-slate-50 focus:border-orange-300 outline-none" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder={userToEdit ? "••••••••" : ""}
+                className="w-full border-2 border-slate-100 rounded-2xl p-3 md:p-4 font-bold bg-slate-50 focus:border-orange-300 outline-none pr-12"
+                value={newUser.password}
+                onChange={e => setNewUser({ ...newUser, password: e.target.value })}
+              />
+              {isOwnProfile && (
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-orange-500 transition-colors rounded-xl hover:bg-orange-50"
+                  title={showPassword ? "Masquer le mot de passe" : "Voir le mot de passe"}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-rose-50 p-4 rounded-3xl border border-rose-100 space-y-4">
