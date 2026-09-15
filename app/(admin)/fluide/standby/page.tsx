@@ -348,7 +348,7 @@ export default function StandbyPage() {
     created_from: '',
     created_to: '',
   });
-  const [allFlightTypes, setAllFlightTypes] = useState<Array<{ id: number; name: string; season?: string }>>([]);
+  const [allFlightTypes, setAllFlightTypes] = useState<Array<{ id: number; name: string; season?: string; tenant?: string; passengers_per_slot?: number }>>([]);
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -379,7 +379,7 @@ export default function StandbyPage() {
   useEffect(() => {
     apiFetch(`/api/flight-types?tenant=all`)
       .then(r => r.ok ? r.json() : [])
-      .then((data: Array<{ id: number; name: string; season?: string; tenant?: string }>) => setAllFlightTypes(data))
+      .then((data: Array<{ id: number; name: string; season?: string; tenant?: string; passengers_per_slot?: number }>) => setAllFlightTypes(data))
       .catch(() => {});
     apiFetch('/api/partners')
       .then(r => r.ok ? r.json() : [])
@@ -512,7 +512,12 @@ export default function StandbyPage() {
     const availTimeMatch = availTimeRaw.match(/^(\d{1,2})[h:H](\d{2})$/);
     const availTime = availTimeMatch ? `${availTimeMatch[1].padStart(2, '0')}:${availTimeMatch[2]}` : '';
     const preferredTime = hasBookedDate ? (c.booked_time || '') : availTime;
-    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: preferredTime, monitor_ids: Array(Math.max(1, c.nb_passengers || 1)).fill('') });
+    const ftName = c.flight_type || '';
+    const ftBaseName = ftName.split(' - ')[0].trim().toLowerCase();
+    const matchedFt = allFlightTypes.find(ft => ft.name.toLowerCase() === ftBaseName || ft.name.toLowerCase() === ftName.toLowerCase());
+    const paxPerSlot = matchedFt?.passengers_per_slot || 1;
+    const slotsNeeded = Math.max(1, Math.ceil((c.nb_passengers || 1) / paxPerSlot));
+    setSchedForm({ pilot_name: c.pilot_name||'', booked_date: date, booked_time: preferredTime, monitor_ids: Array(slotsNeeded).fill('') });
     setFreeMonitors([]);
     setAvailableTimes([]);
     if (date) fetchAvailableTimes(date, preferredTime, c.source);
@@ -521,8 +526,13 @@ export default function StandbyPage() {
   const saveSchedule = async () => {
     if (!scheduleModal) return;
     const nbPass = scheduleModal.nb_passengers || 1;
+    const ftNameSave = scheduleModal.flight_type || '';
+    const ftBaseNameSave = ftNameSave.split(' - ')[0].trim().toLowerCase();
+    const matchedFtSave = allFlightTypes.find(ft => ft.name.toLowerCase() === ftBaseNameSave || ft.name.toLowerCase() === ftNameSave.toLowerCase());
+    const paxPerSlotSave = matchedFtSave?.passengers_per_slot || 1;
+    const slotsNeededSave = Math.max(1, Math.ceil(nbPass / paxPerSlotSave));
     const selectedMonitors = schedForm.monitor_ids
-      .slice(0, nbPass)
+      .slice(0, slotsNeededSave)
       .map(id => freeMonitors.find(m => m.id === id))
       .filter((m): m is typeof freeMonitors[number] => !!m && !!(m.slot_id));
     if (selectedMonitors.length === 0) return;
@@ -550,7 +560,7 @@ export default function StandbyPage() {
       const slotPatch: Record<string, unknown> = {
         status: 'booked',
         // Slot i>0 : "2/N (Nom)" pour déclencher la couleur de groupe et afficher la position
-        title: i === 0 ? scheduleModal.name : `${i + 1}/${nbPass} (${scheduleModal.name})`,
+        title: i === 0 ? scheduleModal.name : `${i + 1}/${slotsNeededSave} (${scheduleModal.name})`,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
         flight_type_id: resolvedFlightTypeId,
@@ -581,9 +591,9 @@ export default function StandbyPage() {
     if (res.ok) {
       const n = selectedMonitors.length;
       toast.success(
-        n >= nbPass
+        n >= slotsNeededSave
           ? `${n > 1 ? n + ' créneaux réservés' : 'Créneau réservé'} dans le planning`
-          : `${n}/${nbPass} créneau${n > 1 ? 'x' : ''} réservé — complète le planning manuellement`
+          : `${n}/${slotsNeededSave} créneau${n > 1 ? 'x' : ''} réservé — complète le planning manuellement`
       );
       setScheduleModal(null);
       load();
@@ -1305,12 +1315,12 @@ export default function StandbyPage() {
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                  {(scheduleModal.nb_passengers || 1) > 1 ? `Créneaux — ${scheduleModal.nb_passengers} passagers` : 'Créneau disponible'}
+                  {schedForm.monitor_ids.length > 1 ? `Créneaux — ${scheduleModal.nb_passengers} passagers` : 'Créneau disponible'}
                   {loadingMonitors && <span className="text-sky-400 normal-case font-normal"> Recherche...</span>}
                 </label>
                 {freeMonitors.length > 0 ? (
-                  Array.from({ length: scheduleModal.nb_passengers || 1 }).map((_, i) => {
-                    const total = scheduleModal.nb_passengers || 1;
+                  Array.from({ length: schedForm.monitor_ids.length }).map((_, i) => {
+                    const total = schedForm.monitor_ids.length;
                     const otherIds = schedForm.monitor_ids.filter((id, j) => j !== i && id !== '');
                     const opts = freeMonitors.filter(m => !otherIds.includes(m.id));
                     const selectedMonitorName = freeMonitors.find(m => m.id === schedForm.monitor_ids[i])?.first_name;
