@@ -1264,6 +1264,7 @@ export default function StandbyPage() {
         const _matchedFt = allFlightTypes.find(ft => ft.name.toLowerCase() === _ftBase || ft.name.toLowerCase() === _ftName.toLowerCase());
         const _paxPerSlot = _matchedFt?.passengers_per_slot || 1;
         const _slotsNeeded = Math.max(1, Math.ceil((scheduleModal.nb_passengers || 1) / _paxPerSlot));
+        console.log('[SCHED]', { _ftName, _ftBase, _matchedFt: _matchedFt?.name, _paxPerSlot, _slotsNeeded, nb_passengers: scheduleModal.nb_passengers, allFlightTypesCount: allFlightTypes.length });
         return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm">
