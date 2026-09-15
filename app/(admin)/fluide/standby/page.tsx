@@ -543,29 +543,37 @@ export default function StandbyPage() {
       const ftName = scheduleModal.flight_type;
       if (ftName) {
         const ftBaseName = ftName.split(' - ')[0].trim().toLowerCase();
-        const matched = allFlightTypes.find(ft =>
-          ft.name.toLowerCase() === ftBaseName || ft.name.toLowerCase() === ftName.toLowerCase()
-        );
+        const matched = allFlightTypes.find(ft => { const n = ft.name.toLowerCase(); return n === ftBaseName || n === ftName.toLowerCase() || ftBaseName.includes(n); });
         if (matched) return matched.id;
       }
       return selectedMonitors[0]?.flight_type_id ?? null;
     })();
 
-    // Tous les poids renseignés (ex: "65/70" → [65, 70])
+    // Tous les poids renseignés (ex: "65/70/68/72" → [65, 70, 68, 72])
     const allWeights = String(scheduleModal.weight_info || '').match(/\d+/g)?.map(Number) || [];
 
     for (let i = 0; i < selectedMonitors.length; i++) {
       const mon = selectedMonitors[i];
-      const weight = allWeights[i] ?? allWeights[0] ?? undefined;
+      const pax1Idx = i * paxPerSlotSave;
+      const weight = allWeights[pax1Idx] ?? allWeights[0] ?? undefined;
       const slotPatch: Record<string, unknown> = {
         status: 'booked',
-        // Slot i>0 : "2/N (Nom)" pour déclencher la couleur de groupe et afficher la position
         title: i === 0 ? scheduleModal.name : `${i + 1}/${slotsNeededSave} (${scheduleModal.name})`,
         phone: scheduleModal.phone || '',
         email: scheduleModal.email || '',
         flight_type_id: resolvedFlightTypeId,
         weight,
       };
+      // Pour les vols multi-passagers (ex: aiglon, 2 pax/slot) : renseigner second_booking
+      if (paxPerSlotSave >= 2) {
+        const pax2Weight = allWeights[pax1Idx + 1] ?? undefined;
+        slotPatch.second_booking = {
+          title: scheduleModal.name,
+          phone: scheduleModal.phone || null,
+          email: scheduleModal.email || null,
+          ...(pax2Weight !== undefined ? { weight: pax2Weight } : {}),
+        };
+      }
       if (isAravis && aravisPartner) {
         slotPatch.payment_data = {
           partner: true,
