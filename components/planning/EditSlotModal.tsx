@@ -61,6 +61,7 @@ export default function EditSlotModal({
   const [showEncaissement, setShowEncaissement] = useState(false);
   const [showEncaissement2, setShowEncaissement2] = useState(false);
   const [isDefinitive, setIsDefinitive] = useState(true);
+  const [isDefinitive2, setIsDefinitive2] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [manualCounts, setManualCounts] = useState<Record<string, number>>({});
   const [isManual, setIsManual] = useState(false);
@@ -378,6 +379,7 @@ export default function EditSlotModal({
     setShowEncaissement(false);
     setShowEncaissement2(false);
     setIsDefinitive(!((selectedEvent?.payment_data as Record<string, unknown> | null)?.tentative));
+    setIsDefinitive2(!(selectedEvent?.second_booking?.tentative));
     setPasteZoneOpen2(false);
     setPasteText2('');
     setParsed2(null);
@@ -831,11 +833,15 @@ export default function EditSlotModal({
       }
     }
 
-    if (tentative) {
-      finalPaymentData.tentative = true;
-    } else {
-      delete finalPaymentData.tentative;
+    // Provisoire/définitif : ne touche à payment_data.tentative que pour pax1
+    if (activeTab !== 'client2') {
+      if (tentative) {
+        finalPaymentData.tentative = true;
+      } else {
+        delete finalPaymentData.tentative;
+      }
     }
+    // Pour pax2, tentative est géré dans secondBookingData ci-dessous
 
     const complementNames = !isStripePd
       ? selectedComplementIds.map(id => availableComplements.find(c => c.id === id)?.name).filter(Boolean).join(', ')
@@ -897,7 +903,8 @@ export default function EditSlotModal({
       }
     } else {
       const sb2PriceOverrideCents = secondBooking.price_override ? Math.round(parseFloat(secondBooking.price_override) * 100) : null;
-      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, email: secondBooking.email.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
+      const sb2Tentative = activeTab === 'client2' ? !isDefinitive2 : (selectedEvent?.second_booking?.tentative ?? false);
+      const secondBookingData = isShortFlightType ? { second_booking: secondBooking.title.trim() ? { title: secondBooking.title.trim(), phone: secondBooking.phone.trim() || null, email: secondBooking.email.trim() || null, weight: secondBooking.weight ? parseInt(secondBooking.weight) : null, payment_type: secondBooking.payment_type || null, encaisseur_id: secondBooking.encaisseur_id || null, ...(sb2PriceOverrideCents != null ? { price_override_cents: sb2PriceOverrideCents } : {}), ...(sb2Tentative ? { tentative: true } : {}), ...(showGroupSelector && { is_group_booking: true }) } : (showGroupSelector ? { is_group_booking: true } : null) } : { second_booking: null };
 updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title: finalEffectiveTitle, status: finalEffectiveTitle.trim() ? 'booked' : 'available', weight: passengerWeights[0] ? parseInt(passengerWeights[0]) : null, weightChecked: !!passengerWeights[0], payment_data: finalPaymentData, ...secondBookingData } });
     }
     // Chef de groupe : si le nom a changé, mettre à jour le suffixe dans les slots membres
@@ -2249,6 +2256,9 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                   {(activeTab === 'client' || activeTab === 'client2') ? (
                     <div className="flex items-center gap-3">
                       {(() => {
+                        const isPax2 = activeTab === 'client2';
+                        const isDef = isPax2 ? isDefinitive2 : isDefinitive;
+                        const setIsDef = isPax2 ? setIsDefinitive2 : setIsDefinitive;
                         const selFlight = flightTypes.find(f => f.id.toString() === formData.flight_type_id?.toString());
                         const selPartner = selectedPartnerId ? partners.find(p => p.id.toString() === selectedPartnerId) : null;
                         const partnerColor = selPartner?.color_code ?? null;
@@ -2256,21 +2266,21 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                           || (currentUser?.enseigne === 'aravis' ? (selFlight?.color_code ?? '#6CAED8') : null)
                           || '#d946ef';
                         return (
-                          <label className="flex items-center gap-1.5 cursor-pointer shrink-0" title={isDefinitive ? 'Définitif' : 'Provisoire'}>
+                          <label className="flex items-center gap-1.5 cursor-pointer shrink-0" title={isDef ? 'Définitif' : 'Provisoire'}>
                             <input
                               type="checkbox"
-                              checked={isDefinitive}
-                              onChange={e => setIsDefinitive(e.target.checked)}
+                              checked={isDef}
+                              onChange={e => setIsDef(e.target.checked)}
                               className="w-3.5 h-3.5 cursor-pointer"
                             />
                             <span
                               className="inline-block w-3.5 h-3.5 rounded-sm border"
-                              style={{ backgroundColor: isDefinitive ? slotColor : 'white', borderColor: isDefinitive ? slotColor : '#cbd5e1' }}
+                              style={{ backgroundColor: isDef ? slotColor : 'white', borderColor: isDef ? slotColor : '#cbd5e1' }}
                             />
                           </label>
                         );
                       })()}
-                      <button onClick={() => handleSaveNote(!isDefinitive)} className="flex-1 bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors text-sm">Enregistrer les modifications</button>
+                      <button onClick={() => handleSaveNote(activeTab === 'client2' ? !isDefinitive2 : !isDefinitive)} className="flex-1 bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors text-sm">Enregistrer les modifications</button>
                     </div>
                   ) : (
                     <button onClick={() => handleSaveNote(false)} className="w-full bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors">Enregistrer la modification</button>

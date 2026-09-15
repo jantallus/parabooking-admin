@@ -353,6 +353,7 @@ export default function PlanningAdmin() {
     if (ep.second_booking?.title) {
       const sb = ep.second_booking!;
       const isExp = expandedPax2.has(ep.id);
+      const isSbTentative = !!(sb as { tentative?: boolean }).tentative;
       const sbPayShort = sb.payment_type ? (TYPE_SHORT[sb.payment_type] ?? null) : null;
       const sbPayLine = ep.price_cents
         ? (!sb.payment_type
@@ -384,10 +385,10 @@ export default function PlanningAdmin() {
             </div>
           )}
           {/* Séparateur */}
-          <div style={{ width: '1px', background: 'rgba(255,255,255,0.35)', flexShrink: 0, margin: '2px 0' }} />
+          <div style={{ width: '1px', background: isSbTentative ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.35)', flexShrink: 0, margin: '2px 0' }} />
           {/* Pax 2 */}
           <NativeStopDiv
-            style={{ flex: isExp ? 2 : 1, padding: '1px 3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', cursor: 'pointer', opacity: isExp ? 1 : 0.85 }}
+            style={{ flex: isExp ? 2 : 1, padding: '1px 3px', display: 'flex', flexDirection: 'column', gap: '1px', overflow: 'hidden', cursor: 'pointer', opacity: isExp ? 1 : 0.85, backgroundColor: isSbTentative ? 'rgba(255,255,255,0.92)' : undefined, color: isSbTentative ? '#374151' : undefined }}
             onNativeClick={() => togglePax2(ep.id)}
           >
             {isExp ? (
