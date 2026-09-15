@@ -483,6 +483,7 @@ export default function PlanningAdmin() {
       schedulerLicenseKey="CC-Attribution-NonCommercial-NoDerivatives"
       plugins={[resourceTimeGridPlugin, interactionPlugin, scrollgridPlugin]}
       initialView="resourceTimeGridDay"
+      initialDate={dateParam ?? undefined}
       resources={visibleMonitors}
       resourceLabelContent={resourceLabelContent}
       datesSet={(arg) => {
