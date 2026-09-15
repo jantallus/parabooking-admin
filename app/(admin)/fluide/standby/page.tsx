@@ -1258,7 +1258,13 @@ export default function StandbyPage() {
       )}
 
       {/* Modal créneau */}
-      {scheduleModal && (
+      {scheduleModal && (() => {
+        const _ftName = scheduleModal.flight_type || '';
+        const _ftBase = _ftName.split(' - ')[0].trim().toLowerCase();
+        const _matchedFt = allFlightTypes.find(ft => ft.name.toLowerCase() === _ftBase || ft.name.toLowerCase() === _ftName.toLowerCase());
+        const _paxPerSlot = _matchedFt?.passengers_per_slot || 1;
+        const _slotsNeeded = Math.max(1, Math.ceil((scheduleModal.nb_passengers || 1) / _paxPerSlot));
+        return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center">
@@ -1315,12 +1321,12 @@ export default function StandbyPage() {
               </div>
               <div>
                 <label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                  {schedForm.monitor_ids.length > 1 ? `Créneaux — ${scheduleModal.nb_passengers} passagers` : 'Créneau disponible'}
+                  {_slotsNeeded > 1 ? `Créneaux — ${scheduleModal.nb_passengers} passagers` : 'Créneau disponible'}
                   {loadingMonitors && <span className="text-sky-400 normal-case font-normal"> Recherche...</span>}
                 </label>
                 {freeMonitors.length > 0 ? (
-                  Array.from({ length: schedForm.monitor_ids.length }).map((_, i) => {
-                    const total = schedForm.monitor_ids.length;
+                  Array.from({ length: _slotsNeeded }).map((_, i) => {
+                    const total = _slotsNeeded;
                     const otherIds = schedForm.monitor_ids.filter((id, j) => j !== i && id !== '');
                     const opts = freeMonitors.filter(m => !otherIds.includes(m.id));
                     const selectedMonitorName = freeMonitors.find(m => m.id === schedForm.monitor_ids[i])?.first_name;
@@ -1398,7 +1404,8 @@ export default function StandbyPage() {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
