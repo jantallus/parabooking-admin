@@ -582,6 +582,7 @@ export default function StandbyPage() {
           partner_color: aravisPartner.color_code ?? '#6CAED8',
         };
       }
+      console.log('[SAVE]', { slot_id: mon.slot_id, slotPatch });
       const slotRes = await apiFetch(`/api/slots/${mon.slot_id}`, {
         method: 'PATCH',
         body: JSON.stringify(slotPatch),
