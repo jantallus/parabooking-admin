@@ -582,7 +582,6 @@ export default function StandbyPage() {
           partner_color: aravisPartner.color_code ?? '#6CAED8',
         };
       }
-      console.log('[SAVE]', { slot_id: mon.slot_id, slotPatch });
       const slotRes = await apiFetch(`/api/slots/${mon.slot_id}`, {
         method: 'PATCH',
         body: JSON.stringify(slotPatch),
@@ -1273,7 +1272,6 @@ export default function StandbyPage() {
         const _matchedFt = allFlightTypes.find(ft => { const n = ft.name.toLowerCase(); return n === _ftBase || n === _ftName.toLowerCase() || _ftBase.includes(n); });
         const _paxPerSlot = _matchedFt?.passengers_per_slot || 1;
         const _slotsNeeded = Math.max(1, Math.ceil((scheduleModal.nb_passengers || 1) / _paxPerSlot));
-        console.log('[SCHED]', { _ftName, _ftBase, _matchedFt: _matchedFt?.name, _paxPerSlot, _slotsNeeded, nb_passengers: scheduleModal.nb_passengers, allFlightTypesCount: allFlightTypes.length });
         return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm">
