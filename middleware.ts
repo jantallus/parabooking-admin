@@ -19,14 +19,25 @@ export async function middleware(request: NextRequest) {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
     const role = payload.role as string;
     const enseigne = (payload.enseigne as string) || 'fluide';
+    const email = (payload.email as string) || '';
     const { pathname } = request.nextUrl;
 
     const isAravis = enseigne === 'aravis' || role === 'aravis';
     const onAravisPath = pathname.startsWith('/aravis');
     const onFluide = pathname.startsWith('/fluide');
 
-    if (isAravis && !onAravisPath) {
-      return NextResponse.redirect(new URL('/aravis/planning', request.url));
+    // Julien peut accéder aux deux backoffices pour le débogage
+    const isSuperAdmin = email === 'juwirtz@gmail.com';
+
+    if (!isSuperAdmin) {
+      // Aravis → interdit sur /fluide
+      if (isAravis && onFluide) {
+        return NextResponse.redirect(new URL('/aravis/planning', request.url));
+      }
+      // Fluide → interdit sur /aravis
+      if (!isAravis && onAravisPath) {
+        return NextResponse.redirect(new URL('/fluide/planning', request.url));
+      }
     }
 
     const isMonitor = role === 'monitor' || role === 'permanent';
