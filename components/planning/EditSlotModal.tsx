@@ -2161,9 +2161,11 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                     <div className="flex items-center gap-3">
                       {(() => {
                         const selFlight = flightTypes.find(f => f.id.toString() === formData.flight_type_id?.toString());
-                        const slotColor = currentUser?.enseigne === 'aravis'
-                          ? (selFlight?.color_code ?? '#6CAED8')
-                          : '#d946ef';
+                        const selPartner = selectedPartnerId ? partners.find(p => p.id.toString() === selectedPartnerId) : null;
+                        const partnerColor = selPartner?.color_code ?? null;
+                        const slotColor = partnerColor
+                          || (currentUser?.enseigne === 'aravis' ? (selFlight?.color_code ?? '#6CAED8') : null)
+                          || '#d946ef';
                         return (
                           <label className="flex items-center gap-1.5 cursor-pointer shrink-0" title={isDefinitive ? 'Définitif' : 'Provisoire'}>
                             <input
