@@ -2248,10 +2248,23 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
             ) : isPermanentClientSlot ? (
               <>
                 <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-1.5 mb-2">
-                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Passager (lecture seule)</p>
+                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Passager</p>
                   <p className="font-bold text-slate-800 text-sm">{selectedEvent?.title}</p>
-                  {selectedEvent?.phone && <p className="text-xs text-slate-500">📞 {selectedEvent.phone}</p>}
-                  {selectedEvent?.email && <p className="text-xs text-slate-500">✉️ {selectedEvent.email}</p>}
+                  {selectedEvent?.phone && <p className="text-xs text-slate-500">{selectedEvent.phone}</p>}
+                  {selectedEvent?.email && <p className="text-xs text-slate-500 truncate">{selectedEvent.email}</p>}
+                  {(selectedEvent?.phone || selectedEvent?.email) && (
+                    <div className="flex gap-2 pt-1">
+                      {selectedEvent?.phone && (
+                        <a href={`tel:${selectedEvent.phone}`} className="w-8 h-8 rounded-full bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-sm transition-colors" title="Appeler">📞</a>
+                      )}
+                      {selectedEvent?.phone && (
+                        <a href={`sms:${selectedEvent.phone}`} className="w-8 h-8 rounded-full bg-sky-50 hover:bg-sky-100 flex items-center justify-center text-sm transition-colors" title="SMS">💬</a>
+                      )}
+                      {selectedEvent?.email && (
+                        <a href={`mailto:${selectedEvent.email}`} className="w-8 h-8 rounded-full bg-violet-50 hover:bg-violet-100 flex items-center justify-center text-sm transition-colors" title="Email">📧</a>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Note interne au pilote</label>
