@@ -19,6 +19,7 @@ interface Props {
 
 export default function GenSlotsModal({ availablePlans, monitors, loadAppointments, onClose }: Props) {
   const { toast, confirm } = useToast();
+  const [action, setAction] = useState<'generate' | 'delete'>('generate');
   const [genConfig, setGenConfig] = useState({
     startDate: '', endDate: '', daysToApply: [1, 2, 3, 4, 5, 6, 0], plan_name: 'Standard',
   });
@@ -150,19 +151,33 @@ export default function GenSlotsModal({ availablePlans, monitors, loadAppointmen
       <div className="bg-white rounded-[40px] p-8 max-w-sm w-full shadow-2xl">
 
         <>
-          <h2 className="text-xl font-black uppercase italic mb-6">Générer les créneaux</h2>
+          <h2 className="text-xl font-black uppercase italic mb-6">Gestion des créneaux</h2>
           <div className="space-y-4">
             <input type="date" className="w-full border-2 border-slate-100 rounded-2xl p-4"
               onChange={e => setGenConfig({ ...genConfig, startDate: e.target.value })} />
             <input type="date" className="w-full border-2 border-slate-100 rounded-2xl p-4"
               onChange={e => setGenConfig({ ...genConfig, endDate: e.target.value })} />
 
-            <select className="w-full border-2 border-slate-100 rounded-2xl p-4 font-bold text-slate-700"
-              value={genConfig.plan_name}
-              onChange={e => setGenConfig({ ...genConfig, plan_name: e.target.value })}>
-              <option value="" disabled>-- Choisir le Modèle --</option>
-              {availablePlans.map(plan => <option key={plan} value={plan}>{plan}</option>)}
-            </select>
+            {/* Sélecteur Générer / Supprimer */}
+            <div className="flex gap-2">
+              <button onClick={() => setAction('generate')}
+                className={`flex-1 py-2.5 rounded-2xl font-black text-[10px] uppercase transition-all ${action === 'generate' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
+                📅 Générer
+              </button>
+              <button onClick={() => setAction('delete')}
+                className={`flex-1 py-2.5 rounded-2xl font-black text-[10px] uppercase transition-all ${action === 'delete' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
+                🗑️ Supprimer
+              </button>
+            </div>
+
+            {action === 'generate' && (
+              <select className="w-full border-2 border-slate-100 rounded-2xl p-4 font-bold text-slate-700"
+                value={genConfig.plan_name}
+                onChange={e => setGenConfig({ ...genConfig, plan_name: e.target.value })}>
+                <option value="" disabled>-- Choisir le Modèle --</option>
+                {availablePlans.map(plan => <option key={plan} value={plan}>{plan}</option>)}
+              </select>
+            )}
 
             {/* Sélection des pilotes avec cases à cocher */}
             <div>
@@ -220,14 +235,17 @@ export default function GenSlotsModal({ availablePlans, monitors, loadAppointmen
               </div>
             </div>
 
-            <button disabled={isGenerating} onClick={handleGenerate}
-              className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all ${isGenerating ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}>
-              {isGenerating ? '⏳ Génération en cours...' : '🚀 Lancer la génération'}
-            </button>
-            <button disabled={isDeleting} onClick={handleDelete}
-              className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all ${isDeleting ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-rose-500 text-white hover:bg-rose-600'}`}>
-              {isDeleting ? '⏳ Suppression...' : '🗑️ Supprimer ces créneaux'}
-            </button>
+            {action === 'generate' ? (
+              <button disabled={isGenerating} onClick={handleGenerate}
+                className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all ${isGenerating ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}>
+                {isGenerating ? '⏳ Génération en cours...' : '🚀 Lancer la génération'}
+              </button>
+            ) : (
+              <button disabled={isDeleting} onClick={handleDelete}
+                className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all ${isDeleting ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-rose-600 text-white hover:scale-105'}`}>
+                {isDeleting ? '⏳ Suppression...' : '🗑️ Supprimer les créneaux'}
+              </button>
+            )}
             <button onClick={onClose} className="w-full text-slate-300 font-bold uppercase text-[10px]">Fermer</button>
           </div>
         </>
