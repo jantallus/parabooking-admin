@@ -168,9 +168,17 @@ export default function PlanningAdmin() {
   // Moniteurs sans créneaux que l'admin a choisi d'afficher manuellement
   const [extraShownIds, setExtraShownIds] = useState<Set<string>>(new Set());
 
+  // Pour les permanents : liste réduite à leur propre colonne
+  const ownMonitors = useMemo(() => {
+    if (currentUser?.role === 'permanent') {
+      return monitors.filter(m => m.id === String(currentUser.id));
+    }
+    return monitors;
+  }, [monitors, currentUser]);
+
   // Moniteurs qui ont au moins un créneau dans la plage affichée
   const monitorsWithSlots = useMemo(() => {
-    if (!viewRange || appointments.length === 0) return monitors;
+    if (!viewRange || appointments.length === 0) return ownMonitors;
     const viewStart = viewRange.start.getTime();
     const viewEnd = viewRange.end.getTime();
     const idsWithSlots = new Set(
@@ -181,16 +189,16 @@ export default function PlanningAdmin() {
         })
         .map(a => a.monitor_id?.toString())
     );
-    const filtered = monitors.filter(m => idsWithSlots.has(m.id.toString()));
-    return filtered.length > 0 ? filtered : monitors;
-  }, [monitors, appointments, viewRange]);
+    const filtered = ownMonitors.filter(m => idsWithSlots.has(m.id.toString()));
+    return filtered.length > 0 ? filtered : ownMonitors;
+  }, [ownMonitors, appointments, viewRange]);
 
   // Moniteurs sans créneaux sur la période (cachés par défaut)
   const monitorsWithoutSlots = useMemo(() => {
     if (!viewRange || appointments.length === 0) return [];
     const withSlotIds = new Set(monitorsWithSlots.map(m => m.id.toString()));
-    return monitors.filter(m => !withSlotIds.has(m.id.toString()));
-  }, [monitors, monitorsWithSlots, viewRange, appointments.length]);
+    return ownMonitors.filter(m => !withSlotIds.has(m.id.toString()));
+  }, [ownMonitors, monitorsWithSlots, viewRange, appointments.length]);
 
   // Réinitialiser les extras quand la plage change
   useEffect(() => { setExtraShownIds(new Set()); }, [viewRange]);
