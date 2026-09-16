@@ -71,6 +71,7 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
   const replacement = monitors.find(m => m.id === replacementId);
 
   const hasNoSlots = monitorASlots.length === 0;
+  const hasNoBookings = monitorASlots.length > 0 && aBooked === 0;
 
   const handleTransfer = async () => {
     if (!replacementId) return;
@@ -95,6 +96,25 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
         onClose();
       } else {
         toast.error(data.error || 'Erreur lors du transfert');
+      }
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setIsTransferring(false); }
+  };
+
+  const handleDeleteSelf = async () => {
+    setIsTransferring(true);
+    try {
+      const res = await apiFetch('/api/delete-slots', {
+        method: 'POST',
+        body: JSON.stringify({ startDate, endDate, monitor_ids: [monitor.id], forceOverwrite: true }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`✅ ${data.deleted} créneau(x) supprimé(s)`);
+        await onSuccess();
+        onClose();
+      } else {
+        toast.error(data.error || 'Erreur lors de la suppression');
       }
     } catch { toast.error('Erreur de connexion'); }
     finally { setIsTransferring(false); }
@@ -154,7 +174,7 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
       <div className="bg-white rounded-[40px] p-6 md:p-8 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
 
-        <h2 className="text-xl font-black uppercase italic mb-1">{hasNoSlots ? 'Générer' : 'Remplacer'}</h2>
+        <h2 className="text-xl font-black uppercase italic mb-1">{hasNoSlots ? 'Générer' : hasNoBookings ? 'Supprimer' : 'Remplacer'}</h2>
         <p className="text-sm font-bold text-slate-500 mb-5">{monitor.title}</p>
 
         {/* Période */}
@@ -170,7 +190,7 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
         </div>
 
         {hasNoSlots ? (
-          /* Aucun créneau — générer pour ce moniteur */
+          /* Aucun créneau — générer */
           <>
             <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4 mb-4">
               <p className="font-black text-[11px] text-sky-700 mb-1">📅 Aucun créneau sur cette période</p>
@@ -188,8 +208,26 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
             </div>
             <button onClick={onClose} className="w-full text-slate-300 font-bold uppercase text-[10px]">Annuler</button>
           </>
+        ) : hasNoBookings ? (
+          /* Créneaux générés mais aucune réservation — supprimer */
+          <>
+            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 mb-4">
+              <p className="font-black text-[11px] text-rose-700 mb-1">Aucune réservation sur cette période</p>
+              <p className="text-[10px] text-rose-500 mb-1">
+                {aAvailable > 0 && `🟢 ${aAvailable} créneau${aAvailable > 1 ? 'x' : ''} libre${aAvailable > 1 ? 's' : ''}`}
+                {aAvailable > 0 && aBlocked > 0 && ' · '}
+                {aBlocked > 0 && `🔒 ${aBlocked} bloqué${aBlocked > 1 ? 's' : ''}`}
+              </p>
+              <p className="text-[10px] text-rose-400 mt-2">Supprimer ces créneaux pour éviter de nouvelles réservations.</p>
+            </div>
+            <button disabled={isTransferring} onClick={handleDeleteSelf}
+              className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all mb-3 ${isTransferring ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-rose-600 text-white hover:scale-105'}`}>
+              {isTransferring ? '⏳ Suppression...' : '🗑️ Supprimer les créneaux'}
+            </button>
+            <button onClick={onClose} className="w-full text-slate-300 font-bold uppercase text-[10px]">Annuler</button>
+          </>
         ) : (
-          /* A des créneaux — flow de remplacement */
+          /* A des réservations — flow de remplacement */
           <>
             <div className="bg-slate-50 rounded-2xl p-3 mb-4 space-y-1">
               <p className="font-black uppercase text-slate-400 text-[8px] mb-1.5">{monitor.title} sur cette période</p>
