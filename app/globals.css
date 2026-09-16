@@ -134,8 +134,3 @@ body, *:not(.font-georgia) {
 .no-spinner::-webkit-outer-spin-button,
 .no-spinner::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .no-spinner { -moz-appearance: textfield; }
-
-/* Zones cliquables pleine cellule dans les en-têtes de colonne moniteur */
-.fc-col-header-cell { position: relative !important; }
-.fc-col-header-cell .fc-scrollgrid-sync-inner { height: 100%; }
-.fc-col-header-cell .fc-col-header-cell-cushion { display: block; padding: 0; width: 100%; height: 100%; }
