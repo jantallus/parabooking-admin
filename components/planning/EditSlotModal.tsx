@@ -753,11 +753,13 @@ export default function EditSlotModal({
           const newPd: Record<string, unknown> = { ...existingPd };
           if (paymentType) {
             newPd.payment_type = paymentType;
-            if (encaisseurId) newPd.encaisseur_id = encaisseurId;
-            else delete newPd.encaisseur_id;
+            newPd.encaisseur_id = selectedEvent.monitor_id;
+            if (flightPriceOverride) newPd.price_override_cents = Math.round(parseFloat(flightPriceOverride) * 100);
+            else delete newPd.price_override_cents;
           } else {
             delete newPd.payment_type;
             delete newPd.encaisseur_id;
+            delete newPd.price_override_cents;
           }
           payload.payment_data = newPd;
         }
@@ -2272,10 +2274,11 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       </div>
                     );
                   }
+                  const baseCents = flightTypes.find(f => f.id?.toString() === selectedEvent?.flight_type_id?.toString())?.price_cents ?? 0;
                   return (
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase text-slate-400 block">Encaissement</label>
-                      <select value={paymentType} onChange={e => handlePaymentTypeChange(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold">
+                      <select value={paymentType} onChange={e => setPaymentType(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold">
                         <option value="">— Non renseigné (NP) —</option>
                         <option value="esp">Espèces</option>
                         <option value="cb">CB</option>
@@ -2284,12 +2287,11 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                         <option value="chq">Chèque</option>
                       </select>
                       {paymentType && paymentType !== 'np' && (
-                        <div>
-                          <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Encaissé par</label>
-                          <select value={encaisseurId} onChange={e => setEncaisseurId(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold">
-                            <option value="">— Choisir —</option>
-                            {monitors.map(m => <option key={m.id} value={m.id.toString()}>{m.title}</option>)}
-                          </select>
+                        <div className="flex items-center gap-2">
+                          <label className="text-[10px] font-black uppercase text-slate-400 shrink-0">Montant</label>
+                          <input type="number" min={0} step={0.5} placeholder={baseCents > 0 ? (baseCents / 100).toFixed(0) : '0'} value={flightPriceOverride} onChange={e => setFlightPriceOverride(e.target.value)} className="no-spinner flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-right" />
+                          <span className="text-[11px] text-slate-400 shrink-0">€</span>
+                          {flightPriceOverride && <button onClick={() => setFlightPriceOverride('')} className="shrink-0 text-slate-300 hover:text-rose-400 text-sm font-bold">↺</button>}
                         </div>
                       )}
                     </div>
