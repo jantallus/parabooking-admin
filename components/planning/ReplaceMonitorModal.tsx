@@ -123,11 +123,38 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
     finally { setIsGenerating(false); }
   };
 
+  const handleGenerateForSelf = async () => {
+    setIsGenerating(true);
+    try {
+      const res = await apiFetch('/api/generate-slots', {
+        method: 'POST',
+        body: JSON.stringify({
+          startDate, endDate,
+          plan_name: selectedPlan,
+          monitor_ids: [monitor.id],
+          daysToApply: [0, 1, 2, 3, 4, 5, 6],
+          ignoreUnavailability: true,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`✅ ${data.count} créneaux générés pour ${monitor.title}`);
+        await onSuccess();
+        onClose();
+      } else {
+        toast.error(data.error || 'Erreur lors de la génération');
+      }
+    } catch { toast.error('Erreur de connexion'); }
+    finally { setIsGenerating(false); }
+  };
+
+  const hasNoSlots = monitorASlots.length === 0;
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
       <div className="bg-white rounded-[40px] p-6 md:p-8 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
 
-        <h2 className="text-xl font-black uppercase italic mb-1">Remplacer</h2>
+        <h2 className="text-xl font-black uppercase italic mb-1">{hasNoSlots ? 'Générer' : 'Remplacer'}</h2>
         <p className="text-sm font-bold text-slate-500 mb-5">{monitor.title}</p>
 
         {/* Période */}
@@ -142,14 +169,39 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
           </div>
         </div>
 
-        {/* Situation de Monitor A */}
-        <div className="bg-slate-50 rounded-2xl p-3 mb-4 space-y-1">
-          <p className="font-black uppercase text-slate-400 text-[8px] mb-1.5">{monitor.title} sur cette période</p>
-          {aBooked > 0 && <p className="text-[11px] font-bold text-slate-700">✈️ {aBooked} réservation{aBooked > 1 ? 's' : ''}</p>}
-          {aAvailable > 0 && <p className="text-[11px] text-slate-500">🟢 {aAvailable} créneau{aAvailable > 1 ? 'x' : ''} libre{aAvailable > 1 ? 's' : ''}</p>}
-          {aBlocked > 0 && <p className="text-[11px] text-slate-400">🔒 {aBlocked} bloqué{aBlocked > 1 ? 's' : ''}</p>}
-          {monitorASlots.length === 0 && <p className="text-[11px] text-slate-400 italic">Aucun créneau sur cette période</p>}
-        </div>
+        {/* Générer pour soi-même quand aucun créneau */}
+        {hasNoSlots ? (
+          <>
+            <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4 mb-4">
+              <p className="font-black text-[11px] text-sky-700 mb-1">📅 Aucun créneau sur cette période</p>
+              <p className="text-[10px] text-sky-500 mb-3">Générer des créneaux pour {monitor.title} selon un modèle :</p>
+              {availablePlans.length > 0 && (
+                <select className="w-full border border-sky-200 rounded-xl p-2 text-[10px] font-bold mb-3 bg-white"
+                  value={selectedPlan} onChange={e => setSelectedPlan(e.target.value)}>
+                  {availablePlans.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+              )}
+              <button disabled={isGenerating} onClick={handleGenerateForSelf}
+                className={`w-full py-3 rounded-2xl font-black text-[11px] uppercase shadow-md transition-all ${isGenerating ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-sky-500 text-white hover:bg-sky-600 hover:scale-[1.02]'}`}>
+                {isGenerating ? '⏳ Génération...' : `📅 Générer les créneaux`}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-slate-100" />
+              <span className="text-[9px] font-black uppercase text-slate-300 tracking-widest">ou remplacer</span>
+              <div className="flex-1 h-px bg-slate-100" />
+            </div>
+          </>
+        ) : (
+          /* Situation de Monitor A (has slots) */
+          <div className="bg-slate-50 rounded-2xl p-3 mb-4 space-y-1">
+            <p className="font-black uppercase text-slate-400 text-[8px] mb-1.5">{monitor.title} sur cette période</p>
+            {aBooked > 0 && <p className="text-[11px] font-bold text-slate-700">✈️ {aBooked} réservation{aBooked > 1 ? 's' : ''}</p>}
+            {aAvailable > 0 && <p className="text-[11px] text-slate-500">🟢 {aAvailable} créneau{aAvailable > 1 ? 'x' : ''} libre{aAvailable > 1 ? 's' : ''}</p>}
+            {aBlocked > 0 && <p className="text-[11px] text-slate-400">🔒 {aBlocked} bloqué{aBlocked > 1 ? 's' : ''}</p>}
+          </div>
+        )}
 
         {/* Liste des remplaçants */}
         <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2 ml-1">Remplacé par</p>
