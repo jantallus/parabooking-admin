@@ -458,7 +458,7 @@ export default function PlanningAdmin() {
       <button
         onClick={(e) => { e.stopPropagation(); setHiddenMonitorIds(prev => new Set([...prev, arg.resource.id])); setExtraShownIds(prev => { const next = new Set(prev); next.delete(arg.resource.id); return next; }); }}
         title="Masquer ce pilote"
-        style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', opacity: 0.4, fontSize: '11px', padding: '0 2px', lineHeight: '1', color: 'inherit' }}
+        style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', opacity: 0.4, fontSize: '11px', padding: '0 4px 0 8px', lineHeight: '1', color: 'inherit' }}
         onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
         onMouseLeave={e => (e.currentTarget.style.opacity = '0.4')}
       ><EyeOff size={11} /></button>
