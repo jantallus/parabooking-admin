@@ -11,7 +11,7 @@ import EditSlotModal from '@/components/planning/EditSlotModal';
 import GenSlotsModal from '@/components/planning/GenSlotsModal';
 import ReplaceMonitorModal from '@/components/planning/ReplaceMonitorModal';
 import { useToast } from '@/components/ui/ToastProvider';
-import { Wrench, CalendarDays, Search, X } from 'lucide-react';
+import { Wrench, CalendarDays, Search, X, Eye } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { CurrentUser, Slot, FlightType } from '@/lib/types';
@@ -447,10 +447,10 @@ export default function PlanningAdmin() {
   }, [monitors, groupColors, expandedPax2, togglePax2, currentUser]);
 
   const resourceLabelContent = useCallback((arg: { resource: { id: string; title: string } }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '4px', minWidth: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'stretch', width: '100%', minWidth: 0, height: '100%' }}>
       <span
-        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', opacity: 0.85 }}
-        title={`Remplacer ${arg.resource.title}`}
+        style={{ flex: '3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', opacity: 0.85, display: 'flex', alignItems: 'center' }}
+        title={arg.resource.title}
         onClick={(e) => { e.stopPropagation(); setReplaceMonitor({ id: arg.resource.id, title: arg.resource.title }); }}
         onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
         onMouseLeave={e => (e.currentTarget.style.opacity = '0.85')}
@@ -458,10 +458,10 @@ export default function PlanningAdmin() {
       <button
         onClick={(e) => { e.stopPropagation(); setHiddenMonitorIds(prev => new Set([...prev, arg.resource.id])); setExtraShownIds(prev => { const next = new Set(prev); next.delete(arg.resource.id); return next; }); }}
         title="Masquer ce pilote"
-        style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', opacity: 0.4, fontSize: '11px', padding: '0 2px', lineHeight: '1', color: 'inherit' }}
+        style={{ flex: '1', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.3, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'inherit' }}
         onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-        onMouseLeave={e => (e.currentTarget.style.opacity = '0.4')}
-      >✕</button>
+        onMouseLeave={e => (e.currentTarget.style.opacity = '0.3')}
+      ><Eye size={12} /></button>
     </div>
   ), [setReplaceMonitor]);
 
