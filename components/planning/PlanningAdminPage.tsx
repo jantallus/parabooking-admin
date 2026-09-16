@@ -11,7 +11,7 @@ import EditSlotModal from '@/components/planning/EditSlotModal';
 import GenSlotsModal from '@/components/planning/GenSlotsModal';
 import ReplaceMonitorModal from '@/components/planning/ReplaceMonitorModal';
 import { useToast } from '@/components/ui/ToastProvider';
-import { Wrench, CalendarDays, Search, X } from 'lucide-react';
+import { Wrench, CalendarDays, Search, X, EyeOff } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { CurrentUser, Slot, FlightType } from '@/lib/types';
@@ -446,24 +446,32 @@ export default function PlanningAdmin() {
     );
   }, [monitors, groupColors, expandedPax2, togglePax2, currentUser]);
 
+  const resourceLabelDidMount = useCallback((info: { el: HTMLElement }) => {
+    info.el.style.padding = '0';
+    info.el.style.display = 'flex';
+    info.el.style.alignItems = 'stretch';
+    info.el.style.width = '100%';
+  }, []);
+
   const resourceLabelContent = useCallback((arg: { resource: { id: string; title: string } }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '4px', minWidth: 0 }}>
+    <div style={{ display: 'flex', flex: 1, alignItems: 'stretch', minHeight: '30px' }}>
       <span
-        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', opacity: 0.85 }}
-        title={`Remplacer ${arg.resource.title}`}
+        style={{ flex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: 0.85, overflow: 'hidden' }}
         onClick={(e) => { e.stopPropagation(); setReplaceMonitor({ id: arg.resource.id, title: arg.resource.title }); }}
         onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
         onMouseLeave={e => (e.currentTarget.style.opacity = '0.85')}
-      >{arg.resource.title}</span>
+      >
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{arg.resource.title}</span>
+      </span>
       <button
         onClick={(e) => { e.stopPropagation(); setHiddenMonitorIds(prev => new Set([...prev, arg.resource.id])); setExtraShownIds(prev => { const next = new Set(prev); next.delete(arg.resource.id); return next; }); }}
         title="Masquer ce pilote"
-        style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', opacity: 0.4, fontSize: '11px', padding: '0 2px', lineHeight: '1', color: 'inherit' }}
+        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.3, color: 'inherit' }}
         onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-        onMouseLeave={e => (e.currentTarget.style.opacity = '0.4')}
-      >✕</button>
+        onMouseLeave={e => (e.currentTarget.style.opacity = '0.3')}
+      ><EyeOff size={12} /></button>
     </div>
-  ), [setReplaceMonitor]);
+  ), [setReplaceMonitor, setHiddenMonitorIds, setExtraShownIds]);
 
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -495,6 +503,7 @@ export default function PlanningAdmin() {
       initialDate={dateParam ?? undefined}
       resources={visibleMonitors}
       resourceLabelContent={resourceLabelContent}
+      resourceLabelDidMount={resourceLabelDidMount}
       datesSet={(arg) => {
         setCurrentDate(arg.startStr.split('T')[0]);
         setViewRange({ start: arg.view.activeStart, end: arg.view.activeEnd });
@@ -522,7 +531,7 @@ export default function PlanningAdmin() {
       eventTimeFormat={{ hour: '2-digit', minute: '2-digit', meridiem: false, hour12: false }}
       dayMinWidth={130}
     />
-  ), [calendarEvents, visibleMonitors, timeBounds, handleEventClick, loadAppointments, renderEventContent, resourceLabelContent]);
+  ), [calendarEvents, visibleMonitors, timeBounds, handleEventClick, loadAppointments, renderEventContent, resourceLabelContent, resourceLabelDidMount]);
 
   return (
     <div className="p-2 md:p-4 min-h-screen">
