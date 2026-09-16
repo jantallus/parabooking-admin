@@ -26,6 +26,7 @@ interface StandbyClient {
   status: 'pending' | 'scheduled' | 'done';
   processing_by: string | null;
   created_at: string;
+  deleted_at?: string | null;
 }
 
 const emptyClient = (): Omit<StandbyClient, 'id' | 'created_at' | 'status'> => ({
@@ -335,6 +336,9 @@ export default function StandbyPage() {
   const [aravisPartner, setAravisPartner] = useState<{ id: number; name: string; color_code?: string } | null>(null);
   const [loadingMonitors, setLoadingMonitors] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
+  const [trashItems, setTrashItems] = useState<StandbyClient[]>([]);
+  const [trashLoading, setTrashLoading] = useState(false);
   const [currentUserName, setCurrentUserName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -430,9 +434,31 @@ export default function StandbyPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Supprimer cette fiche ?')) return;
     const res = await apiFetch(`/api/standby/${id}`, { method: 'DELETE' });
-    if (res.ok) { toast.success('Supprimé'); load(); }
+    if (res.ok) {
+      toast.success('Déplacé à la corbeille');
+      load();
+      if (showTrash) loadTrash();
+    }
+  };
+
+  const loadTrash = async () => {
+    setTrashLoading(true);
+    try {
+      const r = await apiFetch('/api/standby/trash');
+      if (r.ok) setTrashItems(await r.json());
+    } finally { setTrashLoading(false); }
+  };
+
+  const handleRestore = async (id: number) => {
+    const r = await apiFetch(`/api/standby/${id}/restore`, { method: 'PATCH' });
+    if (r.ok) { toast.success('Demande restaurée'); loadTrash(); load(); }
+  };
+
+  const handlePurge = async (id: number) => {
+    if (!confirm('Supprimer définitivement cette fiche ? Cette action est irréversible.')) return;
+    const r = await apiFetch(`/api/standby/${id}/purge`, { method: 'DELETE' });
+    if (r.ok) { toast.success('Supprimé définitivement'); loadTrash(); }
   };
 
   const handleStatusChange = async (c: StandbyClient, status: StandbyClient['status']) => {
@@ -1135,6 +1161,65 @@ export default function StandbyPage() {
           )}
         </div>
       )}
+
+      {/* Corbeille */}
+      <div>
+        <button
+          onClick={() => { setShowTrash(t => { if (!t) loadTrash(); return !t; }); }}
+          className="flex items-center gap-2 text-[11px] font-black uppercase text-slate-400 hover:text-rose-500 tracking-widest transition-colors"
+        >
+          <span>{showTrash ? '▼' : '▶'}</span> 🗑️ Corbeille{trashItems.length > 0 && !showTrash ? ` (${trashItems.length})` : ''}
+        </button>
+        {showTrash && (
+          <div className="mt-3">
+            {trashLoading ? (
+              <p className="text-center py-6 text-slate-400 text-sm animate-pulse">Chargement...</p>
+            ) : trashItems.length === 0 ? (
+              <p className="text-center py-6 text-slate-300 text-sm">La corbeille est vide.</p>
+            ) : (
+              <div className="overflow-x-auto rounded-3xl border border-rose-100 bg-rose-50/30">
+                <div className="px-4 py-2 border-b border-rose-100 flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase text-rose-400 tracking-widest">🗑️ {trashItems.length} demande{trashItems.length !== 1 ? 's' : ''} à la corbeille</span>
+                  <span className="text-[9px] text-slate-400 font-medium">Restaurer pour récupérer · Supprimer définitivement pour effacer</span>
+                </div>
+                <table className="w-full text-sm min-w-[560px]">
+                  <tbody className="divide-y divide-rose-50">
+                    {trashItems.map(c => (
+                      <tr key={c.id} className="bg-white/60">
+                        <td className="p-3 pl-4 w-28">
+                          <p className="text-[10px] font-black text-rose-400">Supprimé le</p>
+                          <p className="text-[11px] font-bold text-slate-600">
+                            {new Date(c.deleted_at ?? '').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: '2-digit' })}
+                          </p>
+                          <p className="text-[9px] text-slate-400 mt-0.5">{c.status === 'done' ? '✓ Effectué' : c.status === 'scheduled' ? 'Programmé' : 'En attente'}</p>
+                        </td>
+                        <td className="p-3">
+                          <p className="font-bold text-slate-700">{c.name || '—'}</p>
+                          {c.phone && <p className="text-xs text-slate-400">{c.phone}</p>}
+                          {c.email && <p className="text-xs text-slate-400 truncate max-w-[140px]">{c.email}</p>}
+                        </td>
+                        <td className="p-3">
+                          <p className="text-xs font-bold text-slate-600">{c.flight_type || '—'}</p>
+                          {c.availability_start && <p className="text-[10px] text-slate-400">{fmtDate(c.availability_start)}</p>}
+                        </td>
+                        <td className="p-3 max-w-[160px]">
+                          <p className="text-[10px] text-slate-400 line-clamp-2">{c.notes}</p>
+                        </td>
+                        <td className="p-3 w-40">
+                          <div className="flex gap-1.5">
+                            <button onClick={() => handleRestore(c.id)} className="text-[10px] font-black text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-xl transition-colors whitespace-nowrap">↩ Restaurer</button>
+                            <button onClick={() => handlePurge(c.id)} className="text-[10px] font-black text-rose-400 hover:text-rose-600 hover:bg-rose-50 px-2 py-1.5 rounded-xl transition-colors" title="Supprimer définitivement">✕</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Modal création / édition */}
       {modalOpen && (
