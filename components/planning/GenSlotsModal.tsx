@@ -213,7 +213,7 @@ export default function GenSlotsModal({ availablePlans, monitors, loadAppointmen
                       {genConfig.startDate && genConfig.endDate && !isChecking && hasUnavail && (
                         <span className="text-[9px] font-bold text-rose-400">jours bloqués</span>
                       )}
-                      {isSelected && (
+                      {isSelected && action === 'generate' && (
                         <button
                           onClick={() => setBlockedPilotIds(prev => isBlocked ? prev.filter(id => id !== m.id) : [...prev, m.id])}
                           className={`text-[9px] font-black px-2 py-1 rounded-lg transition-colors whitespace-nowrap ${isBlocked ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-400 hover:bg-slate-300'}`}
