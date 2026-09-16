@@ -169,8 +169,8 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
           </div>
         </div>
 
-        {/* Générer pour soi-même quand aucun créneau */}
         {hasNoSlots ? (
+          /* Aucun créneau — proposer uniquement la génération */
           <>
             <div className="bg-sky-50 border border-sky-200 rounded-2xl p-4 mb-4">
               <p className="font-black text-[11px] text-sky-700 mb-1">📅 Aucun créneau sur cette période</p>
@@ -183,80 +183,74 @@ export default function ReplaceMonitorModal({ monitor, monitors, viewRange, appo
               )}
               <button disabled={isGenerating} onClick={handleGenerateForSelf}
                 className={`w-full py-3 rounded-2xl font-black text-[11px] uppercase shadow-md transition-all ${isGenerating ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-sky-500 text-white hover:bg-sky-600 hover:scale-[1.02]'}`}>
-                {isGenerating ? '⏳ Génération...' : `📅 Générer les créneaux`}
+                {isGenerating ? '⏳ Génération...' : '📅 Générer les créneaux'}
               </button>
             </div>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-slate-100" />
-              <span className="text-[9px] font-black uppercase text-slate-300 tracking-widest">ou remplacer</span>
-              <div className="flex-1 h-px bg-slate-100" />
-            </div>
+            <button onClick={onClose} className="w-full text-slate-300 font-bold uppercase text-[10px]">Annuler</button>
           </>
         ) : (
-          /* Situation de Monitor A (has slots) */
-          <div className="bg-slate-50 rounded-2xl p-3 mb-4 space-y-1">
-            <p className="font-black uppercase text-slate-400 text-[8px] mb-1.5">{monitor.title} sur cette période</p>
-            {aBooked > 0 && <p className="text-[11px] font-bold text-slate-700">✈️ {aBooked} réservation{aBooked > 1 ? 's' : ''}</p>}
-            {aAvailable > 0 && <p className="text-[11px] text-slate-500">🟢 {aAvailable} créneau{aAvailable > 1 ? 'x' : ''} libre{aAvailable > 1 ? 's' : ''}</p>}
-            {aBlocked > 0 && <p className="text-[11px] text-slate-400">🔒 {aBlocked} bloqué{aBlocked > 1 ? 's' : ''}</p>}
-          </div>
-        )}
+          /* A des créneaux — flow de remplacement */
+          <>
+            <div className="bg-slate-50 rounded-2xl p-3 mb-4 space-y-1">
+              <p className="font-black uppercase text-slate-400 text-[8px] mb-1.5">{monitor.title} sur cette période</p>
+              {aBooked > 0 && <p className="text-[11px] font-bold text-slate-700">✈️ {aBooked} réservation{aBooked > 1 ? 's' : ''}</p>}
+              {aAvailable > 0 && <p className="text-[11px] text-slate-500">🟢 {aAvailable} créneau{aAvailable > 1 ? 'x' : ''} libre{aAvailable > 1 ? 's' : ''}</p>}
+              {aBlocked > 0 && <p className="text-[11px] text-slate-400">🔒 {aBlocked} bloqué{aBlocked > 1 ? 's' : ''}</p>}
+            </div>
 
-        {/* Liste des remplaçants */}
-        <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2 ml-1">Remplacé par</p>
-        <div className="space-y-1 max-h-40 overflow-y-auto pr-1 mb-4 custom-scrollbar">
-          {otherMonitors.map(m => (
-            <button key={m.id} onClick={() => setReplacementId(m.id)}
-              className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left transition-colors ${replacementId === m.id ? 'bg-slate-900 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
-              <span className="text-sm font-bold flex-1">{m.title}</span>
-              {replacementId === m.id && <span className="text-[10px] opacity-60">✓</span>}
-            </button>
-          ))}
-        </div>
-
-        {/* Avertissements Monitor B */}
-        {replacementId && replacement && (
-          <div className="mb-5 space-y-2">
-            {bBooked > 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3">
-                <p className="font-black text-[11px] text-amber-600">⚠️ {replacement.title} a déjà {bBooked} réservation{bBooked > 1 ? 's' : ''}</p>
-                <p className="text-[10px] text-amber-500 mt-0.5">Ces réservations resteront sur {replacement.title} après le transfert (pas de double-réservation possible).</p>
-              </div>
-            )}
-            {bBlocked > 0 && (
-              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3">
-                <p className="font-black text-[11px] text-rose-600">🚫 {replacement.title} a {bBlocked} créneau{bBlocked > 1 ? 'x' : ''} bloqué{bBlocked > 1 ? 's' : ''}</p>
-                <p className="text-[10px] text-rose-400 mt-0.5">Ces créneaux resteront bloqués après le transfert.</p>
-              </div>
-            )}
-            {bHasNoSlots && (
-              <div className="bg-sky-50 border border-sky-200 rounded-2xl p-3">
-                <p className="font-black text-[11px] text-sky-600">📅 Aucun créneau pour {replacement.title} sur cette période</p>
-                <p className="text-[10px] text-sky-500 mt-1 mb-3">Générer des créneaux sur le même modèle avant de transférer.</p>
-                {availablePlans.length > 1 && (
-                  <select className="w-full border border-sky-200 rounded-xl p-2 text-[10px] font-bold mb-2 bg-white"
-                    value={selectedPlan} onChange={e => setSelectedPlan(e.target.value)}>
-                    {availablePlans.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
-                )}
-                <button disabled={isGenerating} onClick={handleGenerate}
-                  className={`w-full py-2.5 rounded-2xl font-black text-[10px] uppercase transition-all ${isGenerating ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-sky-500 text-white hover:bg-sky-600'}`}>
-                  {isGenerating ? '⏳ Génération...' : `📅 Générer pour ${replacement.title}`}
+            <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-2 ml-1">Remplacé par</p>
+            <div className="space-y-1 max-h-40 overflow-y-auto pr-1 mb-4 custom-scrollbar">
+              {otherMonitors.map(m => (
+                <button key={m.id} onClick={() => setReplacementId(m.id)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-2xl text-left transition-colors ${replacementId === m.id ? 'bg-slate-900 text-white' : 'bg-slate-50 hover:bg-slate-100 text-slate-700'}`}>
+                  <span className="text-sm font-bold flex-1">{m.title}</span>
+                  {replacementId === m.id && <span className="text-[10px] opacity-60">✓</span>}
                 </button>
+              ))}
+            </div>
+
+            {replacementId && replacement && (
+              <div className="mb-5 space-y-2">
+                {bBooked > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3">
+                    <p className="font-black text-[11px] text-amber-600">⚠️ {replacement.title} a déjà {bBooked} réservation{bBooked > 1 ? 's' : ''}</p>
+                    <p className="text-[10px] text-amber-500 mt-0.5">Ces réservations resteront sur {replacement.title} après le transfert (pas de double-réservation possible).</p>
+                  </div>
+                )}
+                {bBlocked > 0 && (
+                  <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3">
+                    <p className="font-black text-[11px] text-rose-600">🚫 {replacement.title} a {bBlocked} créneau{bBlocked > 1 ? 'x' : ''} bloqué{bBlocked > 1 ? 's' : ''}</p>
+                    <p className="text-[10px] text-rose-400 mt-0.5">Ces créneaux resteront bloqués après le transfert.</p>
+                  </div>
+                )}
+                {bHasNoSlots && (
+                  <div className="bg-sky-50 border border-sky-200 rounded-2xl p-3">
+                    <p className="font-black text-[11px] text-sky-600">📅 Aucun créneau pour {replacement.title} sur cette période</p>
+                    <p className="text-[10px] text-sky-500 mt-1 mb-3">Générer des créneaux sur le même modèle avant de transférer.</p>
+                    {availablePlans.length > 1 && (
+                      <select className="w-full border border-sky-200 rounded-xl p-2 text-[10px] font-bold mb-2 bg-white"
+                        value={selectedPlan} onChange={e => setSelectedPlan(e.target.value)}>
+                        {availablePlans.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    )}
+                    <button disabled={isGenerating} onClick={handleGenerate}
+                      className={`w-full py-2.5 rounded-2xl font-black text-[10px] uppercase transition-all ${isGenerating ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-sky-500 text-white hover:bg-sky-600'}`}>
+                      {isGenerating ? '⏳ Génération...' : `📅 Générer pour ${replacement.title}`}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {/* Actions */}
-        <button
-          disabled={!replacementId || isTransferring || monitorASlots.length === 0}
-          onClick={handleTransfer}
-          className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all mb-3 ${(!replacementId || isTransferring || monitorASlots.length === 0) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}>
-          {isTransferring ? '⏳ Transfert en cours...' : '🔄 Transférer les créneaux'}
-        </button>
-        <button onClick={onClose} className="w-full text-slate-300 font-bold uppercase text-[10px]">Annuler</button>
+            <button
+              disabled={!replacementId || isTransferring}
+              onClick={handleTransfer}
+              className={`w-full py-4 rounded-3xl font-black uppercase italic shadow-xl transition-all mb-3 ${(!replacementId || isTransferring) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}>
+              {isTransferring ? '⏳ Transfert en cours...' : '🔄 Transférer les créneaux'}
+            </button>
+            <button onClick={onClose} className="w-full text-slate-300 font-bold uppercase text-[10px]">Annuler</button>
+          </>
+        )}
       </div>
     </div>
   );
