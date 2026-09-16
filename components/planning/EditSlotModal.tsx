@@ -740,6 +740,29 @@ export default function EditSlotModal({
     let slotsToUpdate: Slot[] = [];
 
     if (activeTab === 'note') {
+      if (currentUser?.role === 'permanent' && IS_CLIENT_SLOT(selectedEvent)) {
+        const existingPd = (selectedEvent.payment_data || {}) as Record<string, unknown>;
+        const isAlreadyPaid = !!(existingPd.payment_type && existingPd.payment_type !== 'np');
+        const payload: Record<string, unknown> = {
+          title: selectedEvent.title, status: selectedEvent.status, phone: selectedEvent.phone,
+          email: selectedEvent.email, flight_type_id: selectedEvent.flight_type_id,
+          notes: formData.notes, weightChecked: selectedEvent.weight_checked,
+          booking_options: selectedEvent.booking_options, client_message: selectedEvent.client_message,
+        };
+        if (!isAlreadyPaid) {
+          const newPd: Record<string, unknown> = { ...existingPd };
+          if (paymentType) {
+            newPd.payment_type = paymentType;
+            if (encaisseurId) newPd.encaisseur_id = encaisseurId;
+            else delete newPd.encaisseur_id;
+          } else {
+            delete newPd.payment_type;
+            delete newPd.encaisseur_id;
+          }
+          payload.payment_data = newPd;
+        }
+        return applyAll([{ id: selectedEvent.id, data: payload }]);
+      }
       const isNonBlockingNote = !formData.title?.includes('NON DISPO');
       targetMonitors = blockType === 'all' ? monitors.map(m => m.id.toString()) : blockType === 'specific' ? selectedMonitors : [selectedEvent.monitor_id?.toString()];
       const startMs = new Date(selectedEvent.start as Date | string).getTime();
@@ -1236,7 +1259,8 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
   const isClientLocked = isEventBlocked || isOutOfSeason;
   const isClientSlotLocal = IS_CLIENT_SLOT(selectedEvent || {});
   const isAdminBlockLocal = !!(selectedEvent?.title?.includes('(Admin)'));
-  const isLockedForMe = currentUser?.role === 'permanent' && (isClientSlotLocal || isAdminBlockLocal);
+  const isLockedForMe = currentUser?.role === 'permanent' && isAdminBlockLocal;
+  const isPermanentClientSlot = currentUser?.role === 'permanent' && isClientSlotLocal;
 
   // ── JSX ────────────────────────────────────────────────────────────────────
   return (
@@ -2216,9 +2240,62 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
             isLockedForMe ? (
               <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center mt-4 shadow-inner">
                 <span className="text-3xl block mb-2">🔒</span>
-                <p className="text-slate-700 font-bold text-[11px] uppercase tracking-widest">{isAdminBlockLocal ? 'Verrouillé par la direction' : 'Réservation Client'}</p>
+                <p className="text-slate-700 font-bold text-[11px] uppercase tracking-widest">Verrouillé par la direction</p>
                 <p className="text-slate-500 text-[10px] mt-2 font-medium">Vous ne pouvez pas modifier ce créneau.</p>
               </div>
+            ) : isPermanentClientSlot ? (
+              <>
+                <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-1.5 mb-2">
+                  <p className="text-[9px] font-black uppercase text-slate-400 mb-1">Passager (lecture seule)</p>
+                  <p className="font-bold text-slate-800 text-sm">{selectedEvent?.title}</p>
+                  {selectedEvent?.phone && <p className="text-xs text-slate-500">📞 {selectedEvent.phone}</p>}
+                  {selectedEvent?.email && <p className="text-xs text-slate-500">✉️ {selectedEvent.email}</p>}
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Note interne au pilote</label>
+                  <textarea className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 font-bold h-24" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })} placeholder="Infos météo, retard..." />
+                </div>
+                {(() => {
+                  const pd = selectedEvent?.payment_data;
+                  const isLegacyPaid = pd && (pd.cb || pd.especes || pd.cheque || pd.ancv || pd.online || pd.voucher);
+                  const isAlreadyPaid = !!(pd?.payment_type && pd.payment_type !== 'np') || !!isLegacyPaid;
+                  const ENC_LABELS: Record<string, string> = { esp: 'Espèces', cb: 'CB', chq: 'Chèque', ancv: 'ANCV', ancv_connect: 'ANCV Connect', online: 'En ligne (Stripe)', bon_cadeau: 'Bon cadeau', a_facturer: 'À facturer', np: 'Non payé' };
+                  if (isAlreadyPaid) {
+                    const label = ENC_LABELS[pd?.payment_type ?? ''] ?? pd?.payment_type ?? 'Payé';
+                    return (
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                        <p className="text-[9px] font-black uppercase text-emerald-600 mb-1">Encaissement</p>
+                        <p className="text-sm font-black text-emerald-800">{label}</p>
+                        {pd?.encaisseur_id && monitors.find(m => m.id.toString() === pd.encaisseur_id?.toString()) && (
+                          <p className="text-xs text-emerald-600 mt-0.5">par {monitors.find(m => m.id.toString() === pd.encaisseur_id?.toString())?.title}</p>
+                        )}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 block">Encaissement</label>
+                      <select value={paymentType} onChange={e => handlePaymentTypeChange(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold">
+                        <option value="">— Non renseigné (NP) —</option>
+                        <option value="esp">Espèces</option>
+                        <option value="cb">CB</option>
+                        <option value="ancv">ANCV</option>
+                        <option value="ancv_connect">ANCV Connect</option>
+                        <option value="chq">Chèque</option>
+                      </select>
+                      {paymentType && paymentType !== 'np' && (
+                        <div>
+                          <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Encaissé par</label>
+                          <select value={encaisseurId} onChange={e => setEncaisseurId(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold">
+                            <option value="">— Choisir —</option>
+                            {monitors.map(m => <option key={m.id} value={m.id.toString()}>{m.title}</option>)}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </>
             ) : (
               <>
                 {!isClientSlotLocal && !selectedEvent?.title?.includes('NON DISPO') && (
@@ -2268,9 +2345,9 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
           {/* ── Boutons save/release ── */}
           {(activeTab === 'client' || activeTab === 'client2' || activeTab === 'note') && (
             <div className="pt-4 space-y-3 border-t border-slate-100">
-              {(activeTab === 'client' || activeTab === 'client2') && !isEditing && selectedEvent?.status === 'booked' && !isClientLocked ? (
+              {(activeTab === 'client' || activeTab === 'client2') && !isEditing && selectedEvent?.status === 'booked' && !isClientLocked && !isPermanentClientSlot ? (
                 <button onClick={() => setIsEditing(true)} className="w-full bg-slate-800 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-slate-700 transition-colors">✏️ Modifier la fiche</button>
-              ) : !(activeTab === 'client' && isClientLocked) && !isLockedForMe && (
+              ) : !(activeTab === 'client' && (isClientLocked || isPermanentClientSlot)) && !isLockedForMe && (
                 <>
                   {(activeTab === 'client' || activeTab === 'client2') && isEditing && selectedEvent?.status === 'booked' && (
                     <button onClick={() => setIsEditing(false)} className="w-full bg-slate-100 text-slate-500 py-2.5 rounded-2xl font-black uppercase text-xs hover:bg-slate-200 transition-colors">↩ Annuler les modifications</button>
@@ -2307,7 +2384,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                   ) : (
                     <button onClick={() => handleSaveNote(false)} className="w-full bg-sky-500 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-sky-600 transition-colors">Enregistrer la modification</button>
                   )}
-                  {activeTab !== 'client2' && (selectedEvent?.title || selectedEvent?.notes || selectedEvent?.status !== 'available') && (
+                  {activeTab !== 'client2' && !isPermanentClientSlot && (selectedEvent?.title || selectedEvent?.notes || selectedEvent?.status !== 'available') && (
                     activeTab === 'note' ? (
                       <div className="pt-2">
                         {(() => {
