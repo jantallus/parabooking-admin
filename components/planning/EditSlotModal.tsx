@@ -2350,9 +2350,6 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                 <button onClick={() => setIsEditing(true)} className="w-full bg-slate-800 text-white py-4 rounded-3xl font-black uppercase italic shadow-xl hover:bg-slate-700 transition-colors">✏️ Modifier la fiche</button>
               ) : !(activeTab === 'client' && (isClientLocked || isPermanentClientSlot)) && !isLockedForMe && (
                 <>
-                  {(activeTab === 'client' || activeTab === 'client2') && isEditing && selectedEvent?.status === 'booked' && (
-                    <button onClick={() => setIsEditing(false)} className="w-full bg-slate-100 text-slate-500 py-2.5 rounded-2xl font-black uppercase text-xs hover:bg-slate-200 transition-colors">↩ Annuler les modifications</button>
-                  )}
                   {(activeTab === 'client' || activeTab === 'client2') ? (
                     <div className="flex items-center gap-3">
                       {(() => {
