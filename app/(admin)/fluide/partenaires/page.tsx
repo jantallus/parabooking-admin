@@ -41,7 +41,7 @@ interface Partner {
   commission_type: 'none' | 'percentage' | 'fixed';
   commission_value: number;
   facturable: boolean;
-  default_encaisseur_id: number | null;
+  default_encaisseur_id: string | null;
   allowed_flight_types: PartnerFlightTypeConfig[];
 }
 
@@ -448,7 +448,7 @@ export default function PartenairesPage() {
                     <label className="text-[10px] font-black uppercase text-slate-400 block mb-1.5">Facturé par (défaut)</label>
                     <select
                       value={form.default_encaisseur_id?.toString() ?? ''}
-                      onChange={e => setForm(f => ({ ...f, default_encaisseur_id: e.target.value ? Number(e.target.value) : null }))}
+                      onChange={e => setForm(f => ({ ...f, default_encaisseur_id: e.target.value || null }))}
                       className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
                     >
                       <option value="">— Non défini —</option>

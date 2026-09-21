@@ -382,7 +382,7 @@ export interface Partner {
   commission_type?: 'none' | 'percentage' | 'fixed';
   commission_value?: number;
   facturable?: boolean;
-  default_encaisseur_id?: number | null;
+  default_encaisseur_id?: string | null;
   allowed_flight_types?: PartnerFlightType[];
 }
 
