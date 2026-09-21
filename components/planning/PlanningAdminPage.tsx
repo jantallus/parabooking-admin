@@ -164,15 +164,15 @@ export default function PlanningAdmin() {
     });
   }, [appointments, flightTypes, currentUser]);
 
-  // Total encaissé par moniteur par jour : clé "monitorId:YYYY-MM-DD"
-  const monitorDayTotals = useMemo(() => {
+  // Total encaissé par moniteur par créneau horaire : clé "encaisseurId:start_time"
+  const monitorSlotTotals = useMemo(() => {
     const map = new Map<string, number>();
     for (const ev of calendarEvents) {
       const ep = ev.extendedProps as Slot & { price_cents?: number | null };
       if (ep.status !== 'booked') continue;
       const pd = ep.payment_data;
       if (!pd?.encaisseur_id || !pd?.payment_type || pd.payment_type === 'np') continue;
-      const key = `${String(pd.encaisseur_id)}:${ep.start_time.slice(0, 10)}`;
+      const key = `${String(pd.encaisseur_id)}:${ep.start_time}`;
       map.set(key, (map.get(key) ?? 0) + (ep.price_cents ?? 0));
     }
     return map;
@@ -338,9 +338,8 @@ export default function PlanningAdmin() {
     const payLine = [priceStr, encaisseurName ? `✓ ${encaisseurName}` : null].filter(Boolean).join(' · ');
 
     const monitorId = ep.monitor_id?.toString() ?? '';
-    const slotDate = ep.start_time?.slice(0, 10) ?? '';
-    const monitorCollectedCents = (!isUnpaid && !isNP && monitorId && slotDate)
-      ? (monitorDayTotals.get(`${monitorId}:${slotDate}`) ?? 0)
+    const monitorCollectedCents = (!isUnpaid && !isNP && monitorId && ep.start_time)
+      ? (monitorSlotTotals.get(`${monitorId}:${ep.start_time}`) ?? 0)
       : null;
     const showCollectedLine = monitorCollectedCents !== null && monitorCollectedCents !== (ep.price_cents ?? 0);
     const collectedLine = showCollectedLine ? `total créneau ${(monitorCollectedCents / 100).toFixed(0)} €` : null;
@@ -468,7 +467,7 @@ export default function PlanningAdmin() {
         {collectedLine && subSpan(collectedLine)}
       </div>
     );
-  }, [monitors, groupColors, expandedPax2, togglePax2, currentUser, monitorDayTotals]);
+  }, [monitors, groupColors, expandedPax2, togglePax2, currentUser, monitorSlotTotals]);
 
   const resourceLabelContent = useCallback((arg: { resource: { id: string; title: string } }) => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '4px', minWidth: 0 }}>
