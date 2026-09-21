@@ -1906,12 +1906,14 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                             const partnerDisp = selectedPartnerId ? partners.find(p => p.id.toString() === selectedPartnerId) : null;
                             const partnerFtDisp = partnerDisp?.allowed_flight_types?.find(ft => ft.flight_type_id === selFlight?.id) ?? null;
                             const baseCents = partnerFtDisp?.base_price_cents != null ? partnerFtDisp.base_price_cents : (selFlight?.price_cents ?? 0);
-                            let catalogCents = baseCents;
+                            let commissionCents = 0;
                             if (partnerDisp?.commission_type === 'percentage') {
-                              catalogCents = Math.round(baseCents * (1 - (partnerDisp.commission_value ?? 0) / 100));
+                              commissionCents = Math.round(baseCents * (partnerDisp.commission_value ?? 0) / 100);
                             } else if (partnerDisp?.commission_type === 'fixed') {
-                              catalogCents = Math.max(0, baseCents - Math.round((partnerDisp.commission_value ?? 0) * 100));
+                              commissionCents = Math.round((partnerDisp.commission_value ?? 0) * 100);
                             }
+                            const catalogCents = Math.max(0, baseCents - commissionCents);
+                            const showCommission = commissionCents > 0 && !flightPriceOverride;
                             const autoCompTotal = selectedComplementIds.reduce((s, id) => { const c = availableComplements.find(x => x.id === id); return s + (c?.price_cents ?? 0); }, 0);
                             const flightCents = flightPriceOverride ? Math.round(parseFloat(flightPriceOverride) * 100) : catalogCents;
                             const compCents = complementPriceOverride ? Math.round(parseFloat(complementPriceOverride) * 100) : autoCompTotal;
@@ -1920,6 +1922,22 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                             return (
                               <div className="bg-white rounded-xl border border-slate-100 p-3 space-y-2">
                                 <label className="text-[10px] font-black uppercase text-slate-400 block">Prix à encaisser</label>
+                                {showCommission && (
+                                  <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 space-y-1 text-[11px]">
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500 font-bold">Base {partnerDisp?.name}</span>
+                                      <span className="font-black text-slate-700">{(baseCents / 100).toFixed(2)} €</span>
+                                    </div>
+                                    <div className="flex justify-between text-indigo-600">
+                                      <span className="font-bold">Commission {partnerDisp?.commission_type === 'percentage' ? `${partnerDisp.commission_value}%` : `${partnerDisp?.commission_value} €`}</span>
+                                      <span className="font-black">−{(commissionCents / 100).toFixed(2)} €</span>
+                                    </div>
+                                    <div className="flex justify-between border-t border-indigo-100 pt-1">
+                                      <span className="font-black text-slate-700 uppercase text-[10px]">Net facturé</span>
+                                      <span className="font-black text-slate-900">{(catalogCents / 100).toFixed(2)} €</span>
+                                    </div>
+                                  </div>
+                                )}
                                 <div className="flex items-center gap-2">
                                   <span className="text-[11px] font-bold text-slate-500 w-16 shrink-0">Vol</span>
                                   <input type="number" min={0} step={0.5} placeholder={(catalogCents / 100).toFixed(0)} value={flightPriceOverride} onChange={e => setFlightPriceOverride(e.target.value)} className="no-spinner min-w-0 flex-1 border border-slate-200 rounded-lg px-2 py-1.5 text-sm font-bold text-right" />

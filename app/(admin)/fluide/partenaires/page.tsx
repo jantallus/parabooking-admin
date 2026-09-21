@@ -246,7 +246,7 @@ export default function PartenairesPage() {
                   <p className="text-xs font-bold text-slate-600 truncate">{fieldSummary(p.booking_fields)}</p>
                 </div>
 
-                {/* Facturable */}
+                {/* Facturable + Commission */}
                 <div className="shrink-0 text-center">
                   <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Encaissement</p>
                   <p className="text-xs font-bold">
@@ -254,6 +254,11 @@ export default function PartenairesPage() {
                       ? <span className="text-orange-600">📄 À facturer{p.default_encaisseur_id ? ` · ${monitors.find(m => m.id === p.default_encaisseur_id?.toString())?.title?.split(' ')[0] ?? ''}` : ''}</span>
                       : <span className="text-emerald-600">💳 Direct client</span>}
                   </p>
+                  {p.commission_type && p.commission_type !== 'none' && (p.commission_value ?? 0) > 0 && (
+                    <p className="text-[10px] font-bold text-indigo-500 mt-0.5">
+                      Commission {p.commission_type === 'percentage' ? `${p.commission_value}%` : `${p.commission_value} €`}
+                    </p>
+                  )}
                 </div>
 
                 {/* Actions */}
@@ -423,6 +428,43 @@ export default function PartenairesPage() {
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Commission */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div
+                    onClick={() => setForm(f => ({ ...f, commission_type: f.commission_type === 'none' ? 'percentage' : 'none', commission_value: 0 }))}
+                    className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${form.commission_type !== 'none' ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                  >
+                    <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.commission_type !== 'none' ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-slate-700">Commission</p>
+                    <p className="text-[11px] text-slate-400">Montant déduit du prix de base pour calculer le prix facturé</p>
+                  </div>
+                </label>
+                {form.commission_type !== 'none' && (
+                  <div className="ml-14 flex gap-2 items-center">
+                    <select
+                      value={form.commission_type}
+                      onChange={e => setForm(f => ({ ...f, commission_type: e.target.value as 'percentage' | 'fixed', commission_value: 0 }))}
+                      className="border border-slate-200 rounded-xl p-2.5 text-sm font-bold bg-white"
+                    >
+                      <option value="percentage">%</option>
+                      <option value="fixed">€ fixe</option>
+                    </select>
+                    <input
+                      type="number"
+                      min={0}
+                      step={form.commission_type === 'percentage' ? 1 : 0.5}
+                      value={form.commission_value ?? 0}
+                      onChange={e => setForm(f => ({ ...f, commission_value: parseFloat(e.target.value) || 0 }))}
+                      className="flex-1 border border-slate-200 rounded-xl p-2.5 text-sm font-bold text-right"
+                    />
+                    <span className="text-sm font-bold text-slate-500 shrink-0">{form.commission_type === 'percentage' ? '%' : '€'}</span>
+                  </div>
+                )}
               </div>
 
               {/* Facturable */}
