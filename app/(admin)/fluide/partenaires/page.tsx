@@ -26,6 +26,11 @@ interface FlightTypeOption {
   is_active?: boolean;
 }
 
+interface Monitor {
+  id: string;
+  title: string;
+}
+
 interface Partner {
   id: number;
   name: string;
@@ -36,6 +41,7 @@ interface Partner {
   commission_type: 'none' | 'percentage' | 'fixed';
   commission_value: number;
   facturable: boolean;
+  default_encaisseur_id: number | null;
   allowed_flight_types: PartnerFlightTypeConfig[];
 }
 
@@ -82,6 +88,7 @@ const emptyPartner = (): Omit<Partner, 'id'> => ({
   commission_type: 'none',
   commission_value: 0,
   facturable: true,
+  default_encaisseur_id: null,
   allowed_flight_types: [],
 });
 
@@ -89,6 +96,7 @@ export default function PartenairesPage() {
   const { toast, confirm } = useToast();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [flightTypes, setFlightTypes] = useState<FlightTypeOption[]>([]);
+  const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Partner | null>(null);
@@ -101,14 +109,19 @@ export default function PartenairesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [partnersRes, ftRes] = await Promise.all([
+      const [partnersRes, ftRes, monRes] = await Promise.all([
         apiFetch('/api/partners'),
         apiFetch('/api/flight-types'),
+        apiFetch('/api/monitors-admin'),
       ]);
       if (partnersRes.ok) setPartners(await partnersRes.json());
       if (ftRes.ok) {
         const data = await ftRes.json();
         setFlightTypes(Array.isArray(data) ? data.filter((f: FlightTypeOption) => f.is_active !== false) : []);
+      }
+      if (monRes.ok) {
+        const data = await monRes.json();
+        setMonitors(Array.isArray(data) ? data.map((m: { id: string; first_name: string; last_name?: string }) => ({ id: m.id, title: `${m.first_name}${m.last_name ? ' ' + m.last_name : ''}` })) : []);
       }
     } finally { setLoading(false); }
   }, []);
@@ -126,7 +139,7 @@ export default function PartenairesPage() {
 
   const openEdit = (p: Partner) => {
     setEditing(p);
-    setForm({ name: p.name, code: p.code, color_code: p.color_code, booking_fields: { ...p.booking_fields }, is_active: p.is_active, commission_type: p.commission_type || 'none', commission_value: p.commission_value ?? 0, facturable: p.facturable ?? true, allowed_flight_types: p.allowed_flight_types || [] });
+    setForm({ name: p.name, code: p.code, color_code: p.color_code, booking_fields: { ...p.booking_fields }, is_active: p.is_active, commission_type: p.commission_type || 'none', commission_value: p.commission_value ?? 0, facturable: p.facturable ?? true, default_encaisseur_id: p.default_encaisseur_id ?? null, allowed_flight_types: p.allowed_flight_types || [] });
     setMode(getMode(p.booking_fields));
     const prices: Record<number, string> = {};
     (p.allowed_flight_types || []).forEach(ft => {
@@ -238,7 +251,7 @@ export default function PartenairesPage() {
                   <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Encaissement</p>
                   <p className="text-xs font-bold">
                     {p.facturable
-                      ? <span className="text-orange-600">📄 À facturer</span>
+                      ? <span className="text-orange-600">📄 À facturer{p.default_encaisseur_id ? ` · ${monitors.find(m => m.id === p.default_encaisseur_id?.toString())?.title?.split(' ')[0] ?? ''}` : ''}</span>
                       : <span className="text-emerald-600">💳 Direct client</span>}
                   </p>
                 </div>
@@ -413,22 +426,39 @@ export default function PartenairesPage() {
               </div>
 
               {/* Facturable */}
-              <label className="flex items-center gap-3 cursor-pointer">
-                <div
-                  onClick={() => setForm(f => ({ ...f, facturable: !f.facturable }))}
-                  className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${form.facturable ? 'bg-orange-400' : 'bg-emerald-500'}`}
-                >
-                  <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.facturable ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                </div>
-                <div>
-                  <p className="font-bold text-sm text-slate-700">Partenaire à facturer</p>
-                  <p className="text-[11px] text-slate-400">
-                    {form.facturable
-                      ? 'Le partenaire règle les vols — on lui envoie une facture'
-                      : 'Les clients paient directement — on saisit le mode de paiement'}
-                  </p>
-                </div>
-              </label>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div
+                    onClick={() => setForm(f => ({ ...f, facturable: !f.facturable, default_encaisseur_id: f.facturable ? null : f.default_encaisseur_id }))}
+                    className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${form.facturable ? 'bg-orange-400' : 'bg-emerald-500'}`}
+                  >
+                    <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.facturable ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-slate-700">Partenaire à facturer</p>
+                    <p className="text-[11px] text-slate-400">
+                      {form.facturable
+                        ? 'Le partenaire règle les vols — on lui envoie une facture'
+                        : 'Les clients paient directement — on saisit le mode de paiement'}
+                    </p>
+                  </div>
+                </label>
+                {form.facturable && monitors.length > 0 && (
+                  <div className="ml-14">
+                    <label className="text-[10px] font-black uppercase text-slate-400 block mb-1.5">Facturé par (défaut)</label>
+                    <select
+                      value={form.default_encaisseur_id?.toString() ?? ''}
+                      onChange={e => setForm(f => ({ ...f, default_encaisseur_id: e.target.value ? Number(e.target.value) : null }))}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
+                    >
+                      <option value="">— Non défini —</option>
+                      {monitors.map(m => (
+                        <option key={m.id} value={m.id}>{m.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
 
               {/* Actif */}
               <label className="flex items-center gap-3 cursor-pointer">

@@ -1747,7 +1747,8 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       const badge = isGiftCard ? '🎁' : isStripePaid ? 'Stripe' : (paymentType ? (ENC_SHORT[paymentType] ?? paymentType) : 'NP');
                       const badgeColor = (!paymentType || paymentType === 'np') ? 'text-slate-400 bg-slate-100' : 'text-emerald-700 bg-emerald-50 border border-emerald-200';
                       const encName = encaisseurId ? (monitors.find(m => m.id === encaisseurId)?.title?.split(' ')[0] ?? null) : null;
-                      const label = encName ? `Encaissé par ${encName}` : 'Encaissement';
+                      const partnerName = (paymentType === 'a_facturer' && selectedPartnerId) ? (partners.find(p => p.id.toString() === selectedPartnerId)?.name ?? null) : null;
+                      const label = partnerName ? `Facturé à ${partnerName}` : encName ? `Encaissé par ${encName}` : 'Encaissement';
                       return (
                         <button type="button" onClick={() => setShowEncaissement(v => !v)} className="w-full flex items-center justify-between text-left">
                           <span className="text-[10px] font-black uppercase text-slate-400">{label}</span>
@@ -1796,28 +1797,30 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       // Sélecteur manuel (paiements sur place ou à renseigner)
                       return (
                         <>
-                          <select
-                            value={paymentType}
-                            onChange={e => handlePaymentTypeChange(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
-                          >
-                            <option value="">— Non renseigné (NP) —</option>
-                            {(() => {
-                              const partner = partners.find(p => p.id.toString() === selectedPartnerId);
-                              if (selectedPartnerId && partner?.facturable !== false) {
-                                return <option value="a_facturer">À facturer au partenaire</option>;
-                              }
-                              return (
-                                <>
-                                  <option value="esp">Espèces</option>
-                                  <option value="cb">CB</option>
-                                  <option value="ancv">ANCV</option>
-                                  <option value="ancv_connect">ANCV Connect</option>
-                                  <option value="chq">Chèque</option>
-                                </>
-                              );
-                            })()}
-                          </select>
+                          {paymentType !== 'a_facturer' && (
+                            <select
+                              value={paymentType}
+                              onChange={e => handlePaymentTypeChange(e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
+                            >
+                              <option value="">— Non renseigné (NP) —</option>
+                              {(() => {
+                                const partner = partners.find(p => p.id.toString() === selectedPartnerId);
+                                if (selectedPartnerId && partner?.facturable !== false) {
+                                  return <option value="a_facturer">À facturer au partenaire</option>;
+                                }
+                                return (
+                                  <>
+                                    <option value="esp">Espèces</option>
+                                    <option value="cb">CB</option>
+                                    <option value="ancv">ANCV</option>
+                                    <option value="ancv_connect">ANCV Connect</option>
+                                    <option value="chq">Chèque</option>
+                                  </>
+                                );
+                              })()}
+                            </select>
+                          )}
 
                           {paymentType && paymentType !== 'np' && paymentType !== 'a_facturer' && (
                             <div>
@@ -1843,7 +1846,7 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                           )}
 
                           {/* ── Encaissement des options si différent du vol ── */}
-                          {(selectedComplementIds.length > 0 || (selectedEvent?.payment_data?.complement_total_cents ?? 0) > 0) && paymentType && paymentType !== 'np' && paymentType !== 'a_facturer' && paymentType !== 'online' && paymentType !== 'bon_cadeau' && (
+                          {(selectedComplementIds.length > 0 || (selectedEvent?.payment_data?.complement_total_cents ?? 0) > 0) && paymentType && paymentType !== 'np' && paymentType !== 'online' && paymentType !== 'bon_cadeau' && (
                             <div className="border-t border-slate-100 pt-2 space-y-2">
                               <label className="text-[10px] font-black uppercase text-slate-400 block">Options 📸 — paiement différent ?</label>
                               <select
