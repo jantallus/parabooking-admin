@@ -220,17 +220,19 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
           {/* Section 2 — Période antérieure */}
           <div>
             <p className="text-[10px] font-black uppercase text-slate-400 mb-3">Période antérieure</p>
-            <div className="flex gap-2 items-end mb-3">
-              <div className="flex-1">
-                <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Du</label>
-                <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold" />
+            <div className="space-y-2 mb-3">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Du</label>
+                  <input type="date" value={from} onChange={e => setFrom(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold" />
+                </div>
+                <div className="flex-1">
+                  <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Au</label>
+                  <input type="date" value={to} onChange={e => setTo(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold" />
+                </div>
               </div>
-              <div className="flex-1">
-                <label className="text-[9px] font-black uppercase text-slate-400 block mb-1">Au</label>
-                <input type="date" value={to} onChange={e => setTo(e.target.value)} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold" />
-              </div>
-              <button onClick={loadPast} disabled={loading} className="bg-slate-900 text-white px-4 py-2 rounded-xl font-black uppercase text-[10px] whitespace-nowrap disabled:opacity-50">
-                {loading ? '…' : 'Calculer'}
+              <button onClick={loadPast} disabled={loading} className="w-full bg-slate-900 text-white py-2.5 rounded-xl font-black uppercase text-[10px] disabled:opacity-50">
+                {loading ? 'Chargement…' : 'Calculer'}
               </button>
             </div>
             {error && <p className="text-rose-500 text-xs font-bold mb-2">{error}</p>}

@@ -586,12 +586,12 @@ export default function PlanningAdmin() {
             Planning <span className="text-sky-500">Vols</span>
           </h1>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex items-center bg-white border-2 border-slate-200 rounded-2xl px-4 py-1 shadow-sm hover:border-sky-300 transition-colors">
-            <CalendarDays size={18} className="mr-2 text-slate-500" />
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex items-center bg-white border-2 border-slate-200 rounded-2xl px-3 py-1 shadow-sm hover:border-sky-300 transition-colors">
+            <CalendarDays size={16} className="mr-1.5 text-slate-500 shrink-0" />
             <input
               type="date"
-              className="bg-transparent font-bold text-sm text-slate-700 outline-none cursor-pointer"
+              className="bg-transparent font-bold text-sm text-slate-700 outline-none cursor-pointer w-[130px]"
               value={currentDate}
               onChange={(e) => {
                 setCurrentDate(e.target.value);
@@ -604,11 +604,11 @@ export default function PlanningAdmin() {
             className={`p-3 rounded-2xl border-2 shadow-sm transition-colors ${showSearch ? 'bg-sky-600 border-sky-600 text-white' : 'bg-white border-slate-200 text-slate-500 hover:border-sky-300'}`}
             title="Rechercher un passager"
           >
-            <Search size={16} />
+            <Search size={15} />
           </button>
           <button
             onClick={() => setShowRegulation(true)}
-            className="bg-white border-2 border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-black uppercase text-[10px] shadow-sm hover:border-amber-400 hover:text-amber-600 transition-colors"
+            className="bg-white border-2 border-slate-200 text-slate-700 px-4 py-3 rounded-2xl font-black uppercase text-[10px] shadow-sm hover:border-amber-400 hover:text-amber-600 transition-colors"
             title="Régulation pilotes"
           >
             <Scale size={13} className="inline mr-1" />Régul.
@@ -616,7 +616,7 @@ export default function PlanningAdmin() {
           <button
             onClick={() => setShowGenModal(true)}
             disabled={currentUser?.role !== 'admin'}
-            className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] shadow-xl hover:scale-105 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="bg-slate-900 text-white px-4 py-3 rounded-2xl font-black uppercase text-[10px] shadow-xl hover:scale-105 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
           >
             <Wrench size={13} className="inline mr-1" />Gestion des créneaux
           </button>
