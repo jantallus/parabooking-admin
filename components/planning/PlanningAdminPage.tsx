@@ -294,7 +294,7 @@ export default function PlanningAdmin() {
     const isNP = pd?.payment_type === 'np';
     let priceStr: string | null = null;
 
-    const MANUAL_TYPES = ['chq', 'cb', 'ancv', 'ancv_connect'];
+    const MANUAL_TYPES = ['chq', 'cb', 'ancv', 'ancv_connect', 'esp'];
     const encaisseurName = (pd?.encaisseur_id && pd?.payment_type && MANUAL_TYPES.includes(pd.payment_type))
       ? (monitors as { id: string; title: string }[]).find(m => m.id === String(pd!.encaisseur_id))?.title?.split(' ')[0] ?? null
       : null;

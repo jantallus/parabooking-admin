@@ -1437,15 +1437,43 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       {groupTotalPax > 1 && row('Groupe', `${groupTotalPax} passagers`)}
                       {ev.weight && row('Poids', `${ev.weight} kg`)}
                     </div>
-                    {(pd?.payment_type || pd?.online) && (
-                      <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-2">
-                        <p className="text-[9px] font-black uppercase text-slate-400">Encaissement</p>
-                        <p className="text-sm font-bold text-slate-800">
-                          {pd?.online && !pd?.code ? 'En ligne (Stripe)' : pd?.code_type === 'gift_card' && pd?.code ? `🎁 Bon cadeau ${pd.code}` : (payTypeLabel[pd?.payment_type ?? ''] ?? pd?.payment_type)}
-                          {encaisseurName && ` · ✓ ${encaisseurName}`}
-                        </p>
-                      </div>
-                    )}
+                    {(pd?.payment_type || pd?.online) && (() => {
+                      const ownAmountCents = pd?.price_override_cents != null
+                        ? Number(pd.price_override_cents)
+                        : (flight?.price_cents ?? 0);
+                      const monitorIdStr = ev.monitor_id?.toString() ?? '';
+                      const slotDate = ev.start_time.slice(0, 10);
+                      const monitorCollectedCents = monitorIdStr
+                        ? appointments
+                            .filter(a => {
+                              if (a.status !== 'booked') return false;
+                              const aPd = a.payment_data;
+                              if (!aPd?.encaisseur_id || !aPd?.payment_type || aPd.payment_type === 'np') return false;
+                              return String(aPd.encaisseur_id) === monitorIdStr && a.start_time.slice(0, 10) === slotDate;
+                            })
+                            .reduce((sum, a) => {
+                              const aPd = a.payment_data;
+                              const ft = flightTypes.find(f => f.id?.toString() === a.flight_type_id?.toString());
+                              return sum + (aPd?.price_override_cents != null ? Number(aPd.price_override_cents) : (ft?.price_cents ?? 0));
+                            }, 0)
+                        : 0;
+                      const showTotal = monitorCollectedCents !== ownAmountCents;
+                      return (
+                        <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-1">
+                          <p className="text-[9px] font-black uppercase text-slate-400">Encaissement</p>
+                          <p className="text-sm font-bold text-slate-800">
+                            {pd?.online && !pd?.code ? 'En ligne (Stripe)' : pd?.code_type === 'gift_card' && pd?.code ? `🎁 Bon cadeau ${pd.code}` : (payTypeLabel[pd?.payment_type ?? ''] ?? pd?.payment_type)}
+                            {encaisseurName && ` · ✓ ${encaisseurName}`}
+                          </p>
+                          {ownAmountCents > 0 && (
+                            <p className="text-xs text-slate-500 font-medium">
+                              {(ownAmountCents / 100).toFixed(0)} € prestation
+                              {showTotal && ` · ${(monitorCollectedCents / 100).toFixed(0)} € collecté ce jour`}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {(ev.phone || ev.email) && (
                       <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-100 space-y-3">
                         {ev.phone && (
