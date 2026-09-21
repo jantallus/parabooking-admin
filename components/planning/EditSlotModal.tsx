@@ -1746,9 +1746,11 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                       const ENC_SHORT: Record<string, string> = { esp: 'Esp', cb: 'CB', chq: 'Chq', ancv: 'ANCV', ancv_connect: 'ANCV+', a_facturer: 'Fact.', np: 'NP', online: 'Stripe' };
                       const badge = isGiftCard ? '🎁' : isStripePaid ? 'Stripe' : (paymentType ? (ENC_SHORT[paymentType] ?? paymentType) : 'NP');
                       const badgeColor = (!paymentType || paymentType === 'np') ? 'text-slate-400 bg-slate-100' : 'text-emerald-700 bg-emerald-50 border border-emerald-200';
+                      const encName = encaisseurId ? (monitors.find(m => m.id === encaisseurId)?.title?.split(' ')[0] ?? null) : null;
+                      const label = encName ? `Encaissé par ${encName}` : 'Encaissement';
                       return (
                         <button type="button" onClick={() => setShowEncaissement(v => !v)} className="w-full flex items-center justify-between text-left">
-                          <span className="text-[10px] font-black uppercase text-slate-400">Encaissement</span>
+                          <span className="text-[10px] font-black uppercase text-slate-400">{label}</span>
                           <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg ${badgeColor}`}>{badge} {showEncaissement ? '▲' : '▼'}</span>
                         </button>
                       );
