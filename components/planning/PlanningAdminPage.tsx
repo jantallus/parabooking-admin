@@ -10,8 +10,9 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import EditSlotModal from '@/components/planning/EditSlotModal';
 import GenSlotsModal from '@/components/planning/GenSlotsModal';
 import ReplaceMonitorModal from '@/components/planning/ReplaceMonitorModal';
+import RegulationModal from '@/components/planning/RegulationModal';
 import { useToast } from '@/components/ui/ToastProvider';
-import { Wrench, CalendarDays, Search, X, EyeOff } from 'lucide-react';
+import { Wrench, CalendarDays, Search, X, EyeOff, Scale } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { CurrentUser, Slot, FlightType } from '@/lib/types';
@@ -69,6 +70,7 @@ export default function PlanningAdmin() {
 
   const currentUser = useCurrentUser();
   const [showGenModal, setShowGenModal] = useState(false);
+  const [showRegulation, setShowRegulation] = useState(false);
   const [replaceMonitor, setReplaceMonitor] = useState<{ id: string; title: string } | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -605,6 +607,13 @@ export default function PlanningAdmin() {
             <Search size={16} />
           </button>
           <button
+            onClick={() => setShowRegulation(true)}
+            className="bg-white border-2 border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-black uppercase text-[10px] shadow-sm hover:border-amber-400 hover:text-amber-600 transition-colors"
+            title="Régulation pilotes"
+          >
+            <Scale size={13} className="inline mr-1" />Régul.
+          </button>
+          <button
             onClick={() => setShowGenModal(true)}
             disabled={currentUser?.role !== 'admin'}
             className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-black uppercase text-[10px] shadow-xl hover:scale-105 transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
@@ -773,6 +782,16 @@ export default function PlanningAdmin() {
           availablePlans={availablePlans}
           onClose={() => setReplaceMonitor(null)}
           onSuccess={loadAppointments}
+        />
+      )}
+
+      {showRegulation && (
+        <RegulationModal
+          currentDate={currentDate}
+          calendarEvents={calendarEvents as Parameters<typeof RegulationModal>[0]['calendarEvents']}
+          monitors={monitors}
+          visibleMonitorIds={(visibleMonitors as { id: string }[]).map(m => m.id)}
+          onClose={() => setShowRegulation(false)}
         />
       )}
     </div>
