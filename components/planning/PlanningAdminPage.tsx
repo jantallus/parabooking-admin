@@ -165,11 +165,26 @@ export default function PlanningAdmin() {
           const slotMs = a.start_time && a.end_time ? new Date(a.end_time).getTime() - new Date(a.start_time).getTime() : 0;
           const slotMin = Math.round(slotMs / 60000);
           const isShortFlight = a.status === 'booked' && fd > 0 && fd * 2 <= slotMin;
-          return { ...a, flight_name: flight?.name || null, price_cents: flight?.price_cents ? (a.payment_data?.price_override_cents ?? flight.price_cents) + (a.payment_data?.complement_total_cents ?? 0) : null, flight_duration: fd || null, isShortFlight };
+          const priceCents = (() => {
+            if (!flight?.price_cents) return null;
+            const pd = a.payment_data;
+            const compCents = pd?.complement_total_cents ?? 0;
+            if (pd?.price_override_cents != null) return pd.price_override_cents + compCents;
+            // Appliquer la commission partenaire si définie
+            const partnerId = (pd as { partner_id?: number } | null)?.partner_id;
+            const partner = partnerId ? partners.find(p => p.id === partnerId) : null;
+            const partnerFt = partner?.allowed_flight_types?.find(ft => ft.flight_type_id === a.flight_type_id);
+            const baseCents = partnerFt?.base_price_cents != null ? partnerFt.base_price_cents : flight.price_cents;
+            let commissionCents = 0;
+            if (partner?.commission_type === 'percentage') commissionCents = Math.round(baseCents * (partner.commission_value ?? 0) / 100);
+            else if (partner?.commission_type === 'fixed') commissionCents = Math.round((partner.commission_value ?? 0) * 100);
+            return Math.max(0, baseCents - commissionCents) + compCents;
+          })();
+          return { ...a, flight_name: flight?.name || null, price_cents: priceCents, flight_duration: fd || null, isShortFlight };
         })(),
       };
     });
-  }, [appointments, flightTypes, currentUser]);
+  }, [appointments, flightTypes, currentUser, partners]);
 
   // Total encaissé par moniteur par créneau horaire : clé "encaisseurId:start_time"
   const monitorSlotTotals = useMemo(() => {
