@@ -118,6 +118,7 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
 
   // Régulation du jour courant depuis les données déjà chargées
   const todayRegulation = useMemo(() => {
+    const onlineCollectorId = (monitors as (typeof monitors[0] & { receives_online_payments?: boolean })[]).find(m => m.receives_online_payments)?.id ?? null;
     const flew: Record<string, number> = {};
     const collected: Record<string, number> = {};
     visibleMonitorIds.forEach(id => { flew[id] = 0; collected[id] = 0; });
@@ -127,7 +128,7 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
       if (ep.status !== 'booked') continue;
       if (!ep.start_time.startsWith(currentDate)) continue;
       const pd = ep.payment_data;
-      if (!pd?.encaisseur_id || !pd?.payment_type || pd.payment_type === 'np') continue;
+      if (!pd?.payment_type || pd.payment_type === 'np') continue;
 
       const monId = ep.monitor_id?.toString() ?? '';
       if (!visibleSet.has(monId)) continue;
@@ -138,13 +139,18 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
 
       flew[monId] = (flew[monId] ?? 0) + totalCents;
 
-      const encId = String(pd.encaisseur_id);
+      // Résoudre l'encaisseur effectif
+      const effectiveEncId = (pd.payment_type === 'online' && !pd.encaisseur_id)
+        ? onlineCollectorId
+        : (pd.encaisseur_id ? String(pd.encaisseur_id) : null);
+      if (!effectiveEncId) continue;
+
       if (pd.complement_payment_type && pd.complement_encaisseur_id && compCents > 0) {
-        if (encId in collected) collected[encId] += flightCents;
+        if (effectiveEncId in collected) collected[effectiveEncId] += flightCents;
         const compEncId = String(pd.complement_encaisseur_id);
         if (compEncId in collected) collected[compEncId] += compCents;
       } else {
-        if (encId in collected) collected[encId] += totalCents;
+        if (effectiveEncId in collected) collected[effectiveEncId] += totalCents;
       }
     }
 

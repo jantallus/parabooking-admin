@@ -674,6 +674,11 @@ export default function EditSlotModal({
       // Stripe / bon cadeau Fluide : toujours CB via Stripe, encaisseur auto
       const caisse = fullMonitors.find(m => m.receives_online_payments);
       setEncaisseurId(caisse ? caisse.id.toString() : '');
+    } else if (type === 'a_facturer') {
+      // Partenaire à facturer : encaisseur = factureur par défaut du partenaire si défini
+      const partner = partners.find(p => p.id.toString() === selectedPartnerId);
+      const defaultEnc = partner?.default_encaisseur_id;
+      setEncaisseurId(defaultEnc ? String(defaultEnc) : '');
     } else {
       // CB, ANCV, ANCV Connect, CHQ, NP : sélection manuelle
       setEncaisseurId('');

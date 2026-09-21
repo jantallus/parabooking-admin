@@ -71,6 +71,7 @@ export interface Monitor {
   id: string;
   title: string;
   is_active?: boolean;
+  receives_online_payments?: boolean;
 }
 
 export interface SlotDefinition {
