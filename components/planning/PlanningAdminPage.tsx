@@ -342,7 +342,8 @@ export default function PlanningAdmin() {
       ? (monitorSlotTotals.get(`${monitorId}:${ep.start_time}`) ?? 0)
       : null;
     const showCollectedLine = monitorCollectedCents !== null && monitorCollectedCents !== (ep.price_cents ?? 0);
-    const collectedLine = showCollectedLine ? `total créneau ${(monitorCollectedCents / 100).toFixed(0)} €` : null;
+    const monitorFirstName = showCollectedLine ? ((monitors as { id: string; title: string }[]).find(m => m.id === monitorId)?.title?.split(' ')[0] ?? null) : null;
+    const collectedLine = showCollectedLine ? `total créneau ${monitorFirstName ? monitorFirstName + ' ' : ''}${(monitorCollectedCents / 100).toFixed(0)} €` : null;
 
     const subSpan = (text: string) => (
       <span style={{ fontSize: '9px', lineHeight: '1.2', opacity: 0.85, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
