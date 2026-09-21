@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useMemo } from 'react';
 import { apiFetch } from '@/lib/api';
-import type { Monitor, Slot } from '@/lib/types';
+import type { Monitor, Slot, Partner } from '@/lib/types';
 
 interface CalendarEv {
   extendedProps: Slot & { price_cents?: number | null };
@@ -17,6 +17,7 @@ interface Props {
   currentDate: string;
   calendarEvents: CalendarEv[];
   monitors: Monitor[];
+  partners: Partner[];
   visibleMonitorIds: string[];
   onClose: () => void;
 }
@@ -90,7 +91,7 @@ function RegulationSection({ balances, transactions }: { balances: ReturnType<ty
   );
 }
 
-export default function RegulationModal({ currentDate, calendarEvents, monitors, visibleMonitorIds, onClose }: Props) {
+export default function RegulationModal({ currentDate, calendarEvents, monitors, partners, visibleMonitorIds, onClose }: Props) {
   const [from, setFrom] = useState(() => {
     const d = new Date(currentDate);
     d.setDate(1);
@@ -118,7 +119,18 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
 
   // Régulation du jour courant depuis les données déjà chargées
   const todayRegulation = useMemo(() => {
-    const onlineCollectorId = (monitors as (typeof monitors[0] & { receives_online_payments?: boolean })[]).find(m => m.receives_online_payments)?.id ?? null;
+    const onlineCollectorId = monitors.find(m => m.receives_online_payments)?.id ?? null;
+    const resolveEncId = (pd: NonNullable<Slot['payment_data']>): string | null => {
+      const isStripe = pd.payment_type === 'online' || (pd as { online?: boolean }).online === true;
+      if (isStripe && !pd.encaisseur_id) return onlineCollectorId;
+      if (pd.encaisseur_id) return String(pd.encaisseur_id);
+      if (pd.payment_type === 'a_facturer') {
+        const partnerId = (pd as { partner_id?: number }).partner_id;
+        const p = partners.find(p => p.id === partnerId);
+        return p?.default_encaisseur_id ? String(p.default_encaisseur_id) : null;
+      }
+      return null;
+    };
     const flew: Record<string, number> = {};
     const collected: Record<string, number> = {};
     visibleMonitorIds.forEach(id => { flew[id] = 0; collected[id] = 0; });
@@ -128,7 +140,9 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
       if (ep.status !== 'booked') continue;
       if (!ep.start_time.startsWith(currentDate)) continue;
       const pd = ep.payment_data;
-      if (!pd?.payment_type || pd.payment_type === 'np') continue;
+      if (!pd) continue;
+      const isStripe = pd.payment_type === 'online' || (pd as { online?: boolean }).online === true;
+      if (!isStripe && (!pd.payment_type || pd.payment_type === 'np')) continue;
 
       const monId = ep.monitor_id?.toString() ?? '';
       if (!visibleSet.has(monId)) continue;
@@ -139,10 +153,7 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
 
       flew[monId] = (flew[monId] ?? 0) + totalCents;
 
-      // Résoudre l'encaisseur effectif
-      const effectiveEncId = (pd.payment_type === 'online' && !pd.encaisseur_id)
-        ? onlineCollectorId
-        : (pd.encaisseur_id ? String(pd.encaisseur_id) : null);
+      const effectiveEncId = resolveEncId(pd);
       if (!effectiveEncId) continue;
 
       if (pd.complement_payment_type && pd.complement_encaisseur_id && compCents > 0) {
@@ -162,7 +173,7 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
       .map(id => ({ id, name: monitorName(id), flightCents: flew[id] ?? 0, collectedCents: collected[id] ?? 0 }));
 
     return items.length > 0 ? computeTricount(items) : null;
-  }, [calendarEvents, currentDate, visibleMonitorIds, visibleSet, monitors]);
+  }, [calendarEvents, currentDate, visibleMonitorIds, visibleSet, monitors, partners]);
 
   const loadPast = async () => {
     setLoading(true); setError(''); setPastData(null);

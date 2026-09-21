@@ -15,7 +15,8 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { Wrench, CalendarDays, Search, X, EyeOff, Scale } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import type { CurrentUser, Slot, FlightType, Monitor } from '@/lib/types';
+import type { CurrentUser, Slot, FlightType, Monitor, Partner } from '@/lib/types';
+import { apiFetch } from '@/lib/api';
 import type { EventClickArg, EventContentArg } from '@fullcalendar/core';
 
 // Composant avec listener natif pour stopper la propagation AVANT FullCalendar
@@ -69,6 +70,10 @@ export default function PlanningAdmin() {
   } = usePlanningData(getDateRange);
 
   const currentUser = useCurrentUser();
+  const [partners, setPartners] = useState<Partner[]>([]);
+  useEffect(() => {
+    apiFetch('/api/partners').then(r => r.ok ? r.json() : []).then(setPartners).catch(() => {});
+  }, []);
   const [showGenModal, setShowGenModal] = useState(false);
   const [showRegulation, setShowRegulation] = useState(false);
   const [replaceMonitor, setReplaceMonitor] = useState<{ id: string; title: string } | null>(null);
@@ -169,6 +174,17 @@ export default function PlanningAdmin() {
   // Total encaissé par moniteur par créneau horaire : clé "encaisseurId:start_time"
   const monitorSlotTotals = useMemo(() => {
     const onlineCollectorId = (monitors as Monitor[]).find(m => m.receives_online_payments)?.id ?? null;
+    const resolveEncId = (pd: NonNullable<Slot['payment_data']>): string | null => {
+      const isStripe = pd.payment_type === 'online' || (pd as { online?: boolean }).online === true;
+      if (isStripe && !pd.encaisseur_id) return onlineCollectorId;
+      if (pd.encaisseur_id) return String(pd.encaisseur_id);
+      if (pd.payment_type === 'a_facturer') {
+        const partnerId = (pd as { partner_id?: number }).partner_id;
+        const p = partners.find(p => p.id === partnerId);
+        return p?.default_encaisseur_id ? String(p.default_encaisseur_id) : null;
+      }
+      return null;
+    };
     const map = new Map<string, number>();
     const add = (encId: string, time: string, cents: number) => {
       if (!encId || cents <= 0) return;
@@ -179,11 +195,10 @@ export default function PlanningAdmin() {
       const ep = ev.extendedProps as Slot & { price_cents?: number | null };
       if (ep.status !== 'booked') continue;
       const pd = ep.payment_data;
-      if (!pd?.payment_type || pd.payment_type === 'np') continue;
-      // Résoudre l'encaisseur effectif : Stripe → Julien, sinon encaisseur_id explicite
-      const effectiveEncId = (pd.payment_type === 'online' && !pd.encaisseur_id)
-        ? onlineCollectorId
-        : (pd.encaisseur_id ? String(pd.encaisseur_id) : null);
+      if (!pd) continue;
+      const isStripe = pd.payment_type === 'online' || (pd as { online?: boolean }).online === true;
+      if (!isStripe && (!pd.payment_type || pd.payment_type === 'np')) continue;
+      const effectiveEncId = resolveEncId(pd);
       if (!effectiveEncId) continue;
       const compTotal = pd.complement_total_cents ? Number(pd.complement_total_cents) : 0;
       const flightOnly = (ep.price_cents ?? 0) - compTotal;
@@ -195,7 +210,7 @@ export default function PlanningAdmin() {
       }
     }
     return map;
-  }, [calendarEvents, monitors]);
+  }, [calendarEvents, monitors, partners]);
 
   const [hiddenMonitorIds, setHiddenMonitorIds] = useState<Set<string>>(new Set());
   // Moniteurs sans créneaux que l'admin a choisi d'afficher manuellement
@@ -792,6 +807,7 @@ export default function PlanningAdmin() {
           currentDate={currentDate}
           calendarEvents={calendarEvents as Parameters<typeof RegulationModal>[0]['calendarEvents']}
           monitors={monitors}
+          partners={partners}
           visibleMonitorIds={(visibleMonitors as { id: string }[]).map(m => m.id)}
           onClose={() => setShowRegulation(false)}
         />
