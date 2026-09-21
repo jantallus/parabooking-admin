@@ -210,6 +210,8 @@ export interface PaymentData {
   // Compléments et prix overrides (réservations admin)
   selected_complements?: { id: number; name: string; price_cents: number }[];
   complement_total_cents?: number;
+  complement_payment_type?: string;
+  complement_encaisseur_id?: number | string;
   price_override_cents?: number;
   // Stripe
   stripe_session_id?: string;

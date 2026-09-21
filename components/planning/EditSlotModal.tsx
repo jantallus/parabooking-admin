@@ -86,6 +86,8 @@ export default function EditSlotModal({
   const [selectedComplementIds, setSelectedComplementIds] = useState<number[]>([]);
   const [flightPriceOverride, setFlightPriceOverride] = useState('');
   const [complementPriceOverride, setComplementPriceOverride] = useState('');
+  const [complementPaymentType, setComplementPaymentType] = useState('');
+  const [complementEncaisseurId, setComplementEncaisseurId] = useState('');
   const [cbNetAmount, setCbNetAmount] = useState('');
   const [secondBooking, setSecondBooking] = useState<{ title: string; phone: string; email: string; weight: string; payment_type: string; encaisseur_id: string; price_override: string }>({ title: '', phone: '', email: '', weight: '', payment_type: '', encaisseur_id: '', price_override: '' });
   const [standbyPrefill, setStandbyPrefill] = useState<{ standby_id: number; name: string; phone: string; email: string; flight_type: string; weight_info: string; nb_passengers: number; source?: string | null } | null>(null);
@@ -388,6 +390,8 @@ export default function EditSlotModal({
     setSelectedComplementIds(Array.isArray(pd?.selected_complements) ? (pd.selected_complements as { id: number }[]).map(c => Number(c.id)) : []);
     setFlightPriceOverride(pd?.price_override_cents != null ? (Number(pd.price_override_cents) / 100).toFixed(2) : '');
     setComplementPriceOverride(pd?.complement_total_cents ? (Number(pd.complement_total_cents) / 100).toFixed(2) : '');
+    setComplementPaymentType(pd?.complement_payment_type?.toString() ?? '');
+    setComplementEncaisseurId(pd?.complement_encaisseur_id?.toString() ?? '');
     setCbNetAmount(pd?.cb_net_cents != null ? (Number(pd.cb_net_cents) / 100).toFixed(2) : '');
     setSlotHistory([]);
     setActiveTab(t => t === 'history' ? 'client' : t);
@@ -841,9 +845,18 @@ export default function EditSlotModal({
         finalPaymentData.selected_complements = comps.map(c => ({ id: c.id, name: c.name, price_cents: c.price_cents }));
         const autoTotal = comps.reduce((s, c) => s + c.price_cents, 0);
         finalPaymentData.complement_total_cents = complementPriceOverride ? Math.round(parseFloat(complementPriceOverride) * 100) : autoTotal;
+        if (complementPaymentType) {
+          finalPaymentData.complement_payment_type = complementPaymentType;
+          finalPaymentData.complement_encaisseur_id = complementEncaisseurId || encaisseurId || null;
+        } else {
+          delete finalPaymentData.complement_payment_type;
+          delete finalPaymentData.complement_encaisseur_id;
+        }
       } else {
         delete finalPaymentData.selected_complements;
         delete finalPaymentData.complement_total_cents;
+        delete finalPaymentData.complement_payment_type;
+        delete finalPaymentData.complement_encaisseur_id;
       }
       const selectedFlightObj = flightTypes.find(f => f.id.toString() === formData.flight_type_id);
       const catalogPriceCents = selectedFlightObj?.price_cents ?? 0;
@@ -1823,6 +1836,40 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                                     <option key={m.id} value={m.id.toString()}>{m.title}</option>
                                   ))}
                                 </select>
+                              )}
+                            </div>
+                          )}
+
+                          {/* ── Encaissement des options si différent du vol ── */}
+                          {(selectedComplementIds.length > 0 || (selectedEvent?.payment_data?.complement_total_cents ?? 0) > 0) && paymentType && paymentType !== 'np' && paymentType !== 'a_facturer' && paymentType !== 'online' && paymentType !== 'bon_cadeau' && (
+                            <div className="border-t border-slate-100 pt-2 space-y-2">
+                              <label className="text-[10px] font-black uppercase text-slate-400 block">Options 📸 — paiement différent ?</label>
+                              <select
+                                value={complementPaymentType}
+                                onChange={e => { setComplementPaymentType(e.target.value); if (!e.target.value) setComplementEncaisseurId(''); }}
+                                className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
+                              >
+                                <option value="">Idem vol</option>
+                                <option value="esp">Espèces</option>
+                                <option value="cb">CB</option>
+                                <option value="ancv">ANCV</option>
+                                <option value="ancv_connect">ANCV Connect</option>
+                                <option value="chq">Chèque</option>
+                              </select>
+                              {complementPaymentType && (
+                                <div>
+                                  <label className="text-[10px] font-black uppercase text-slate-400 block mb-1">Encaissé par (options)</label>
+                                  <select
+                                    value={complementEncaisseurId}
+                                    onChange={e => setComplementEncaisseurId(e.target.value)}
+                                    className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-bold"
+                                  >
+                                    <option value="">Idem vol</option>
+                                    {monitors.map(m => (
+                                      <option key={m.id} value={m.id.toString()}>{m.title}</option>
+                                    ))}
+                                  </select>
+                                </div>
                               )}
                             </div>
                           )}

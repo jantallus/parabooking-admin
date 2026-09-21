@@ -167,13 +167,28 @@ export default function PlanningAdmin() {
   // Total encaissé par moniteur par créneau horaire : clé "encaisseurId:start_time"
   const monitorSlotTotals = useMemo(() => {
     const map = new Map<string, number>();
+    const add = (encId: string, time: string, cents: number) => {
+      if (!encId || cents <= 0) return;
+      const key = `${encId}:${time}`;
+      map.set(key, (map.get(key) ?? 0) + cents);
+    };
     for (const ev of calendarEvents) {
       const ep = ev.extendedProps as Slot & { price_cents?: number | null };
       if (ep.status !== 'booked') continue;
       const pd = ep.payment_data;
       if (!pd?.encaisseur_id || !pd?.payment_type || pd.payment_type === 'np') continue;
-      const key = `${String(pd.encaisseur_id)}:${ep.start_time}`;
-      map.set(key, (map.get(key) ?? 0) + (ep.price_cents ?? 0));
+      const compTotal = pd.complement_total_cents ? Number(pd.complement_total_cents) : 0;
+      const flightOnly = (ep.price_cents ?? 0) - compTotal;
+      if (pd.complement_payment_type && pd.complement_encaisseur_id) {
+        // Photos/vidéos encaissées par quelqu'un d'autre
+        add(String(pd.encaisseur_id), ep.start_time, flightOnly);
+        add(String(pd.complement_encaisseur_id), ep.start_time, compTotal);
+      } else if (pd.complement_payment_type) {
+        // Type différent mais même encaisseur
+        add(String(pd.encaisseur_id), ep.start_time, ep.price_cents ?? 0);
+      } else {
+        add(String(pd.encaisseur_id), ep.start_time, ep.price_cents ?? 0);
+      }
     }
     return map;
   }, [calendarEvents]);
