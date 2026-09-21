@@ -81,7 +81,6 @@ export default function EditSlotModal({
   const [selectedPartnerId, setSelectedPartnerId] = useState('');
   const [paymentType, setPaymentType] = useState('');
   const [encaisseurId, setEncaisseurId] = useState('');
-  const [paymentScope, setPaymentScope] = useState<'slot' | 'time' | 'pilot' | 'group'>('slot');
   const [fullMonitors, setFullMonitors] = useState<Array<{ id: string; first_name: string; receives_online_payments: boolean }>>([]);
   const [availableComplements, setAvailableComplements] = useState<{ id: number; name: string; price_cents: number }[]>([]);
   const [selectedComplementIds, setSelectedComplementIds] = useState<number[]>([]);
@@ -385,7 +384,7 @@ export default function EditSlotModal({
     setPasteZoneOpen2(false);
     setPasteText2('');
     setParsed2(null);
-    setPaymentScope('slot');
+
     setSelectedComplementIds(Array.isArray(pd?.selected_complements) ? (pd.selected_complements as { id: number }[]).map(c => Number(c.id)) : []);
     setFlightPriceOverride(pd?.price_override_cents != null ? (Number(pd.price_override_cents) / 100).toFixed(2) : '');
     setComplementPriceOverride(pd?.complement_total_cents ? (Number(pd.complement_total_cents) / 100).toFixed(2) : '');
@@ -975,42 +974,6 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
 
     applyAll(updatesToApply);
 
-    // Appliquer le payment_data aux autres slots du groupe via /quick (ne touche pas aux autres champs)
-    if (groupLocked && groupRootSlots.length > 1 && paymentScope !== 'slot') {
-      const currentStartMs = new Date(selectedEvent.start as Date | string).getTime();
-      const currentMonitorId = selectedEvent.monitor_id?.toString();
-      const otherSlots = groupRootSlots.filter(s => s.id !== selectedEvent.id);
-      const scopedSlots = otherSlots.filter(s => {
-        if (paymentScope === 'group') return true;
-        if (paymentScope === 'time') return new Date(s.start_time).getTime() === currentStartMs;
-        if (paymentScope === 'pilot') return s.monitor_id?.toString() === currentMonitorId;
-        return false;
-      });
-      if (scopedSlots.length > 0) {
-        Promise.all(scopedSlots.map(slot => {
-          const slotExistingPd = (slot.payment_data || {}) as Record<string, unknown>;
-          const slotPd: Record<string, unknown> = { ...slotExistingPd, ...partnerPaymentData };
-          if (paymentType) {
-            slotPd.payment_type = paymentType;
-            if (paymentType !== 'np' && paymentType !== 'a_facturer' && encaisseurId) {
-              slotPd.encaisseur_id = encaisseurId;
-            } else if (paymentType === 'np' || paymentType === 'a_facturer') {
-              delete slotPd.encaisseur_id;
-            }
-          } else {
-            delete slotPd.payment_type;
-            delete slotPd.encaisseur_id;
-          }
-          // Propager prix override et compléments
-          if ('price_override_cents' in finalPaymentData) slotPd.price_override_cents = finalPaymentData.price_override_cents;
-          else delete slotPd.price_override_cents;
-          if (finalPaymentData.complement_total_cents != null) slotPd.complement_total_cents = finalPaymentData.complement_total_cents;
-          if (Array.isArray(finalPaymentData.selected_complements)) slotPd.selected_complements = finalPaymentData.selected_complements;
-          const slotBookingOptions = complementNames || undefined;
-          return apiFetch(`/api/slots/${slot.id}/quick`, { method: 'PATCH', body: JSON.stringify({ payment_data: slotPd, ...(slotBookingOptions !== undefined ? { booking_options: slotBookingOptions } : {}) }) });
-        })).then(() => loadAppointments()).catch(() => {});
-      }
-    }
   };
 
   const fetchStandbyBySlotIds = async (slotIds: number[]) => {
@@ -1990,30 +1953,6 @@ updatesToApply.push({ id: selectedEvent.id, data: { ...effectiveFormData, title:
                             );
                           })()}
 
-                          {groupLocked && groupRootSlots.length > 1 && (
-                            <div className="pt-1">
-                              <label className="text-[10px] font-black uppercase text-slate-400 block mb-1.5">Appliquer l&apos;encaissement à</label>
-                              <div className="grid grid-cols-2 gap-1.5">
-                                {([
-                                  { value: 'slot', label: 'Ce vol' },
-                                  { value: 'time', label: 'Ce créneau horaire' },
-                                  { value: 'pilot', label: 'Ce pilote' },
-                                  { value: 'group', label: 'Tout le groupe' },
-                                ] as const).map(opt => (
-                                  <button
-                                    key={opt.value}
-                                    type="button"
-                                    onClick={() => setPaymentScope(opt.value)}
-                                    className={`py-2 px-3 rounded-xl text-[10px] font-black uppercase text-left transition-colors border ${paymentScope === opt.value ? 'bg-sky-500 text-white border-sky-500' : 'bg-white text-slate-500 border-slate-200 hover:border-sky-300'}`}
-                                  >
-                                    {paymentScope === opt.value && '✓ '}{opt.label}
-                                    {opt.value === 'group' && ` (${groupRootSlots.length})`}
-                                    {opt.value === 'pilot' && ` (${groupRootSlots.filter(s => s.monitor_id?.toString() === selectedEvent?.monitor_id?.toString()).length})`}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </>
                       );
                     })()}
