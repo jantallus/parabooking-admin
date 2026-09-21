@@ -164,6 +164,20 @@ export default function PlanningAdmin() {
     });
   }, [appointments, flightTypes, currentUser]);
 
+  // Total encaissé par moniteur par jour : clé "monitorId:YYYY-MM-DD"
+  const monitorDayTotals = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const ev of calendarEvents) {
+      const ep = ev.extendedProps as Slot & { price_cents?: number | null };
+      if (ep.status !== 'booked') continue;
+      const pd = ep.payment_data;
+      if (!pd?.encaisseur_id || !pd?.payment_type || pd.payment_type === 'np') continue;
+      const key = `${String(pd.encaisseur_id)}:${ep.start_time.slice(0, 10)}`;
+      map.set(key, (map.get(key) ?? 0) + (ep.price_cents ?? 0));
+    }
+    return map;
+  }, [calendarEvents]);
+
   const [hiddenMonitorIds, setHiddenMonitorIds] = useState<Set<string>>(new Set());
   // Moniteurs sans créneaux que l'admin a choisi d'afficher manuellement
   const [extraShownIds, setExtraShownIds] = useState<Set<string>>(new Set());
@@ -323,6 +337,14 @@ export default function PlanningAdmin() {
     const infoLine = [ep.flight_name, ep.weight ? `${ep.weight} kg` : null].filter(Boolean).join(' · ');
     const payLine = [priceStr, encaisseurName ? `✓ ${encaisseurName}` : null].filter(Boolean).join(' · ');
 
+    const monitorId = ep.monitor_id?.toString() ?? '';
+    const slotDate = ep.start_time?.slice(0, 10) ?? '';
+    const monitorCollectedCents = (!isUnpaid && !isNP && monitorId && slotDate)
+      ? (monitorDayTotals.get(`${monitorId}:${slotDate}`) ?? 0)
+      : null;
+    const showCollectedLine = monitorCollectedCents !== null && monitorCollectedCents !== (ep.price_cents ?? 0);
+    const collectedLine = showCollectedLine ? `total créneau ${(monitorCollectedCents / 100).toFixed(0)} €` : null;
+
     const subSpan = (text: string) => (
       <span style={{ fontSize: '9px', lineHeight: '1.2', opacity: 0.85, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {text}
@@ -353,6 +375,7 @@ export default function PlanningAdmin() {
             {badges && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>{badges}</span>}
             {infoLine && subSpan(infoLine)}
             {payLine && subSpan(payLine)}
+            {collectedLine && subSpan(collectedLine)}
           </div>
         </div>
       );
@@ -442,9 +465,10 @@ export default function PlanningAdmin() {
         {badges && <span style={{ fontSize: '9px', lineHeight: '1', flexShrink: 0 }}>{badges}</span>}
         {infoLine && subSpan(infoLine)}
         {payLine && subSpan(payLine)}
+        {collectedLine && subSpan(collectedLine)}
       </div>
     );
-  }, [monitors, groupColors, expandedPax2, togglePax2, currentUser]);
+  }, [monitors, groupColors, expandedPax2, togglePax2, currentUser, monitorDayTotals]);
 
   const resourceLabelContent = useCallback((arg: { resource: { id: string; title: string } }) => (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '4px', minWidth: 0 }}>
