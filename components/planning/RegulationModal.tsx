@@ -103,6 +103,19 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
 
   const visibleSet = useMemo(() => new Set(visibleMonitorIds), [visibleMonitorIds]);
 
+  // Moniteurs qui ont au moins une réservation le jour affiché
+  const bookedOnDayIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const ev of calendarEvents) {
+      const ep = ev.extendedProps;
+      if (ep.status === 'booked' && ep.start_time.startsWith(currentDate)) {
+        ids.add(ep.monitor_id?.toString() ?? '');
+      }
+    }
+    ids.delete('');
+    return ids;
+  }, [calendarEvents, currentDate]);
+
   // Régulation du jour courant depuis les données déjà chargées
   const todayRegulation = useMemo(() => {
     const flew: Record<string, number> = {};
@@ -158,7 +171,7 @@ export default function RegulationModal({ currentDate, calendarEvents, monitors,
 
   const pastRegulation = useMemo(() => {
     if (!pastData) return null;
-    const relevant = pastData.filter(m => m.flights.length > 0);
+    const relevant = pastData.filter(m => m.flights.length > 0 && bookedOnDayIds.has(m.id));
     if (relevant.length === 0) return null;
 
     const flew: Record<string, number> = {};
