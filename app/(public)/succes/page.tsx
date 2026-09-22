@@ -40,6 +40,13 @@ function SuccessContent() {
               setGiftCode(data.code);
             }
             setStatus('success');
+            // Conversion Google Ads via GTM
+            if (typeof window !== 'undefined') {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const w = window as any;
+              w.dataLayer = w.dataLayer || [];
+              w.dataLayer.push({ event: 'purchase_confirmed' });
+            }
           }
         } else {
           setStatus('error');
