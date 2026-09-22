@@ -7,11 +7,9 @@ function updateConsent(granted: boolean) {
   if (typeof window === 'undefined') return;
   const val = granted ? 'granted' : 'denied';
   const w = window as any;
-  w.dataLayer = w.dataLayer || [];
-  w.dataLayer.push('consent', 'update', {
-    ad_storage: val,
-    analytics_storage: val,
-  });
+  if (typeof w.gtag === 'function') {
+    w.gtag('consent', 'update', { ad_storage: val, analytics_storage: val });
+  }
 }
 
 export default function ConsentBanner() {

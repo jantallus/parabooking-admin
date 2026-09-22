@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Consent Mode v2 — default denied, updated from localStorage if already set */}
         <Script id="consent-init" strategy="beforeInteractive">{`
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
+          window.gtag = function(){dataLayer.push(arguments);}
           gtag('consent', 'default', {
             ad_storage: 'denied',
             analytics_storage: 'denied',
