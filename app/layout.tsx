@@ -50,10 +50,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
         />
-      </head>
-      <body>
-        {/* Consent Mode v2 — default denied, updated from localStorage if already set */}
-        <Script id="consent-init" strategy="beforeInteractive">{`
+        {/* Consent Mode v2 — doit absolument être avant GTM */}
+        <script dangerouslySetInnerHTML={{ __html: `
           window.dataLayer = window.dataLayer || [];
           window.gtag = function(){dataLayer.push(arguments);}
           gtag('consent', 'default', {
@@ -68,7 +66,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               gtag('consent', 'update', { ad_storage: v, analytics_storage: v });
             }
           } catch(e) {}
-        `}</Script>
+        `}} />
+      </head>
+      <body>
         {/* Google Tag Manager */}
         <Script id="gtm" strategy="beforeInteractive">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
