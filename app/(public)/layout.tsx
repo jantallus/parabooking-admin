@@ -1,6 +1,7 @@
 "use client";
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import ConsentBanner from '@/components/ui/ConsentBanner';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           </ErrorBoundary>
         </ToastProvider>
       </main>
+      <ConsentBanner />
     </div>
   );
 }

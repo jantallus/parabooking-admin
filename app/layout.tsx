@@ -52,6 +52,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        {/* Consent Mode v2 — default denied, updated from localStorage if already set */}
+        <Script id="consent-init" strategy="beforeInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent', 'default', {
+            ad_storage: 'denied',
+            analytics_storage: 'denied',
+            wait_for_update: 500
+          });
+          try {
+            var c = localStorage.getItem('fluide_consent_v1');
+            if (c) {
+              var v = JSON.parse(c).granted ? 'granted' : 'denied';
+              gtag('consent', 'update', { ad_storage: v, analytics_storage: v });
+            }
+          } catch(e) {}
+        `}</Script>
         {/* Google Tag Manager */}
         <Script id="gtm" strategy="beforeInteractive">{`
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
