@@ -106,7 +106,7 @@ export function VoucherModal({ cardToEdit, flights, complements, onClose, onSave
       }
       payload = {
         ...payload,
-        flight_type_id: (giftCardMode === 'prestation' && selectedPrestation.startsWith('flight|')) ? newVoucher.flight_type_id : null,
+        flight_type_id: (giftCardMode === 'prestation' && selectedPrestation.startsWith('flight|')) ? (newVoucher.flight_type_id ? Number(newVoucher.flight_type_id) : null) : null,
         buyer_name: newVoucher.buyer_name,
         beneficiary_name: '',
         price_paid_cents: Math.round(parseFloat(newVoucher.gift_value) * 100),
@@ -129,7 +129,7 @@ export function VoucherModal({ cardToEdit, flights, complements, onClose, onSave
       }
       payload = {
         ...payload,
-        flight_type_id: newVoucher.flight_type_id || null,
+        flight_type_id: newVoucher.flight_type_id ? Number(newVoucher.flight_type_id) : null,
         discount_type: newVoucher.discount_type,
         discount_value: parseFloat(newVoucher.discount_value),
         discount_scope: newVoucher.discount_scope,
