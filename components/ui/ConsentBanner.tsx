@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 const STORAGE_KEY = 'fluide_consent_v1';
 
@@ -14,8 +15,10 @@ function updateConsent(granted: boolean) {
 
 export default function ConsentBanner() {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    if (pathname === '/login') return;
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) setVisible(true);
