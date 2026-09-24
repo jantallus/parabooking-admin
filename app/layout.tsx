@@ -57,6 +57,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           gtag('consent', 'default', {
             ad_storage: 'denied',
             analytics_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
             wait_for_update: 500
           });
           try {

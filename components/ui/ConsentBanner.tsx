@@ -9,7 +9,7 @@ function updateConsent(granted: boolean) {
   const val = granted ? 'granted' : 'denied';
   const w = window as any;
   if (typeof w.gtag === 'function') {
-    w.gtag('consent', 'update', { ad_storage: val, analytics_storage: val });
+    w.gtag('consent', 'update', { ad_storage: val, analytics_storage: val, ad_user_data: val, ad_personalization: val });
   }
 }
 

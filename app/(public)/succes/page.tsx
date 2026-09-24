@@ -45,7 +45,7 @@ function SuccessContent() {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const w = window as any;
               w.dataLayer = w.dataLayer || [];
-              w.dataLayer.push({ event: 'purchase_confirmed', value: data.amount_total ? data.amount_total / 100 : 70, currency: 'EUR' });
+              w.dataLayer.push({ event: 'purchase_confirmed', value: data.amount_total ? data.amount_total / 100 : 70, currency: 'EUR', transaction_id: session_id });
             }
           }
         } else {
