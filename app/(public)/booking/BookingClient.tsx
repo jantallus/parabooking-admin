@@ -1107,10 +1107,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
           <div className="max-w-7xl mx-auto mb-12 rounded-[10px] p-6 shadow-sm" style={{ backgroundColor: 'rgba(49,39,131,0.04)' }}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 
-              <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center shrink-0 mt-1" style={{ color: '#312783' }}><Gift size={28} strokeWidth={1.5} /></div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px' }}>J'ai un bon cadeau</h4>
+              <div>
+                <div className="flex items-center gap-3" style={{ marginBottom: '10px' }}>
+                  <div style={{ color: '#312783' }}><Gift size={24} strokeWidth={1.5} /></div>
+                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700 }}>J'ai un bon cadeau</h4>
+                </div>
+                <div>
                   {(appliedVoucher || appliedPartner) ? (
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: appliedVoucher ? '10px' : 0 }}>
