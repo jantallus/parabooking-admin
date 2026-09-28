@@ -121,6 +121,12 @@ export interface FlightType {
   media_included?: boolean;
   passengers_per_slot?: number;
   tenant?: string;
+  is_giftable?: boolean;
+  gift_pdf_background_url?: string;
+  gift_custom_line_1?: string;
+  gift_custom_line_2?: string;
+  gift_custom_line_3?: string;
+  gift_validity_months?: number;
 }
 
 export interface Complement {

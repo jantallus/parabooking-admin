@@ -1317,23 +1317,20 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             </div>
                           );
                         })()}
-                        {!appliedVoucher && !appliedPartner && (() => {
-                          const matchedTpl = giftTemplates.find(t => t.price_cents === flight.price_cents);
-                          const offrirHref = matchedTpl
-                            ? `/bons-cadeaux?templateId=${matchedTpl.id}&flightName=${encodeURIComponent(flight.name)}`
-                            : `/bons-cadeaux?flightId=${flight.id}&flightName=${encodeURIComponent(flight.name)}&flightPrice=${flight.price_cents}`;
-                          return (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); window.location.href = offrirHref; }}
-                              className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2"
-                              style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
-                              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
-                              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
-                            >
-                              <Gift size={16} strokeWidth={1.5} />Offrir
-                            </button>
-                          );
-                        })()}
+                        {!appliedVoucher && !appliedPartner && flight.is_giftable && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.location.href = `/bons-cadeaux?flightId=${flight.id}&flightName=${encodeURIComponent(flight.name)}&flightPrice=${flight.price_cents}`;
+                            }}
+                            className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2"
+                            style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
+                          >
+                            <Gift size={16} strokeWidth={1.5} />Offrir
+                          </button>
+                        )}
                       </div>
                       <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white w-full py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem' }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
                         Réserver ce vol

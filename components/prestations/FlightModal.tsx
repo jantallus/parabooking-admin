@@ -29,6 +29,12 @@ const EMPTY_FORM = {
   activity_gopro: false,
   media_included: false,
   passengers_per_slot: 1,
+  is_giftable: false,
+  gift_pdf_background_url: '',
+  gift_custom_line_1: '',
+  gift_custom_line_2: '',
+  gift_custom_line_3: '',
+  gift_validity_months: 12,
 };
 
 interface Props {
@@ -71,6 +77,12 @@ export function FlightModal({ flightToEdit, slotDefs, onClose, onSaved, tenant }
         activity_gopro: flightToEdit.activity_gopro || false,
         media_included: flightToEdit.media_included || false,
         passengers_per_slot: flightToEdit.passengers_per_slot ?? 1,
+        is_giftable: flightToEdit.is_giftable || false,
+        gift_pdf_background_url: flightToEdit.gift_pdf_background_url || '',
+        gift_custom_line_1: flightToEdit.gift_custom_line_1 || '',
+        gift_custom_line_2: flightToEdit.gift_custom_line_2 || '',
+        gift_custom_line_3: flightToEdit.gift_custom_line_3 || '',
+        gift_validity_months: flightToEdit.gift_validity_months ?? 12,
       });
     } else {
       setFormData({ ...EMPTY_FORM });
@@ -290,6 +302,39 @@ export function FlightModal({ flightToEdit, slotDefs, onClose, onSaved, tenant }
               </div>
             )}
           </div>
+
+          {tenant !== 'aravis' && (
+            <div className="mt-2 p-4 rounded-2xl border" style={{ backgroundColor: 'rgba(230,0,126,0.04)', borderColor: 'rgba(230,0,126,0.2)' }}>
+              <label className="flex items-center gap-3 cursor-pointer mb-3">
+                <input type="checkbox" className="w-5 h-5 rounded" style={{ accentColor: '#E6007E' }} checked={formData.is_giftable} onChange={e => set({ is_giftable: e.target.checked })} />
+                <span className="font-black text-xs uppercase" style={{ color: '#E6007E' }}>🎁 Ce vol peut être offert (bouton "Offrir" visible)</span>
+              </label>
+              {formData.is_giftable && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Image de fond du PDF (URL Cloudinary)</label>
+                    <input type="text" placeholder="https://res.cloudinary.com/..." className="w-full border-2 border-slate-100 rounded-2xl p-3 font-medium text-xs outline-none focus:border-pink-300 text-slate-700 mt-1" value={formData.gift_pdf_background_url} onChange={e => set({ gift_pdf_background_url: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Ligne 1 (nom du vol sur le bon)</label>
+                    <input type="text" maxLength={80} placeholder={`Ex: Vol ${formData.name || 'Beauregard'}`} className="w-full border-2 border-slate-100 rounded-2xl p-3 font-medium text-xs outline-none focus:border-pink-300 text-slate-700 mt-1" value={formData.gift_custom_line_1} onChange={e => set({ gift_custom_line_1: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Ligne 2</label>
+                    <input type="text" maxLength={80} placeholder={`Ex: Valeur : ${formData.price_cents / 100}€`} className="w-full border-2 border-slate-100 rounded-2xl p-3 font-medium text-xs outline-none focus:border-pink-300 text-slate-700 mt-1" value={formData.gift_custom_line_2} onChange={e => set({ gift_custom_line_2: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Ligne 3 (optionnel)</label>
+                    <input type="text" maxLength={80} placeholder="Ex: La Clusaz - Massif des Aravis" className="w-full border-2 border-slate-100 rounded-2xl p-3 font-medium text-xs outline-none focus:border-pink-300 text-slate-700 mt-1" value={formData.gift_custom_line_3} onChange={e => set({ gift_custom_line_3: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Validité du bon (mois)</label>
+                    <input type="number" min={1} max={60} className="w-full border-2 border-slate-100 rounded-2xl p-3 font-bold outline-none focus:border-pink-300 text-slate-800 mt-1" value={formData.gift_validity_months} onChange={e => set({ gift_validity_months: Number(e.target.value) })} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="pt-4 space-y-3">
             <button onClick={handleSave} disabled={isSaving} className={`w-full py-4 md:py-5 rounded-3xl font-black uppercase italic shadow-xl transition-transform ${isSaving ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-[1.02]'}`}>
