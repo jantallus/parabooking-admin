@@ -821,6 +821,14 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         setAppliedPartner(partnerData);
         setAppliedVoucher(null);
         setEarlyVoucherInput('');
+        if (partnerData.allowed_flight_types?.length === 1) {
+          const targetId = partnerData.allowed_flight_types[0].flight_type_id.toString();
+          const targetFlight = flights.find(f => f.id.toString() === targetId);
+          if (targetFlight) {
+            setSelectedFlight(targetFlight);
+            setStep(2);
+          }
+        }
         return;
       }
       const res = await fetch(`/api/proxy/gift-cards/check/${earlyVoucherInput.trim()}`);
