@@ -666,8 +666,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   const [nextAvailableDate, setNextAvailableDate] = useState<string | null>(null);
   useEffect(() => {
+    if (!selectedFlight) return;
     const today = getLocalYYYYMMDD(new Date());
-    fetch(`/api/proxy/public/next-available?start=${today}`)
+    const params = `start=${today}&flight_type_id=${selectedFlight.id}`;
+    fetch(`/api/proxy/public/next-available?${params}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => setNextAvailableDate(data?.date ?? null))
       .catch(() => setNextAvailableDate(null));
@@ -1531,24 +1533,27 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   })() ? (
                   /* Hors-saison pour ce vol — message saisonnier */
                   (() => {
-                    const s = String(selectedFlight!.season || 'ALL').toUpperCase().trim();
-                    const isWinterFlight = s === 'WINTER' || s === 'HIVER';
+                    const nextSeasonStr = nextAvailableDate;
+                    const nextSeasonLabel = nextSeasonStr
+                      ? new Date(nextSeasonStr + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : null;
                     return (
                       <div className="text-center py-14 px-6 bg-slate-50 rounded-[10px] border border-slate-100">
-                        <p style={{ fontSize: '1.05rem', fontWeight: 700, color: '#312783', marginBottom: '8px' }}>
-                          {isWinterFlight
-                            ? 'Prochaines dispos en ligne pour ce vol à partir de décembre.'
-                            : 'Pas de dispos pour ce vol avant juin.'}
-                        </p>
-                        <p style={{ fontSize: '1rem', fontWeight: 400, color: '#1D1D1B' }}>
-                          Avant cela, recherchez un créneau sur{' '}
-                          <a
-                            href={isWinterFlight ? 'https://www.fluide-parapente.fr/bapteme-vol-ete/' : 'https://www.fluide-parapente.fr/bapteme-vol-biplace/'}
-                            style={{ color: '#E6007E', fontWeight: 700, textDecoration: 'underline' }}
-                          >
-                            {isWinterFlight ? 'un vol été' : 'nos vols hiver'}
-                          </a>
-                          {' '}ou appelez le{' '}
+                        <p style={{ fontSize: '1.05rem', fontWeight: 400, color: '#1D1D1B' }}>
+                          {nextSeasonStr ? (
+                            <>
+                              Pas de créneaux disponibles pour ce vol avant le{' '}
+                              <button
+                                onClick={() => { setPickedDate(nextSeasonStr); setGridStartDate(calculateGridStart(nextSeasonStr, displayDaysCount)); }}
+                                style={{ color: '#E6007E', fontWeight: 700, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}
+                              >
+                                {nextSeasonLabel}
+                              </button>
+                            </>
+                          ) : (
+                            'Aucun créneau disponible en ligne pour ce vol actuellement'
+                          )}
+                          {' '}— ou appelez le{' '}
                           <a href="tel:+33677285102" style={{ color: '#E6007E', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
                             06 77 28 51 02
                           </a>
