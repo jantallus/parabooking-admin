@@ -1328,38 +1328,40 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       )}
                     </div>
                     <div className="mt-2 pt-3 border-t border-slate-100">
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        {(() => {
-                          const voucherCents = appliedVoucher ? getVoucherCents(appliedVoucher) : null;
-                          if (!voucherCents) {
-                            return <div className="shrink-0" style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>;
-                          }
-                          const delta = flight.price_cents - voucherCents;
-                          if (delta === 0) {
-                            return <div className="shrink-0" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>;
-                          }
-                          if (delta < 0) {
-                            return (
-                              <div className="shrink-0 text-right">
-                                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>{(-delta) / 100}€ de solde pour les options</div>
-                              </div>
-                            );
-                          }
-                          return (
-                            <div className="shrink-0 text-right">
-                              <div style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'line-through' }}>{flight.price_cents / 100}€</div>
-                              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#E6007E' }}>+ {delta / 100}€</div>
-                            </div>
-                          );
-                        })()}
+                      {(() => {
+                        const voucherCents = appliedVoucher ? getVoucherCents(appliedVoucher) : null;
+                        const delta = voucherCents != null ? flight.price_cents - voucherCents : null;
+                        return (
+                          <div className="mb-3">
+                            {voucherCents == null ? (
+                              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1 }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
+                            ) : delta === 0 ? (
+                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
+                            ) : delta! < 0 ? (
+                              <>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783', marginTop: '2px' }}>{(-delta!) / 100}€ de solde pour les options</div>
+                              </>
+                            ) : (
+                              <>
+                                <div style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
+                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>+ {delta! / 100}€</div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })()}
+                      <div className="flex gap-2">
+                        <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
+                          Réserver ce vol
+                        </button>
                         {!appliedVoucher && !appliedPartner && flight.is_giftable && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               window.location.href = `/bons-cadeaux?flightId=${flight.id}&flightName=${encodeURIComponent(flight.name)}&flightPrice=${flight.price_cents}`;
                             }}
-                            className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2"
+                            className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
                             style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
                             onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
@@ -1368,9 +1370,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           </button>
                         )}
                       </div>
-                      <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white w-full py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem' }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
-                        Réserver ce vol
-                      </button>
                     </div>
                   </div>
                 )})}
