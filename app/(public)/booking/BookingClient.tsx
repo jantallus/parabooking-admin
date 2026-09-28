@@ -1268,8 +1268,16 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             return <div className="shrink-0" style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>;
                           }
                           const delta = flight.price_cents - voucherCents;
-                          if (delta <= 0) {
+                          if (delta === 0) {
                             return <div className="shrink-0" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>;
+                          }
+                          if (delta < 0) {
+                            return (
+                              <div className="shrink-0 text-right">
+                                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>+ {(-delta) / 100}€ pour les options</div>
+                              </div>
+                            );
                           }
                           return (
                             <div className="shrink-0 text-right">
