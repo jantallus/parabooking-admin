@@ -772,11 +772,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   });
 
   const displayedFlights = (() => {
-    if (!appliedVoucher || appliedVoucher.type !== 'gift_card') return filteredFlights;
+    if (!appliedVoucher) return filteredFlights;
     if (appliedVoucher.flight_type_id) {
       return filteredFlights.filter(f => f.id.toString() === appliedVoucher.flight_type_id!.toString());
     }
-    const voucherCents = Number(appliedVoucher.price_paid_cents);
+    const voucherCents = getVoucherCents(appliedVoucher);
+    if (!voucherCents) return filteredFlights;
     return [...filteredFlights].sort((a, b) => {
       const aExact = a.price_cents === voucherCents;
       const bExact = b.price_cents === voucherCents;
@@ -809,6 +810,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       needsWeight && !p.weightChecked ? `Confirmation de poids passager ${i + 1}` : null,
     ]),
   ].filter((v): v is string => !!v) : [];
+
+  const getVoucherCents = (v: GiftCard): number | null => {
+    if (v.type === 'gift_card') return Number(v.price_paid_cents) || null;
+    if (v.type === 'promo' && v.discount_type === 'fixed' && v.discount_value != null) return v.discount_value * 100;
+    return null;
+  };
 
   const handleEarlyVoucher = async () => {
     if (!earlyVoucherInput.trim()) return;
@@ -1255,8 +1262,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                     </div>
                     <div className="mt-2 pt-3 border-t border-slate-100">
                       <div className="flex items-center justify-between gap-2 mb-3">
-                        {appliedVoucher?.type === 'gift_card' ? (() => {
-                          const voucherCents = Number(appliedVoucher.price_paid_cents);
+                        {(() => {
+                          const voucherCents = appliedVoucher ? getVoucherCents(appliedVoucher) : null;
+                          if (!voucherCents) {
+                            return <div className="shrink-0" style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>;
+                          }
                           const delta = flight.price_cents - voucherCents;
                           if (delta <= 0) {
                             return <div className="shrink-0" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>;
@@ -1267,9 +1277,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#E6007E' }}>+ {delta / 100}€</div>
                             </div>
                           );
-                        })() : (
-                          <div className="shrink-0" style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
-                        )}
+                        })()}
                         {(() => {
                           const matchedTpl = giftTemplates.find(t => t.price_cents === flight.price_cents);
                           if (!matchedTpl) return null;
