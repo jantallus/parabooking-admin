@@ -65,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             var c = localStorage.getItem('fluide_consent_v1');
             if (c) {
               var v = JSON.parse(c).granted ? 'granted' : 'denied';
-              gtag('consent', 'update', { ad_storage: v, analytics_storage: v });
+              gtag('consent', 'update', { ad_storage: v, analytics_storage: v, ad_user_data: v, ad_personalization: v });
             }
           } catch(e) {}
         `}} />
