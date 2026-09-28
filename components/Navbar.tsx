@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { useCart } from '@/lib/CartContext';
 
 const LINKS = [
   { label: 'Parapente La Clusaz',  href: 'https://www.fluide-parapente.fr/' },
@@ -16,6 +17,7 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
+  const { cartSummary, openCart } = useCart();
   const [hoveredMobileLink, setHoveredMobileLink] = useState<string | null>(null);
   const [mobileCTAHovered, setMobileCTAHovered] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -87,31 +89,63 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
         </nav>
 
         {/* CTA */}
-        <a
-          href={CTA.href}
-          className="hidden lg:inline-block nav-cta"
-          style={{
-            position: 'absolute',
-            right: '29px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: ctaHovered ? '#312783' : '#E6007E',
-            color: '#fff',
-            fontFamily: 'inherit',
-            fontSize: '16px',
-            fontWeight: 700,
-            lineHeight: '24px',
-            padding: '12px 17px',
-            borderRadius: '5px',
-            textDecoration: 'none',
-            whiteSpace: 'nowrap',
-            transition: 'background-color 0.3s ease',
-          }}
-          onPointerEnter={() => setCtaHovered(true)}
-          onPointerLeave={() => setCtaHovered(false)}
-        >
-          {CTA.label}
-        </a>
+        {cartSummary && cartSummary.totalItems > 0 && openCart ? (
+          <button
+            className="hidden lg:inline-flex nav-cta"
+            onClick={openCart}
+            style={{
+              position: 'absolute',
+              right: '29px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              backgroundColor: ctaHovered ? '#2a2070' : '#312783',
+              color: '#fff',
+              fontFamily: 'inherit',
+              fontSize: '15px',
+              fontWeight: 700,
+              lineHeight: '24px',
+              padding: '10px 17px',
+              borderRadius: '5px',
+              border: '2px solid rgba(230,0,126,0.7)',
+              whiteSpace: 'nowrap',
+              transition: 'background-color 0.2s ease',
+              cursor: 'pointer',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+            onPointerEnter={() => setCtaHovered(true)}
+            onPointerLeave={() => setCtaHovered(false)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span>{cartSummary.totalItems} vol{cartSummary.totalItems > 1 ? 's' : ''} · {cartSummary.finalPrice / 100}€</span>
+          </button>
+        ) : (
+          <a
+            href={CTA.href}
+            className="hidden lg:inline-block nav-cta"
+            style={{
+              position: 'absolute',
+              right: '29px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              backgroundColor: ctaHovered ? '#312783' : '#E6007E',
+              color: '#fff',
+              fontFamily: 'inherit',
+              fontSize: '16px',
+              fontWeight: 700,
+              lineHeight: '24px',
+              padding: '12px 17px',
+              borderRadius: '5px',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              transition: 'background-color 0.3s ease',
+            }}
+            onPointerEnter={() => setCtaHovered(true)}
+            onPointerLeave={() => setCtaHovered(false)}
+          >
+            {CTA.label}
+          </a>
+        )}
 
         {/* Mobile : calendrier + hamburger */}
         <div
