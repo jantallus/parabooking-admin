@@ -1129,7 +1129,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                         </button>
                       </div>
                       {appliedVoucher && (
-                        <div style={{ background: 'rgba(49,39,131,0.06)', borderRadius: '8px', padding: '10px 12px', fontSize: '0.82rem', color: '#1D1D1B', lineHeight: 1.6 }}>
+                        <div ref={el => { if (el && !el.dataset.watched) { el.dataset.watched = '1'; setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); } }} style={{ background: 'rgba(49,39,131,0.06)', borderRadius: '8px', padding: '10px 12px', fontSize: '0.82rem', color: '#1D1D1B', lineHeight: 1.6 }}>
                           {appliedVoucher.flight_type_id ? (
                             <>
                               <div style={{ fontWeight: 700, marginBottom: '4px' }}>
