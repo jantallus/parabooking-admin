@@ -47,6 +47,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const bookingRootRef = useRef<HTMLDivElement>(null);
   const datesBarRef = useRef<HTMLDivElement>(null);
   const datesBarNaturalTopRef = useRef<number | null>(null);
+  const flightsGridRef = useRef<HTMLDivElement>(null);
   const cartBarRef = useRef<HTMLDivElement>(null);
   const [isEmbed, setIsEmbed] = useState(false);
   useEffect(() => {
@@ -888,6 +889,14 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     }
   };
 
+  useEffect(() => {
+    if (!appliedVoucher) return;
+    const t = setTimeout(() => {
+      flightsGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 350);
+    return () => clearTimeout(t);
+  }, [appliedVoucher?.code]);
+
   const handleApplyVoucher = async () => {
     if (!voucherInput.trim()) return;
     setIsApplyingVoucher(true);
@@ -1114,16 +1123,41 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 <div style={{ flex: 1 }}>
                   <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px' }}>J'ai un bon cadeau</h4>
                   {(appliedVoucher || appliedPartner) ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                      <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>
-                        ✅ {appliedPartner ? `Partenaire ${appliedPartner.name}` : `Code ${appliedVoucher!.code.toUpperCase()} activé`}
-                      </span>
-                      <button
-                        onClick={() => { appliedPartner ? setAppliedPartner(null) : setAppliedVoucher(null); }}
-                        style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                      >
-                        Retirer
-                      </button>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: appliedVoucher ? '10px' : 0 }}>
+                        <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>
+                          ✅ {appliedPartner ? `Partenaire ${appliedPartner.name}` : `Code ${appliedVoucher!.code.toUpperCase()} activé`}
+                        </span>
+                        <button
+                          onClick={() => { appliedPartner ? setAppliedPartner(null) : setAppliedVoucher(null); }}
+                          style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          Retirer
+                        </button>
+                      </div>
+                      {appliedVoucher && (
+                        <div style={{ background: 'rgba(49,39,131,0.06)', borderRadius: '8px', padding: '10px 12px', fontSize: '0.82rem', color: '#1D1D1B', lineHeight: 1.6 }}>
+                          {appliedVoucher.flight_type_id ? (
+                            <>
+                              <div style={{ fontWeight: 700, marginBottom: '4px' }}>
+                                🪂 {appliedVoucher.flight_name || 'Vol inclus'} — choisissez votre créneau ci-dessous
+                              </div>
+                              <div style={{ color: '#475569' }}>
+                                Des options (photos, vidéos) peuvent s'ajouter à la carte lors du choix du créneau.
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div style={{ fontWeight: 700, marginBottom: '4px' }}>
+                                💳 Avoir de {((Number(appliedVoucher.price_paid_cents) || 0) / 100).toFixed(0)}€ — utilisable sur toutes les formules
+                              </div>
+                              <div style={{ color: '#475569' }}>
+                                Si le vol est moins cher que l&apos;avoir, le solde reste disponible pour les options (photos, vidéos) ou reportable sur une prochaine réservation. Le code est réutilisable tant qu&apos;il reste du crédit.
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -1175,6 +1209,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             </div>
           </div>
 
+            <div ref={flightsGridRef} />
             {isLoading ? (
               /* ☠️ EFFET "SKELETON" POUR LES CARTES DE VOLS */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
