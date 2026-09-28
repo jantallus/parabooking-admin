@@ -15,7 +15,7 @@ export function useBookingData(
 
   useEffect(() => {
     const currentMonth = new Date().getMonth();
-    let defaultSeason: 'Standard' | 'Hiver' = (currentMonth >= 9 || currentMonth <= 3) ? 'Hiver' : 'Standard';
+    let defaultSeason: 'Standard' | 'Hiver' = (currentMonth >= 8 || currentMonth <= 3) ? 'Hiver' : 'Standard';
 
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
