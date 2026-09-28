@@ -760,6 +760,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     return getLocalYYYYMMDD(d);
   });
 
+  const getVoucherCents = (v: GiftCard): number | null => {
+    if (v.type === 'gift_card') return Number(v.price_paid_cents) || null;
+    if (v.type === 'promo' && v.discount_type === 'fixed' && v.discount_value != null) return v.discount_value * 100;
+    return null;
+  };
+
   const filteredFlights = flights.filter(f => {
     const flightSeason = String(f.season || 'ALL').toUpperCase().trim();
     const isLegacy = flightSeason === 'STANDARD' || flightSeason === 'ALL';
@@ -810,12 +816,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       needsWeight && !p.weightChecked ? `Confirmation de poids passager ${i + 1}` : null,
     ]),
   ].filter((v): v is string => !!v) : [];
-
-  const getVoucherCents = (v: GiftCard): number | null => {
-    if (v.type === 'gift_card') return Number(v.price_paid_cents) || null;
-    if (v.type === 'promo' && v.discount_type === 'fixed' && v.discount_value != null) return v.discount_value * 100;
-    return null;
-  };
 
   const handleEarlyVoucher = async () => {
     if (!earlyVoucherInput.trim()) return;
