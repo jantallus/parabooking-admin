@@ -244,10 +244,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         if (res.ok) {
           const data = await res.json();
           setAppliedVoucher(data);
-          if (data.flight_type_id) {
-            const targetFlight = flights.find(f => f.id.toString() === data.flight_type_id.toString());
-            if (targetFlight) { setSelectedFlight(targetFlight); setStep(2); }
-          }
         }
       } catch { /* silently ignore */ }
     };
