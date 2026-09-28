@@ -50,6 +50,7 @@ export function FlightModal({ flightToEdit, slotDefs, onClose, onSaved, tenant }
   const [formData, setFormData] = useState({ ...EMPTY_FORM });
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingGiftBg, setIsUploadingGiftBg] = useState(false);
 
   useEffect(() => {
     if (flightToEdit) {
@@ -126,6 +127,19 @@ export function FlightModal({ flightToEdit, slotDefs, onClose, onSaved, tenant }
       if (data.secure_url) set({ image_url: data.secure_url });
     } catch { toast.error("Erreur lors de l'envoi de l'image."); }
     finally { setIsUploading(false); }
+  };
+
+  const uploadGiftBg = async (file: File) => {
+    setIsUploadingGiftBg(true);
+    const dataForm = new FormData();
+    dataForm.append('file', file);
+    dataForm.append('upload_preset', 'fluide_preset');
+    try {
+      const res = await fetch('https://api.cloudinary.com/v1_1/dscvvpjyb/image/upload', { method: 'POST', body: dataForm });
+      const data = await res.json();
+      if (data.secure_url) set({ gift_pdf_background_url: data.secure_url });
+    } catch { toast.error("Erreur lors de l'envoi de l'image."); }
+    finally { setIsUploadingGiftBg(false); }
   };
 
   const displaySlots = slotDefs.filter(s => {
@@ -312,8 +326,20 @@ export function FlightModal({ flightToEdit, slotDefs, onClose, onSaved, tenant }
               {formData.is_giftable && (
                 <div className="mt-3 space-y-3">
                   <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Image de fond du PDF (URL Cloudinary)</label>
-                    <input type="text" placeholder="https://res.cloudinary.com/..." className="w-full border-2 border-slate-100 rounded-2xl p-3 font-medium text-xs outline-none focus:border-pink-300 text-slate-700 mt-1" value={formData.gift_pdf_background_url} onChange={e => set({ gift_pdf_background_url: e.target.value })} />
+                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Image de fond du PDF (A4 portrait recommandé)</label>
+                    <div className="flex flex-col sm:flex-row gap-3 mt-1">
+                      <input type="file" id="gift-bg-upload" accept="image/*" className="hidden"
+                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadGiftBg(f); e.currentTarget.value = ''; }} />
+                      <label htmlFor="gift-bg-upload" className={`flex items-center justify-center border-2 border-dashed rounded-2xl p-3 font-black uppercase text-[10px] tracking-widest transition-colors cursor-pointer ${isUploadingGiftBg ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-pink-50 text-pink-500 hover:bg-pink-100 border-pink-200 hover:border-pink-400'}`}>
+                        {isUploadingGiftBg ? '⏳ Envoi...' : '📸 Uploader'}
+                      </label>
+                      <input type="text" placeholder="Ou coller un lien Cloudinary..." className="flex-1 border-2 border-slate-100 rounded-2xl p-3 font-bold bg-slate-50 text-xs text-slate-500 outline-none focus:border-pink-300" value={formData.gift_pdf_background_url} onChange={e => set({ gift_pdf_background_url: e.target.value })} />
+                    </div>
+                    {formData.gift_pdf_background_url && (
+                      <div className="mt-2 h-20 rounded-2xl bg-cover bg-center border-2 border-slate-200 shadow-inner relative group" style={{ backgroundImage: `url(${formData.gift_pdf_background_url})` }}>
+                        <button onClick={() => set({ gift_pdf_background_url: '' })} className="absolute top-1 right-1 bg-rose-500 text-white w-7 h-7 flex items-center justify-center rounded-full opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity shadow-md text-xs font-bold">✕</button>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Ligne 1 (nom du vol sur le bon)</label>
