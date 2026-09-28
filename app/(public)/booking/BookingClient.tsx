@@ -1133,7 +1133,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           {appliedVoucher.flight_type_id ? (
                             <>
                               <div style={{ fontWeight: 700, marginBottom: '4px' }}>
-                                🪂 {appliedVoucher.flight_name || 'Vol inclus'}
+                                {appliedVoucher.flight_name || 'Vol inclus'}
                               </div>
                               <div style={{ color: '#475569', marginBottom: '8px' }}>
                                 Des options (photos, vidéos) peuvent s&apos;ajouter à la carte lors du choix du créneau.
@@ -1142,7 +1142,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           ) : (
                             <>
                               <div style={{ fontWeight: 700, marginBottom: '4px' }}>
-                                💳 Avoir de {((Number(appliedVoucher.price_paid_cents) || 0) / 100).toFixed(0)}€ — utilisable sur toutes les formules
+                                Avoir de {((Number(appliedVoucher.price_paid_cents) || 0) / 100).toFixed(0)}€ — utilisable sur toutes les formules
                               </div>
                               <div style={{ color: '#475569', marginBottom: '8px' }}>
                                 Si le vol est moins cher que l&apos;avoir, le solde reste disponible pour les options (photos, vidéos) ou reportable sur une prochaine réservation. Le code est réutilisable tant qu&apos;il reste du crédit.
