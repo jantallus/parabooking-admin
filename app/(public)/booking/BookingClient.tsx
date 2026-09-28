@@ -53,36 +53,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     try { setIsEmbed(window.self !== window.top); } catch { setIsEmbed(true); }
   }, []);
 
-  // Auto-application du bon cadeau si passé en param URL (?bon=CODE)
-  useEffect(() => {
-    if (!bonParam) return;
-    const apply = async () => {
-      try {
-        const partnerRes = await fetch(`/api/proxy/public/partners/check/${bonParam}`);
-        if (partnerRes.ok) {
-          const partnerData = await partnerRes.json();
-          setAppliedPartner(partnerData);
-          if (partnerData.allowed_flight_types?.length === 1) {
-            const targetId = partnerData.allowed_flight_types[0].flight_type_id.toString();
-            const targetFlight = flights.find(f => f.id.toString() === targetId);
-            if (targetFlight) { setSelectedFlight(targetFlight); setStep(2); }
-          }
-          return;
-        }
-        const res = await fetch(`/api/proxy/gift-cards/check/${bonParam}`);
-        if (res.ok) {
-          const data = await res.json();
-          setAppliedVoucher(data);
-          if (data.flight_type_id) {
-            const targetFlight = flights.find(f => f.id.toString() === data.flight_type_id.toString());
-            if (targetFlight) { setSelectedFlight(targetFlight); setStep(2); }
-          }
-        }
-      } catch { /* silently ignore */ }
-    };
-    if (flights.length > 0) apply();
-  }, [bonParam, flights]);
-
   // Auto-resize : envoie la hauteur réelle au parent WordPress
   useEffect(() => {
     if (!isEmbed) return;
@@ -252,6 +222,36 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   // Disponibilités : se recharge automatiquement quand gridStartDate ou selectedFlight change
   const { rawSlots, isSearchingTimes } = useAvailabilities(gridStartDate, selectedFlight, displayDaysCount);
+
+  // Auto-application du bon cadeau si passé en param URL (?bon=CODE)
+  useEffect(() => {
+    if (!bonParam || flights.length === 0) return;
+    const apply = async () => {
+      try {
+        const partnerRes = await fetch(`/api/proxy/public/partners/check/${bonParam}`);
+        if (partnerRes.ok) {
+          const partnerData = await partnerRes.json();
+          setAppliedPartner(partnerData);
+          if (partnerData.allowed_flight_types?.length === 1) {
+            const targetId = partnerData.allowed_flight_types[0].flight_type_id.toString();
+            const targetFlight = flights.find(f => f.id.toString() === targetId);
+            if (targetFlight) { setSelectedFlight(targetFlight); setStep(2); }
+          }
+          return;
+        }
+        const res = await fetch(`/api/proxy/gift-cards/check/${bonParam}`);
+        if (res.ok) {
+          const data = await res.json();
+          setAppliedVoucher(data);
+          if (data.flight_type_id) {
+            const targetFlight = flights.find(f => f.id.toString() === data.flight_type_id.toString());
+            if (targetFlight) { setSelectedFlight(targetFlight); setStep(2); }
+          }
+        }
+      } catch { /* silently ignore */ }
+    };
+    apply();
+  }, [bonParam, flights]);
 
   // Mode direct : sélectionne le vol correspondant à ?vol= dès que l'API répond
   useEffect(() => {
