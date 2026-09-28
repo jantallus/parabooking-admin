@@ -1306,7 +1306,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             return (
                               <div className="shrink-0 text-right">
                                 <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>+ {(-delta) / 100}€ pour les options</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>{(-delta) / 100}€ de solde pour les options</div>
                               </div>
                             );
                           }
