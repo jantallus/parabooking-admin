@@ -1317,7 +1317,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             </div>
                           );
                         })()}
-                        {(() => {
+                        {!appliedVoucher && !appliedPartner && (() => {
                           const matchedTpl = giftTemplates.find(t => t.price_cents === flight.price_cents);
                           if (!matchedTpl) return null;
                           return (
