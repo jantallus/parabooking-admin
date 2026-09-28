@@ -36,18 +36,8 @@ const nextConfig: NextConfig = {
         headers: COMMON_SECURITY_HEADERS,
       },
       {
-        // Pages intégrables en iframe : autorise uniquement le site Fluide
-        source: "/(booking|bons-cadeaux)",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: "frame-ancestors 'self' https://www.fluide-parapente.fr http://localhost:* http://127.0.0.1:*",
-          },
-        ],
-      },
-      {
-        // Toutes les autres pages restent non-iframables
-        source: "/((?!booking|bons-cadeaux).*)",
+        // Toutes les pages sont non-iframables
+        source: "/(.*)",
         headers: [
           {
             key: "X-Frame-Options",
