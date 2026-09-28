@@ -889,13 +889,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     }
   };
 
-  useEffect(() => {
-    if (!appliedVoucher) return;
-    const t = setTimeout(() => {
-      flightsGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 350);
-    return () => clearTimeout(t);
-  }, [appliedVoucher?.code]);
 
   const handleApplyVoucher = async () => {
     if (!voucherInput.trim()) return;
@@ -1140,10 +1133,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           {appliedVoucher.flight_type_id ? (
                             <>
                               <div style={{ fontWeight: 700, marginBottom: '4px' }}>
-                                🪂 {appliedVoucher.flight_name || 'Vol inclus'} — choisissez votre créneau ci-dessous
+                                🪂 {appliedVoucher.flight_name || 'Vol inclus'}
                               </div>
-                              <div style={{ color: '#475569' }}>
-                                Des options (photos, vidéos) peuvent s'ajouter à la carte lors du choix du créneau.
+                              <div style={{ color: '#475569', marginBottom: '8px' }}>
+                                Des options (photos, vidéos) peuvent s&apos;ajouter à la carte lors du choix du créneau.
                               </div>
                             </>
                           ) : (
@@ -1151,11 +1144,17 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               <div style={{ fontWeight: 700, marginBottom: '4px' }}>
                                 💳 Avoir de {((Number(appliedVoucher.price_paid_cents) || 0) / 100).toFixed(0)}€ — utilisable sur toutes les formules
                               </div>
-                              <div style={{ color: '#475569' }}>
+                              <div style={{ color: '#475569', marginBottom: '8px' }}>
                                 Si le vol est moins cher que l&apos;avoir, le solde reste disponible pour les options (photos, vidéos) ou reportable sur une prochaine réservation. Le code est réutilisable tant qu&apos;il reste du crédit.
                               </div>
                             </>
                           )}
+                          <button
+                            onClick={() => flightsGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                            style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#312783', fontWeight: 700, fontSize: '0.82rem', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                          >
+                            Voir les formules compatibles <span style={{ fontSize: '1rem' }}>↓</span>
+                          </button>
                         </div>
                       )}
                     </div>
