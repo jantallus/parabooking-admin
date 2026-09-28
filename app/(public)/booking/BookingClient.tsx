@@ -249,6 +249,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [appliedPartner, setAppliedPartner] = useState<Partner | null>(null);
   const [voucherError, setVoucherError] = useState('');
   const [isApplyingVoucher, setIsApplyingVoucher] = useState(false);
+  const [earlyVoucherInput, setEarlyVoucherInput] = useState('');
+  const [isValidatingEarlyVoucher, setIsValidatingEarlyVoucher] = useState(false);
+  const [earlyVoucherError, setEarlyVoucherError] = useState('');
   const [contact, setContact] = useState({ firstName: '', lastName: '', phone: '', email: '', isPassenger: false, notes: '' });
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
@@ -758,7 +761,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   });
 
   const filteredFlights = flights.filter(f => {
-    const flightSeason = String(f.season || 'ALL').toUpperCase().trim(); 
+    const flightSeason = String(f.season || 'ALL').toUpperCase().trim();
     const isLegacy = flightSeason === 'STANDARD' || flightSeason === 'ALL';
 
     if (activeSeason === 'Hiver') {
@@ -767,6 +770,21 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       return flightSeason === 'SUMMER' || flightSeason === 'ETE' || flightSeason === 'ÉTÉ' || isLegacy;
     }
   });
+
+  const displayedFlights = (() => {
+    if (!appliedVoucher || appliedVoucher.type !== 'gift_card') return filteredFlights;
+    if (appliedVoucher.flight_type_id) {
+      return filteredFlights.filter(f => f.id.toString() === appliedVoucher.flight_type_id!.toString());
+    }
+    const voucherCents = Number(appliedVoucher.price_paid_cents);
+    return [...filteredFlights].sort((a, b) => {
+      const aExact = a.price_cents === voucherCents;
+      const bExact = b.price_cents === voucherCents;
+      if (aExact && !bExact) return -1;
+      if (bExact && !aExact) return 1;
+      return 0;
+    });
+  })();
 
   const pf = appliedPartner?.booking_fields;
   const needsName   = !pf || pf.name   !== false;
@@ -791,6 +809,36 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       needsWeight && !p.weightChecked ? `Confirmation de poids passager ${i + 1}` : null,
     ]),
   ].filter((v): v is string => !!v) : [];
+
+  const handleEarlyVoucher = async () => {
+    if (!earlyVoucherInput.trim()) return;
+    setIsValidatingEarlyVoucher(true);
+    setEarlyVoucherError('');
+    try {
+      const partnerRes = await fetch(`/api/proxy/public/partners/check/${earlyVoucherInput.trim()}`);
+      if (partnerRes.ok) {
+        const partnerData = await partnerRes.json();
+        setAppliedPartner(partnerData);
+        setAppliedVoucher(null);
+        setEarlyVoucherInput('');
+        return;
+      }
+      const res = await fetch(`/api/proxy/gift-cards/check/${earlyVoucherInput.trim()}`);
+      if (!res.ok) {
+        const errData = await res.json();
+        setEarlyVoucherError(errData.message || "Code invalide ou expiré");
+      } else {
+        const data = await res.json();
+        setAppliedPartner(null);
+        setAppliedVoucher(data);
+        setEarlyVoucherInput('');
+      }
+    } catch {
+      setEarlyVoucherError("Erreur de connexion.");
+    } finally {
+      setIsValidatingEarlyVoucher(false);
+    }
+  };
 
   const handleApplyVoucher = async () => {
     if (!voucherInput.trim()) return;
@@ -1014,12 +1062,45 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 
               <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center shrink-0" style={{ color: '#312783' }}><Gift size={28} strokeWidth={1.5} /></div>
-                <div>
-                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700, marginBottom: '4px' }}>Bon Cadeau</h4>
-                  <p style={{ color: '#1D1D1B', fontSize: '1.125rem', fontWeight: 400, lineHeight: 1.625 }}>
-                    Vous avez un code cadeau, un code promo ? Inutile de le chercher maintenant, vous pourrez le saisir à la dernière étape, juste avant le paiement.
-                  </p>
+                <div className="flex items-center justify-center shrink-0 mt-1" style={{ color: '#312783' }}><Gift size={28} strokeWidth={1.5} /></div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px' }}>J'ai un bon cadeau</h4>
+                  {(appliedVoucher || appliedPartner) ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                      <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>
+                        ✅ {appliedPartner ? `Partenaire ${appliedPartner.name}` : `Code ${appliedVoucher!.code.toUpperCase()} activé`}
+                      </span>
+                      <button
+                        onClick={() => { appliedPartner ? setAppliedPartner(null) : setAppliedVoucher(null); }}
+                        style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      >
+                        Retirer
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <input
+                          type="text"
+                          placeholder="Ex: FLUIDE-1234"
+                          value={earlyVoucherInput}
+                          onChange={e => { setEarlyVoucherInput(e.target.value.toUpperCase()); setEarlyVoucherError(''); }}
+                          onKeyDown={e => e.key === 'Enter' && handleEarlyVoucher()}
+                          style={{ flex: '1 1 140px', border: '2px solid rgba(49,39,131,0.2)', borderRadius: '8px', padding: '8px 12px', fontWeight: 700, fontSize: '0.875rem', outline: 'none', textTransform: 'uppercase', color: '#312783', backgroundColor: 'white' }}
+                        />
+                        <button
+                          onClick={handleEarlyVoucher}
+                          disabled={isValidatingEarlyVoucher || !earlyVoucherInput.trim()}
+                          style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: earlyVoucherInput.trim() ? '#312783' : 'rgba(49,39,131,0.3)', color: 'white', fontWeight: 700, fontSize: '0.875rem', cursor: earlyVoucherInput.trim() ? 'pointer' : 'default', border: 'none', whiteSpace: 'nowrap' }}
+                        >
+                          {isValidatingEarlyVoucher ? '…' : 'Valider'}
+                        </button>
+                      </div>
+                      {earlyVoucherError && (
+                        <p style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600, marginTop: '4px' }}>{earlyVoucherError}</p>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1074,11 +1155,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   </div>
                 ))}
               </div>
-            ) : filteredFlights.length === 0 ? (
+            ) : displayedFlights.length === 0 ? (
                <div className="text-center py-20 bg-white rounded-[10px] border border-slate-100"><Wind size={48} strokeWidth={1} style={{ color: '#312783', margin: '0 auto 16px', display: 'block' }} /><h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#312783' }}>Aucun vol configuré pour cette saison</h3></div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredFlights.map((flight) => {
+                {displayedFlights.map((flight) => {
                   const s = String(flight.season || 'ALL').toUpperCase().trim();
                   const isWinter = s === 'WINTER' || s === 'HIVER';
                   const isSummer = s === 'SUMMER' || s === 'ETE' || s === 'ÉTÉ';
@@ -1166,7 +1247,21 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                     </div>
                     <div className="mt-2 pt-3 border-t border-slate-100">
                       <div className="flex items-center justify-between gap-2 mb-3">
-                        <div className="shrink-0" style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
+                        {appliedVoucher?.type === 'gift_card' ? (() => {
+                          const voucherCents = Number(appliedVoucher.price_paid_cents);
+                          const delta = flight.price_cents - voucherCents;
+                          if (delta <= 0) {
+                            return <div className="shrink-0" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>;
+                          }
+                          return (
+                            <div className="shrink-0 text-right">
+                              <div style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'line-through' }}>{flight.price_cents / 100}€</div>
+                              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#E6007E' }}>+ {delta / 100}€</div>
+                            </div>
+                          );
+                        })() : (
+                          <div className="shrink-0" style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
+                        )}
                         {(() => {
                           const matchedTpl = giftTemplates.find(t => t.price_cents === flight.price_cents);
                           if (!matchedTpl) return null;
@@ -1230,7 +1325,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                         {showFlightSelect && (
                           <div className="absolute left-0 mt-2 z-50 bg-white rounded-[10px] border border-slate-200 overflow-hidden"
                             style={{ minWidth: '100%', boxShadow: '0 8px 32px rgba(49,39,131,0.13)' }}>
-                            {filteredFlights.map(f => {
+                            {displayedFlights.map(f => {
                               const isActive = f.id === selectedFlight.id;
                               return (
                                 <button
