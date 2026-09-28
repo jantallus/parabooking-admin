@@ -276,29 +276,29 @@ export default function CadeauPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center shrink-0 mt-1" style={{ color: '#312783' }}><Gift size={28} strokeWidth={1.5} /></div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px' }}>J'ai déjà un bon cadeau</h4>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <input
-                      type="text"
-                      placeholder="Ex: FLUIDE-1234"
-                      value={redemptionCode}
-                      onChange={e => { setRedemptionCode(e.target.value.toUpperCase()); setRedemptionError(''); }}
-                      onKeyDown={e => e.key === 'Enter' && handleRedeemCode()}
-                      style={{ flex: '1 1 140px', border: '2px solid rgba(49,39,131,0.2)', borderRadius: '8px', padding: '8px 12px', fontWeight: 700, fontSize: '0.875rem', outline: 'none', textTransform: 'uppercase', color: '#312783', backgroundColor: 'white' }}
-                    />
-                    <button
-                      onClick={handleRedeemCode}
-                      disabled={isRedeeming || !redemptionCode.trim()}
-                      style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: redemptionCode.trim() ? '#312783' : 'rgba(49,39,131,0.3)', color: 'white', fontWeight: 700, fontSize: '0.875rem', cursor: redemptionCode.trim() ? 'pointer' : 'default', border: 'none', whiteSpace: 'nowrap' }}
-                    >
-                      {isRedeeming ? '…' : 'Utiliser'}
-                    </button>
-                  </div>
-                  {redemptionError && <p style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600, marginTop: '4px' }}>{redemptionError}</p>}
+              <div>
+                <div className="flex items-center gap-3" style={{ marginBottom: '10px' }}>
+                  <div style={{ color: '#312783' }}><Gift size={24} strokeWidth={1.5} /></div>
+                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700 }}>J'ai déjà un bon cadeau</h4>
                 </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    placeholder="Ex: FLUIDE-1234"
+                    value={redemptionCode}
+                    onChange={e => { setRedemptionCode(e.target.value.toUpperCase()); setRedemptionError(''); }}
+                    onKeyDown={e => e.key === 'Enter' && handleRedeemCode()}
+                    style={{ flex: '1 1 140px', border: '2px solid rgba(49,39,131,0.2)', borderRadius: '8px', padding: '8px 12px', fontWeight: 700, fontSize: '0.875rem', outline: 'none', textTransform: 'uppercase', color: '#312783', backgroundColor: 'white' }}
+                  />
+                  <button
+                    onClick={handleRedeemCode}
+                    disabled={isRedeeming || !redemptionCode.trim()}
+                    style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: redemptionCode.trim() ? '#312783' : 'rgba(49,39,131,0.3)', color: 'white', fontWeight: 700, fontSize: '0.875rem', cursor: redemptionCode.trim() ? 'pointer' : 'default', border: 'none', whiteSpace: 'nowrap' }}
+                  >
+                    {isRedeeming ? '…' : 'Utiliser'}
+                  </button>
+                </div>
+                {redemptionError && <p style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600, marginTop: '4px' }}>{redemptionError}</p>}
               </div>
 
               <div className="flex items-start gap-4">
