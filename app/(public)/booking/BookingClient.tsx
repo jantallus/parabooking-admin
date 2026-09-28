@@ -1340,7 +1340,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             ) : delta! < 0 ? (
                               <>
                                 <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783', marginTop: '2px' }}>{(-delta!) / 100}€ de solde pour les options</div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783', marginTop: '2px' }}>{(-delta!) / 100}€ de solde pour les options (photos et vidéos)</div>
                               </>
                             ) : (
                               <>
