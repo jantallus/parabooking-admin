@@ -26,8 +26,12 @@ export default function CadeauPage() {
   const [redemptionCode, setRedemptionCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [redemptionError, setRedemptionError] = useState('');
-  const hasAutoScrolled = React.useRef(false); // 🎯 NOUVEAU : Mémoire pour la téléportation
-  const [urlFlightName, setUrlFlightName] = useState<string | null>(null); // 🎯 NOUVEAU : Nom du vol venant de la réservation
+  const hasAutoScrolled = React.useRef(false);
+  const [urlFlightName, setUrlFlightName] = useState<string | null>(null);
+  // Mode direct vol (depuis page réservation, sans template boutique)
+  const [directFlightId, setDirectFlightId] = useState<number | null>(null);
+  const [directFlightName, setDirectFlightName] = useState<string | null>(null);
+  const [directFlightPrice, setDirectFlightPrice] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,8 +51,18 @@ export default function CadeauPage() {
             const found = data.find(t => t.id.toString() === targetId);
             if (found) {
               setSelectedTemplate(found);
-              if (incomingFlightName) setUrlFlightName(incomingFlightName); // 🎯 On le sauvegarde
+              if (incomingFlightName) setUrlFlightName(incomingFlightName);
             }
+          }
+
+          // Mode direct vol : ?flightId=X&flightName=...&flightPrice=...
+          const flightId = params.get('flightId');
+          if (flightId && !targetId) {
+            const fName = params.get('flightName') || '';
+            const fPrice = parseInt(params.get('flightPrice') || '0') || null;
+            setDirectFlightId(parseInt(flightId));
+            setDirectFlightName(fName);
+            setDirectFlightPrice(fPrice);
           }
         }
 
@@ -78,7 +92,7 @@ export default function CadeauPage() {
   // 🎯 MOTEUR DE DÉFILEMENT ROBUSTE (Uniquement à l'arrivée sur la page)
   useEffect(() => {
     // On ne le déclenche que si on n'a pas encore fait le saut automatique !
-    if (selectedTemplate && !isLoading && !hasAutoScrolled.current) {
+    if ((selectedTemplate || directFlightId) && !isLoading && !hasAutoScrolled.current) {
       hasAutoScrolled.current = true; // 🔒 On verrouille pour ne plus jamais le refaire
       
       const performScroll = () => {
@@ -94,7 +108,7 @@ export default function CadeauPage() {
       const timer = setTimeout(performScroll, 50);
       return () => clearTimeout(timer);
     }
-  }, [selectedTemplate, isLoading]);
+  }, [selectedTemplate, directFlightId, isLoading]);
 
   // 🎯 GESTION DU BOUTON RETOUR DU NAVIGATEUR (Bons Cadeaux)
   // 1. On écoute la flèche "Retour"
@@ -131,19 +145,16 @@ export default function CadeauPage() {
 
   // 🎯 SÉCURITÉ : Le formulaire vérifie aussi l'adresse si la case est cochée
   const isShippingValid = !wantsShipping || (address.street && address.zip && address.city);
-  const isFormValid = buyer.name && buyer.email && buyer.phone && isShippingValid;
+  const isFormValid = buyer.name && buyer.email && buyer.phone && isShippingValid && (!!selectedTemplate || !!directFlightId);
 
   const handleCheckout = async () => {
-    if (!isFormValid || !selectedTemplate) return;
+    if (!isFormValid || (!selectedTemplate && !directFlightId)) return;
     setIsCheckingOut(true);
 
     try {
-      const payload = {
-        template: selectedTemplate,
-        buyer,
-        physicalShipping: wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null,
-        selectedComplements,
-      };
+      const payload = selectedTemplate
+        ? { template: selectedTemplate, buyer, physicalShipping: wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null, selectedComplements }
+        : { flight_type_id: directFlightId, buyer, physicalShipping: wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null, selectedComplements };
 
       const res = await fetch(`/api/proxy/public/checkout-gift-card`, {
         method: 'POST',
@@ -204,7 +215,8 @@ export default function CadeauPage() {
   
   // Calcul du prix total affiché sur le bouton
   const optionsPrice = selectedComplements.reduce((sum, c) => sum + (c.price_cents / 100), 0);
-  const totalPrice = selectedTemplate ? ((selectedTemplate.price_cents / 100) + (wantsShipping ? shippingSettings.price : 0) + optionsPrice) : 0;
+  const basePriceCents = selectedTemplate ? selectedTemplate.price_cents : (directFlightPrice ?? 0);
+  const totalPrice = (basePriceCents / 100) + (wantsShipping ? shippingSettings.price : 0) + optionsPrice;
 
   return (
     <main className="main-bons-cadeaux" style={{ width: '100%', overflowX: 'hidden', position: 'relative' }}>
@@ -378,11 +390,13 @@ export default function CadeauPage() {
             </div>
           )}
 
-          {selectedTemplate && (
+          {(selectedTemplate || directFlightId) && (
             <div id="achat-form" style={{ marginTop: '60px', backgroundColor: 'white', borderRadius: '10px', padding: '40px', boxShadow: 'none', border: '1px solid #e2e8f0', scrollMarginTop: '100px' }}>
               <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#312783', marginBottom: '10px' }}>Personnalisez votre bon</h3>
               <p style={{ color: '#E6007E', fontSize: '1.5rem', fontWeight: 900, marginBottom: '30px' }}>
-                {urlFlightName ? `Bon ${urlFlightName}` : selectedTemplate.title} - {selectedTemplate.price_cents / 100}€
+                {directFlightId
+                  ? `Bon ${directFlightName || 'vol'} - ${directFlightPrice ? directFlightPrice / 100 : '?'}€`
+                  : `${urlFlightName ? `Bon ${urlFlightName}` : selectedTemplate!.title} - ${selectedTemplate!.price_cents / 100}€`}
               </p>
               
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>

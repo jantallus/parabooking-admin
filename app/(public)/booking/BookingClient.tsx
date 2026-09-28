@@ -1319,13 +1319,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                         })()}
                         {!appliedVoucher && !appliedPartner && (() => {
                           const matchedTpl = giftTemplates.find(t => t.price_cents === flight.price_cents);
-                          if (!matchedTpl) return null;
+                          const offrirHref = matchedTpl
+                            ? `/bons-cadeaux?templateId=${matchedTpl.id}&flightName=${encodeURIComponent(flight.name)}`
+                            : `/bons-cadeaux?flightId=${flight.id}&flightName=${encodeURIComponent(flight.name)}&flightPrice=${flight.price_cents}`;
                           return (
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.location.href = `/bons-cadeaux?templateId=${matchedTpl.id}&flightName=${encodeURIComponent(flight.name)}`;
-                              }}
+                              onClick={(e) => { e.stopPropagation(); window.location.href = offrirHref; }}
                               className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2"
                               style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
                               onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
