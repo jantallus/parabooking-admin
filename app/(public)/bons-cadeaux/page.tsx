@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import type { GiftCardShopTemplate, Complement } from '@/lib/types';
 import { useToast } from '@/components/ui/ToastProvider';
-import { Clock, Wallet, MapPin, Mail, CalendarDays, Package, Sparkles } from 'lucide-react';
+import { Clock, Wallet, MapPin, Mail, CalendarDays, Package, Sparkles, Gift } from 'lucide-react';
 
 export default function CadeauPage() {
   const { toast } = useToast();
@@ -23,6 +23,9 @@ export default function CadeauPage() {
   const [selectedComplements, setSelectedComplements] = useState<Complement[]>([]);
 
   const [infoTemplate, setInfoTemplate] = useState<GiftCardShopTemplate | null>(null);
+  const [redemptionCode, setRedemptionCode] = useState('');
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [redemptionError, setRedemptionError] = useState('');
   const hasAutoScrolled = React.useRef(false); // 🎯 NOUVEAU : Mémoire pour la téléportation
   const [urlFlightName, setUrlFlightName] = useState<string | null>(null); // 🎯 NOUVEAU : Nom du vol venant de la réservation
 
@@ -173,6 +176,30 @@ export default function CadeauPage() {
     }, 100); 
   };
 
+  const handleRedeemCode = async () => {
+    if (!redemptionCode.trim()) return;
+    setIsRedeeming(true);
+    setRedemptionError('');
+    try {
+      const partnerRes = await fetch(`/api/proxy/public/partners/check/${redemptionCode.trim()}`);
+      if (partnerRes.ok) {
+        window.location.href = `/booking?bon=${encodeURIComponent(redemptionCode.trim())}`;
+        return;
+      }
+      const res = await fetch(`/api/proxy/gift-cards/check/${redemptionCode.trim()}`);
+      if (res.ok) {
+        window.location.href = `/booking?bon=${encodeURIComponent(redemptionCode.trim())}`;
+      } else {
+        const err = await res.json();
+        setRedemptionError(err.message || 'Code invalide ou expiré');
+        setIsRedeeming(false);
+      }
+    } catch {
+      setRedemptionError('Erreur de connexion.');
+      setIsRedeeming(false);
+    }
+  };
+
   const inputStyle = { width: '100%', padding: '15px', borderRadius: '10px', border: '2px solid #e2e8f0', fontSize: '1rem', fontWeight: 700, outline: 'none' };
   
   // Calcul du prix total affiché sur le bouton
@@ -238,12 +265,27 @@ export default function CadeauPage() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="flex items-center justify-center shrink-0" style={{ color: '#312783' }}><CalendarDays size={28} strokeWidth={1.5} /></div>
-                <div>
-                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700, marginBottom: '4px' }}>Réservation facile</h4>
-                  <p style={{ color: '#1D1D1B', fontSize: '1.125rem', fontWeight: 400, lineHeight: '26px' }}>
-                    Le bénéficiaire pourra utiliser son code cadeau directement sur notre site web ou par téléphone pour réserver la date de son vol.
-                  </p>
+                <div className="flex items-center justify-center shrink-0 mt-1" style={{ color: '#312783' }}><Gift size={28} strokeWidth={1.5} /></div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ color: '#312783', fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px' }}>J'ai déjà un bon cadeau</h4>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <input
+                      type="text"
+                      placeholder="Ex: FLUIDE-1234"
+                      value={redemptionCode}
+                      onChange={e => { setRedemptionCode(e.target.value.toUpperCase()); setRedemptionError(''); }}
+                      onKeyDown={e => e.key === 'Enter' && handleRedeemCode()}
+                      style={{ flex: '1 1 140px', border: '2px solid rgba(49,39,131,0.2)', borderRadius: '8px', padding: '8px 12px', fontWeight: 700, fontSize: '0.875rem', outline: 'none', textTransform: 'uppercase', color: '#312783', backgroundColor: 'white' }}
+                    />
+                    <button
+                      onClick={handleRedeemCode}
+                      disabled={isRedeeming || !redemptionCode.trim()}
+                      style={{ padding: '8px 16px', borderRadius: '8px', backgroundColor: redemptionCode.trim() ? '#312783' : 'rgba(49,39,131,0.3)', color: 'white', fontWeight: 700, fontSize: '0.875rem', cursor: redemptionCode.trim() ? 'pointer' : 'default', border: 'none', whiteSpace: 'nowrap' }}
+                    >
+                      {isRedeeming ? '…' : 'Utiliser'}
+                    </button>
+                  </div>
+                  {redemptionError && <p style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 600, marginTop: '4px' }}>{redemptionError}</p>}
                 </div>
               </div>
 
