@@ -1896,6 +1896,14 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       <p className="text-3xl font-bold text-emerald-600">
                         - {discountAmount.toFixed(2)} €
                       </p>
+                      {appliedVoucher.type === 'gift_card' && (() => {
+                        const remaining = Number(appliedVoucher.price_paid_cents) / 100 - discountAmount;
+                        return remaining > 0.009 ? (
+                          <p className="text-xs font-semibold text-emerald-700 mt-1">
+                            + {remaining.toFixed(2).replace('.00', '')} € de solde utilisable sur les options
+                          </p>
+                        ) : null;
+                      })()}
                       <button onClick={() => setAppliedVoucher(null)} className="text-[10px] font-bold uppercase text-rose-500 mt-2 hover:underline">
                         Retirer le code
                       </button>
