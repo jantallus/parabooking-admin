@@ -753,6 +753,24 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const discountAmount = appliedPartner ? originalPrice : rawPrices.discountAmount;
   const finalPrice = appliedPartner ? 0 : rawPrices.finalPrice;
 
+  const cbStyle = (checked: boolean, error = false): React.CSSProperties => ({
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    width: '1.5rem', height: '1.5rem', minWidth: '1.5rem',
+    border: `2px solid ${error && !checked ? '#fca5a5' : checked ? '#E6007E' : '#cbd5e1'}`,
+    borderRadius: '4px',
+    backgroundColor: '#fff',
+    cursor: 'pointer',
+    flexShrink: 0,
+    backgroundImage: checked
+      ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8l4 4 8-8' stroke='%23E6007E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")`
+      : 'none',
+    backgroundPosition: 'center',
+    backgroundSize: '70%',
+    backgroundRepeat: 'no-repeat',
+    transition: 'border-color 0.15s ease',
+  });
+
   useEffect(() => {
     if (totalItems === 0) setCartOpen(false);
     if (step === 3 && totalItems === 0) setStep(isDirect ? 2 : 1);
@@ -2012,7 +2030,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 </div>
 
                 <label className="flex items-center gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors" style={{ backgroundColor: 'rgba(0,159,227,0.06)', borderColor: 'rgba(0,159,227,0.2)' }}>
-                  <input type="checkbox" className="cb-white" checked={contact.isPassenger} onChange={e => setContact({...contact, isPassenger: e.target.checked})} />
+                  <input type="checkbox" style={cbStyle(contact.isPassenger)} checked={contact.isPassenger} onChange={e => setContact({...contact, isPassenger: e.target.checked})} />
                   <span style={{ fontSize: '1rem', fontWeight: 700, color: '#312783' }}>Je suis aussi l'un des passagers (m'ajouter au vol)</span>
                 </label>
               </div>
@@ -2064,7 +2082,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors mb-4 ${p.weightChecked ? 'border-[#E6007E] bg-white' : hasAttemptedSubmit ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200'}`}>
                         <input
                           type="checkbox"
-                          className={`cb-white mt-0.5 ${hasAttemptedSubmit && !p.weightChecked ? 'cb-error' : ''}`}
+                          style={cbStyle(p.weightChecked, hasAttemptedSubmit && !p.weightChecked)}
                           checked={p.weightChecked}
                           onChange={e => {
                             const newP = [...passengers];
@@ -2113,7 +2131,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                 >
                                   <input
                                     type="checkbox"
-                                    className={`cb-white mt-0.5 ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                    style={{ ...cbStyle(isSelected), ...(isLocked ? { cursor: 'not-allowed', opacity: 0.5 } : {}) }}
                                     checked={isSelected}
                                     disabled={isLocked}
                                     onChange={(e) => {
