@@ -114,23 +114,9 @@ export default function Footer() {
             </li>
             <li style={{ paddingTop: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {/* Mastercard */}
-                <svg width="52" height="33" viewBox="0 0 38 24" style={{ display: 'block' }}>
-                  <rect width="38" height="24" rx="3" fill="white" stroke="#e2e8f0" strokeWidth="0.5"/>
-                  <circle cx="14.5" cy="12" r="8" fill="#EB001B"/>
-                  <circle cx="23.5" cy="12" r="8" fill="#F79E1B"/>
-                  <path d="M19 5.8a8 8 0 0 1 0 12.4A8 8 0 0 1 19 5.8z" fill="#FF5F00"/>
-                </svg>
-                {/* Visa */}
-                <svg width="52" height="33" viewBox="0 0 38 24" style={{ display: 'block' }}>
-                  <rect width="38" height="24" rx="3" fill="white" stroke="#e2e8f0" strokeWidth="0.5"/>
-                  <text x="19" y="16.5" textAnchor="middle" fill="#1A1F71" fontSize="12" fontWeight="900" fontFamily="Arial Black, Arial, sans-serif" letterSpacing="1">VISA</text>
-                </svg>
-                {/* Stripe */}
-                <svg width="52" height="33" viewBox="0 0 38 24" style={{ display: 'block' }}>
-                  <rect width="38" height="24" rx="3" fill="#635BFF"/>
-                  <text x="19" y="16" textAnchor="middle" fill="white" fontSize="10.5" fontWeight="bold" fontFamily="Arial, sans-serif">stripe</text>
-                </svg>
+                <img src="/mastercard.png" alt="Mastercard" style={{ height: '33px', width: 'auto', display: 'block' }} />
+                <img src="/logo%20visa.gif" alt="Visa" style={{ height: '33px', width: 'auto', display: 'block' }} />
+                <img src="/stripe.png" alt="Stripe" style={{ height: '33px', width: 'auto', display: 'block' }} />
               </div>
             </li>
           </ul>
