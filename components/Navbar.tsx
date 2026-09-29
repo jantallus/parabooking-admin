@@ -98,7 +98,9 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
               right: '29px',
               top: '50%',
               transform: 'translateY(-50%)',
-              backgroundColor: ctaHovered ? '#b85590' : '#c966a3',
+              backgroundColor: ctaHovered
+                ? (cartSummary.step === 3 && cartSummary.isFormValid ? '#c2006a' : '#b85590')
+                : (cartSummary.step === 3 && cartSummary.isFormValid ? '#E6007E' : '#c966a3'),
               color: '#fff',
               fontFamily: 'inherit',
               fontSize: '15px',
