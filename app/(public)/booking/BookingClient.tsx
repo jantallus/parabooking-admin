@@ -2090,22 +2090,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             {complementsList.map((comp) => {
                               const isSelected = p.selectedComplements?.includes(comp.id) || false;
                               
-                              // 🎯 NOUVEAU : On vérifie si cette option est couverte par le bon cadeau
-                              let isLockedByVoucher = false;
                               const currentFlight = flights.find(f => f.id.toString() === p.flightId);
-
-                              if (appliedVoucher && appliedVoucher.type === 'gift_card' && currentFlight) {
-                                const isSameFlight = !appliedVoucher.flight_type_id || appliedVoucher.flight_type_id.toString() === p.flightId;
-                                if (isSameFlight) {
-                                  const vVal = Number(appliedVoucher.price_paid_cents) / 100;
-                                  const fPri = currentFlight.price_cents / 100;
-                                  const pPri = comp.price_cents / 100;
-                                  // Si le bon paie le vol + cette option, on verrouille !
-                                  if (vVal >= (fPri + pPri)) {
-                                    isLockedByVoucher = true;
-                                  }
-                                }
-                              }
 
                               // GoPro incluse dans le vol : verrouillage
                               const isLockedByActivity = !!(currentFlight?.activity_gopro && (
@@ -2114,7 +2099,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                 comp.name.toLowerCase().includes('video') ||
                                 comp.name.toLowerCase().includes('gopro')
                               ));
-                              const isLocked = isLockedByVoucher || isLockedByActivity;
+                              const isLocked = isLockedByActivity;
 
                               return (
                                 <label
@@ -2154,7 +2139,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                     <div>
                                       <span className={`font-bold block ${isSelected ? 'text-sky-900' : 'text-slate-700'}`}>
                                         {comp.name} <span className={isLocked ? 'text-emerald-600' : ''}>
-                                          {isLockedByActivity ? '(Inclus dans le vol)' : isLockedByVoucher ? '(Inclus dans le Bon)' : `(+${comp.price_cents / 100}€)`}
+                                          {isLockedByActivity ? '(Inclus dans le vol)' : `(+${comp.price_cents / 100}€)`}
                                         </span>
                                       </span>
                                       {comp.description && (
