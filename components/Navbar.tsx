@@ -154,13 +154,31 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
           className="lg:hidden flex items-center"
           style={{ position: 'absolute', right: 16, top: 0, height: '80px' }}
         >
-          <a
-            href={CTA.href}
-            aria-label="Réserver un vol"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 84, height: '100%', position: 'relative', top: '-2.5px', left: '4.5px' }}
-          >
-            <img src="/calendar.svg" alt="Réserver" style={{ width: '27px', height: 'auto' }} />
-          </a>
+          {cartSummary && cartSummary.totalItems > 0 && openCart ? (
+            <button
+              onClick={openCart}
+              aria-label="Voir le panier"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 84, height: '100%', position: 'relative', top: '-2.5px', left: '4.5px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              <div style={{ position: 'relative', display: 'inline-flex' }}>
+                <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <span style={{ position: 'absolute', top: '-6px', right: '-8px', minWidth: '18px', height: '18px', borderRadius: '9px', backgroundColor: '#E6007E', color: 'white', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>
+                  {cartSummary.totalItems}
+                </span>
+              </div>
+            </button>
+          ) : (
+            <a
+              href={CTA.href}
+              aria-label="Réserver un vol"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 84, height: '100%', position: 'relative', top: '-2.5px', left: '4.5px' }}
+            >
+              <img src="/calendar.svg" alt="Réserver" style={{ width: '27px', height: 'auto' }} />
+            </a>
+          )}
           <button
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 60, height: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative', top: '0px', left: '3.5px' }}
             aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
