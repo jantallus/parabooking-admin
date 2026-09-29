@@ -23,7 +23,7 @@ export default function BackToTop() {
         height: '40px',
         borderRadius: '100%',
         position: 'fixed',
-        bottom: '45px',
+        bottom: '40px',
         right: '20px',
         cursor: 'pointer',
         zIndex: 1000,
