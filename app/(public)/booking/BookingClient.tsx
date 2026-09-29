@@ -49,73 +49,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const datesBarRef = useRef<HTMLDivElement>(null);
   const datesBarNaturalTopRef = useRef<number | null>(null);
   const flightsGridRef = useRef<HTMLDivElement>(null);
-  const cartBarRef = useRef<HTMLDivElement>(null);
-  const [isEmbed, setIsEmbed] = useState(false);
-  useEffect(() => {
-    try { setIsEmbed(window.self !== window.top); } catch { setIsEmbed(true); }
-  }, []);
-
-  // Auto-resize : envoie la hauteur réelle au parent WordPress
-  useEffect(() => {
-    if (!isEmbed) return;
-    const ro = new ResizeObserver(() => {
-      window.parent.postMessage({ type: 'fluide-resize', height: document.documentElement.scrollHeight }, '*');
-    });
-    ro.observe(document.body);
-    return () => ro.disconnect();
-  }, [isEmbed]);
-
-  // Dernier scroll reçu — partagé entre le handler et le useEffect panier
-  const lastScrollData = useRef<{ scrollY: number; iframeTop: number; headerHeight: number; viewportHeight: number } | null>(null);
-
-  // Fake sticky dates + panier flottant : repositionnement JS via scroll WordPress
-  useEffect(() => {
-    if (!isEmbed) return;
-    let rafId: number | null = null;
-
-    const applyPositions = () => {
-      rafId = null;
-      const data = lastScrollData.current;
-      if (!data) return;
-      const { scrollY, iframeTop, headerHeight, viewportHeight } = data;
-
-      // Dates bar : fake sticky via transform (composited — pas de reflow)
-      if (datesBarRef.current) {
-        if (datesBarNaturalTopRef.current === null) {
-          let top = 0;
-          let el: HTMLElement | null = datesBarRef.current;
-          while (el) { top += el.offsetTop; el = el.offsetParent as HTMLElement | null; }
-          datesBarNaturalTopRef.current = top;
-        }
-        const targetPos = scrollY - iframeTop + headerHeight;
-        const offset = targetPos - datesBarNaturalTopRef.current;
-        datesBarRef.current.style.transform = offset > 0
-          ? `translate3d(0,${offset}px,0)`
-          : '';
-      }
-
-      // Panier flottant : translate3d depuis top:0 (composited — pas de reflow)
-      if (cartBarRef.current) {
-        const visibleBottom = scrollY + viewportHeight - iframeTop;
-        const cartHeight = cartBarRef.current.offsetHeight;
-        const maxY = document.documentElement.scrollHeight - cartHeight;
-        const y = Math.min(Math.max(0, visibleBottom - cartHeight), maxY);
-        cartBarRef.current.style.transform = `translate3d(0,${y}px,0)`;
-      }
-    };
-
-    const handler = (e: MessageEvent) => {
-      if (e.data?.type !== 'fluide-scroll') return;
-      lastScrollData.current = e.data;
-      if (rafId === null) rafId = requestAnimationFrame(applyPositions);
-    };
-
-    window.addEventListener('message', handler);
-    return () => {
-      window.removeEventListener('message', handler);
-      if (rafId !== null) cancelAnimationFrame(rafId);
-    };
-  }, [isEmbed]);
 
   const [selectedFlight, setSelectedFlight] = useState<FlightType | null>(null);
   const [step, setStep] = useState<number>(isDirect ? 2 : 1);
@@ -138,31 +71,21 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       if (skipInitialScroll.current) { skipInitialScroll.current = false; return; }
       setTimeout(() => {
         const isMobile = window.innerWidth < 768;
-        // Sur mobile : scroll instantané vers le titre du vol (juste sous la navbar)
-        // Sur desktop : smooth scroll vers le container
         const el = isMobile
           ? (document.getElementById('etape-2-vol-titre') ?? document.getElementById('etape-2-container'))
           : document.getElementById('etape-2-container');
         if (!el) return;
-        if (isEmbed) {
-          window.parent.postMessage({ type: 'fluide-scroll-to', offsetY: el.offsetTop - 80 }, '*');
-        } else {
-          const behavior = isMobile ? 'instant' : 'smooth';
-          window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior });
-        }
+        const behavior = isMobile ? 'instant' : 'smooth';
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior });
       }, 50);
     } else if (step === 3) {
       setTimeout(() => {
         const el = document.getElementById('etape-3-container');
         if (!el) return;
-        if (isEmbed) {
-          window.parent.postMessage({ type: 'fluide-scroll-to', offsetY: el.offsetTop }, '*');
-        } else {
-          window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
-        }
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' });
       }, 50);
     }
-  }, [step, isEmbed]);
+  }, [step]);
 
   useScrollLock(!!infoFlight);
 
@@ -439,11 +362,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
           const el = bodyScrollRef.current;
           if (!el) return;
           const stickyBarHeight = 80 + (datesBarRef.current?.offsetHeight ?? 60);
-          if (isEmbed) {
-            window.parent.postMessage({ type: 'fluide-scroll-to', offsetY: el.offsetTop - stickyBarHeight }, '*');
-          } else {
-            window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - stickyBarHeight, behavior: 'smooth' });
-          }
+          window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - stickyBarHeight, behavior: 'smooth' });
         }, 100);
         return;
       }
@@ -479,7 +398,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         startAnimDate.setDate(startAnimDate.getDate() - 1);
         const startAnimDateStr = getLocalYYYYMMDD(startAnimDate);
 
-        const animDelay = isEmbed ? 400 : 80;
+        const animDelay = 80;
         setTimeout(() => {
           const startEl = document.getElementById(`mobile-col-${startAnimDateStr}`);
           const targetEl = document.getElementById(`mobile-col-${pickedDate}`);
@@ -867,20 +786,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     if (step === 3 && totalItems === 0) setStep(isDirect ? 2 : 1);
   }, [totalItems, step]);
 
-  // Repositionne le panier avant le paint quand il apparaît (useLayoutEffect = avant le paint)
-  useLayoutEffect(() => {
-    if (!isEmbed || totalItems === 0 || !cartBarRef.current) return;
-    if (!lastScrollData.current) {
-      // Pas encore de données scroll : demande au parent WordPress
-      window.parent.postMessage({ type: 'fluide-request-scroll' }, '*');
-      return;
-    }
-    const { scrollY, iframeTop, viewportHeight } = lastScrollData.current;
-    const cartHeight = cartBarRef.current.offsetHeight;
-    const maxY = document.documentElement.scrollHeight - cartHeight;
-    const y = Math.min(Math.max(0, scrollY + viewportHeight - iframeTop - cartHeight), maxY);
-    cartBarRef.current.style.transform = `translate3d(0,${y}px,0)`;
-  }, [isEmbed, totalItems]);
 
   // 🎯 3. LA VARIABLE POUR DESSINER L'ÉCRAN (71 JOURS)
   const weekDays = Array.from({ length: 71 }).map((_, i) => {
@@ -1141,7 +1046,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   };
 
   return (
-    <div ref={bookingRootRef} className={`relative ${!isEmbed && !isDirect ? 'min-h-screen ' : ''}${isDirect && isEmbed ? 'overflow-clip direct-mode-reveal' : ''}`} style={{ backgroundColor: '#FFFFFF', color: '#1D1D1B' }}>
+    <div ref={bookingRootRef} className={`relative ${!isDirect ? 'min-h-screen ' : ''}`} style={{ backgroundColor: '#FFFFFF', color: '#1D1D1B' }}>
       
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes ultraSmoothReveal { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -1192,7 +1097,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         
         {/* Chargement en mode direct — les vols n'ont pas encore été reçus de l'API */}
         {isDirect && !selectedFlight && (
-          <div className="flex flex-col items-center justify-center gap-4" style={{ minHeight: isDirect && !isEmbed ? '120px' : '700px' }}>
+          <div className="flex flex-col items-center justify-center gap-4" style={{ minHeight: isDirect ? '120px' : '700px' }}>
             <div className="w-8 h-8 rounded-full border-4 border-slate-200 animate-spin" style={{ borderTopColor: '#E6007E' }} />
             <p style={{ fontSize: '1rem', fontWeight: 700, color: '#94a3b8' }}>Chargement des disponibilités…</p>
           </div>
@@ -1703,7 +1608,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 ) : (
                   <div className="relative">
                     {/* 🎯 LE BANDEAU DES JOURS (Esclave) */}
-                    <div ref={datesBarRef} className={`${isEmbed ? 'relative ' : 'sticky top-[80px] lg:top-[90px] '}z-40 bg-white pt-4 pb-4 border-b border-slate-200`} style={isEmbed ? { willChange: 'transform' } : undefined}>
+                    <div ref={datesBarRef} className="sticky top-[80px] lg:top-[90px] z-40 bg-white pt-4 pb-4 border-b border-slate-200">
                       <div ref={headerScrollRef} className="flex overflow-hidden gap-4 px-[12.5vw] md:px-0 opacity-0 md:opacity-100 transition-opacity duration-300">
                         {weekDays.map((dateStr, i) => {
                           const isFirstDesktop = i === 10;
@@ -2311,7 +2216,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
           {/* Panneau expansible */}
           {cartOpen && (
             <div
-              ref={cartBarRef}
               className="fixed z-[9998] bg-white rounded-2xl shadow-2xl"
               style={{ bottom: '80px', right: '16px', width: 'min(360px, calc(100vw - 32px))' }}
             >
