@@ -2317,7 +2317,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                     className={`w-full py-3 rounded-[8px] font-bold uppercase text-xs tracking-widest transition-all shadow-md ${isFormValid && !isCheckingOut ? 'text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                     style={isFormValid && !isCheckingOut ? { backgroundColor: '#E6007E' } : {}}
                   >
-                    {isCheckingOut ? 'Validation...' : (finalPrice === 0 ? '✨ Valider (Gratuit)' : '🔒 Payer la réservation')}
+                    {isCheckingOut ? 'Validation...' : (finalPrice === 0 ? 'Valider (Gratuit)' : 'Payer la réservation')}
                   </button>
                 ) : (
                   <button
@@ -2361,7 +2361,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       className="flex items-center gap-1.5 px-3 py-2 rounded-full shadow-lg transition-all active:scale-95 whitespace-nowrap"
                       style={{ backgroundColor: isFormValid ? '#E6007E' : '#94a3b8', color: 'white', fontSize: '13px', fontWeight: 700, border: 'none', cursor: 'pointer' }}
                     >
-                      {isCheckingOut ? 'Validation...' : (isFormValid ? (finalPrice === 0 ? '✨ Valider (Gratuit) →' : 'Payer la réservation →') : 'Voir le récapitulatif →')}
+                      {isCheckingOut ? 'Validation...' : (isFormValid ? (finalPrice === 0 ? 'Valider (Gratuit) →' : 'Payer la réservation →') : 'Voir le récapitulatif →')}
                     </button>
                   )}
                   <div className="relative">
