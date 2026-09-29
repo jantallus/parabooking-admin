@@ -92,6 +92,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [cartPopup, setCartPopup] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const cartPopupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingComplements, setPendingComplements] = useState<Record<number, number>>({});
   const pendingComplementsRef = useRef<Record<number, number>>({});
@@ -1105,7 +1106,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
         {/* ÉTAPE 1 : CHOIX DU VOL */}
         {step === 1 && !isDirect && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" onClick={() => setActiveTooltip(null)}>
             {/* 🎯 SÉLECTEUR DE SAISON "COLLANT" (STICKY) */}
             <div className="flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40 transition-all duration-300">
               <div className="bg-white p-1.5 rounded-[10px] inline-flex border border-slate-200" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
@@ -1293,44 +1294,35 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       </div>
                       {(flight.activity_ski || flight.activity_snowboard || flight.activity_pedestrian || flight.activity_children || flight.activity_gopro || seasonLabel) && (
                         <div className="flex flex-wrap items-center gap-3 mb-6" style={{ color: '#E6007E' }}>
-                          {SeasonPictoIcon && (
-                            <span className="relative group cursor-default">
-                              <SeasonPictoIcon size={22} strokeWidth={1.5} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-24 text-center rounded px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100" style={{ backgroundColor: '#312783' }}>
-                                {isWinter ? 'Hiver uniquement' : 'Printemps, été, automne'}
-                              </span>
-                            </span>
-                          )}
-                          {flight.activity_ski && (
-                            <span className="relative group cursor-default">
-                              <SkiIcon size={22} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-24 text-center rounded px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100" style={{ backgroundColor: '#312783' }}>Accessible aux skieurs</span>
-                            </span>
-                          )}
-                          {flight.activity_snowboard && (
-                            <span className="relative group cursor-default">
-                              <SnowboardIcon size={22} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-24 text-center rounded px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100" style={{ backgroundColor: '#312783' }}>Accessible aux snowboardeurs</span>
-                            </span>
-                          )}
-                          {flight.activity_pedestrian && (
-                            <span className="relative group cursor-default">
-                              <PedestrianIcon size={22} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-24 text-center rounded px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100" style={{ backgroundColor: '#312783' }}>Accessible aux piétons</span>
-                            </span>
-                          )}
-                          {flight.activity_children && (
-                            <span className="relative group cursor-default">
-                              <ChildrenIcon size={22} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-24 text-center rounded px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100" style={{ backgroundColor: '#312783' }}>Pour les enfants et les poids légers</span>
-                            </span>
-                          )}
-                          {flight.activity_gopro && (
-                            <span className="relative group cursor-default">
-                              <GoproIcon size={22} />
-                              <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-24 text-center rounded px-2 py-1 text-xs font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100" style={{ backgroundColor: '#312783' }}>Photos-vidéos comprises</span>
-                            </span>
-                          )}
+                          {(() => {
+                            const tip = (key: string, label: string, Icon: React.ReactNode) => {
+                              const tipKey = `${flight.id}-${key}`;
+                              const isActive = activeTooltip === tipKey;
+                              return (
+                                <span
+                                  key={key}
+                                  className="relative group cursor-default"
+                                  onClick={e => { e.stopPropagation(); setActiveTooltip(isActive ? null : tipKey); }}
+                                >
+                                  {Icon}
+                                  <span
+                                    className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-28 text-center rounded px-2 py-1 text-xs font-semibold text-white transition-opacity group-hover:opacity-100"
+                                    style={{ backgroundColor: '#312783', opacity: isActive ? 1 : undefined, whiteSpace: 'normal' }}
+                                  >{label}</span>
+                                </span>
+                              );
+                            };
+                            return (
+                              <>
+                                {SeasonPictoIcon && tip('season', isWinter ? 'Hiver uniquement' : 'Printemps, été, automne', <SeasonPictoIcon size={22} strokeWidth={1.5} />)}
+                                {flight.activity_ski && tip('ski', 'Accessible aux skieurs', <SkiIcon size={22} />)}
+                                {flight.activity_snowboard && tip('snowboard', 'Accessible aux snowboardeurs', <SnowboardIcon size={22} />)}
+                                {flight.activity_pedestrian && tip('pedestrian', 'Accessible aux piétons', <PedestrianIcon size={22} />)}
+                                {flight.activity_children && tip('children', 'Pour les enfants et les poids légers', <ChildrenIcon size={22} />)}
+                                {flight.activity_gopro && tip('gopro', 'Photos-vidéos comprises', <GoproIcon size={22} />)}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
                       {flight.description && (
