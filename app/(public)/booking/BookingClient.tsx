@@ -757,6 +757,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const { originalPrice } = rawPrices;
   const discountAmount = appliedPartner ? originalPrice : rawPrices.discountAmount;
   const finalPrice = appliedPartner ? 0 : rawPrices.finalPrice;
+  const remainingBalance = appliedVoucher?.type === 'gift_card'
+    ? Math.max(0, Number(appliedVoucher.price_paid_cents) / 100 - discountAmount)
+    : 0;
 
   const cbStyle = (checked: boolean, error = false): React.CSSProperties => ({
     appearance: 'none',
@@ -2197,7 +2200,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                     onMouseEnter={e => { if (!isCheckingOut) e.currentTarget.style.backgroundColor = '#312783'; }}
                     onMouseLeave={e => { if (!isCheckingOut) e.currentTarget.style.backgroundColor = '#E6007E'; }}
                   >
-                    {isCheckingOut ? 'Validation en cours…' : (finalPrice === 0 ? 'Valider la réservation (Gratuit)' : `Valider et payer — ${finalPrice.toFixed(2)} €`)}
+                    {isCheckingOut ? 'Validation en cours…' : finalPrice === 0
+                      ? `Valider la réservation (Gratuit${remainingBalance > 0.009 ? ` · ${remainingBalance % 1 === 0 ? remainingBalance : remainingBalance.toFixed(2)}€ de solde` : ''})`
+                      : `Valider et payer — ${finalPrice.toFixed(2)} €`}
                   </button>
                   <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.7rem', marginTop: '8px' }}>
                     En validant, vous acceptez nos <a href="https://www.fluide-parapente.fr/cgv/" target="_blank" rel="noopener" style={{ color: '#312783', textDecoration: 'underline' }}>CGV</a> et notre <a href="/politique-confidentialite" target="_blank" rel="noopener" style={{ color: '#312783', textDecoration: 'underline' }}>politique de confidentialité</a>.
@@ -2319,7 +2324,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                     className={`w-full py-3 rounded-[8px] font-bold uppercase text-xs tracking-widest transition-all shadow-md ${isFormValid && !isCheckingOut ? 'text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
                     style={isFormValid && !isCheckingOut ? { backgroundColor: '#E6007E' } : {}}
                   >
-                    {isCheckingOut ? 'Validation...' : (finalPrice === 0 ? 'Valider (Gratuit)' : 'Payer la réservation')}
+                    {isCheckingOut ? 'Validation...' : finalPrice === 0
+                      ? `Valider (Gratuit${remainingBalance > 0.009 ? ` · ${remainingBalance % 1 === 0 ? remainingBalance : remainingBalance.toFixed(2)}€ de solde` : ''})`
+                      : 'Payer la réservation'}
                   </button>
                 ) : (
                   <button
@@ -2363,7 +2370,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       className="flex items-center gap-1.5 px-3 py-2 rounded-full shadow-lg transition-all active:scale-95 whitespace-nowrap"
                       style={{ backgroundColor: isFormValid ? '#E6007E' : '#94a3b8', color: 'white', fontSize: '13px', fontWeight: 700, border: 'none', cursor: 'pointer' }}
                     >
-                      {isCheckingOut ? 'Validation...' : (isFormValid ? (finalPrice === 0 ? 'Valider (Gratuit) →' : 'Payer la réservation →') : 'Voir le récapitulatif →')}
+                      {isCheckingOut ? 'Validation...' : isFormValid
+                        ? finalPrice === 0
+                          ? `Valider (Gratuit${remainingBalance > 0.009 ? ` · ${remainingBalance % 1 === 0 ? remainingBalance : remainingBalance.toFixed(2)}€ de solde` : ''}) →`
+                          : 'Payer la réservation →'
+                        : 'Voir le récapitulatif →'}
                     </button>
                   )}
                   <div className="relative">
