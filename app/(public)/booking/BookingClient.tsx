@@ -2160,6 +2160,24 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   ))}
                 </div>
               </div>
+
+              {isFormValid && (
+                <div className="mt-8">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isCheckingOut}
+                    className="w-full py-4 rounded-[8px] font-bold text-white transition-all shadow-lg"
+                    style={{ backgroundColor: isCheckingOut ? '#94a3b8' : '#E6007E', fontSize: '1.05rem', letterSpacing: '0.03em' }}
+                    onMouseEnter={e => { if (!isCheckingOut) e.currentTarget.style.backgroundColor = '#312783'; }}
+                    onMouseLeave={e => { if (!isCheckingOut) e.currentTarget.style.backgroundColor = '#E6007E'; }}
+                  >
+                    {isCheckingOut ? 'Validation en cours…' : (finalPrice === 0 ? 'Valider la réservation (Gratuit)' : `Valider et payer — ${finalPrice.toFixed(2)} €`)}
+                  </button>
+                  <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.7rem', marginTop: '8px' }}>
+                    En validant, vous acceptez nos <a href="https://www.fluide-parapente.fr/cgv/" target="_blank" rel="noopener" style={{ color: '#312783', textDecoration: 'underline' }}>CGV</a> et notre <a href="/politique-confidentialite" target="_blank" rel="noopener" style={{ color: '#312783', textDecoration: 'underline' }}>politique de confidentialité</a>.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
