@@ -388,23 +388,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         // On récupère ce qui est déjà coché par l'utilisateur
         let currentComplements = existing ? [...(existing.selectedComplements || [])] : [];
         
-        // 🎯 2. LA SOURCE UNIQUE DE VÉRITÉ : C'est ici que la magie opère !
-        if (appliedVoucher && appliedVoucher.type === 'gift_card' && photoOption && flight) {
-           // On vérifie que le bon est soit générique, soit lié à ce vol précis
-           const isSameFlight = !appliedVoucher.flight_type_id || appliedVoucher.flight_type_id.toString() === nP.flightId;
-
-           if (isSameFlight) {
-             const vVal = Number(appliedVoucher.price_paid_cents) / 100;
-             const fPri = flight.price_cents / 100;
-             const pPri = photoOption.price_cents / 100;
-
-             // Si la valeur du bon couvre [Vol + Photo] et que la photo n'est pas encore cochée
-             if (vVal >= (fPri + pPri) && !currentComplements.includes(photoOption.id)) {
-               currentComplements.push(photoOption.id);
-             }
-           }
-        }
-
         // GoPro incluse dans le vol : auto-sélection
         if (flight?.activity_gopro && photoOption && !currentComplements.includes(photoOption.id)) {
           currentComplements.push(photoOption.id);
