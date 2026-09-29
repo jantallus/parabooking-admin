@@ -99,8 +99,8 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
               top: '50%',
               transform: 'translateY(-50%)',
               backgroundColor: ctaHovered
-                ? (cartSummary.isFormValid && cartSummary.step === 3 ? '#c2006a' : '#b85590')
-                : (cartSummary.isFormValid && cartSummary.step === 3 ? '#E6007E' : '#c966a3'),
+                ? (cartSummary.isFormValid && cartSummary.step === 3 ? '#0284c7' : '#b85590')
+                : (cartSummary.isFormValid && cartSummary.step === 3 ? '#0ea5e9' : '#c966a3'),
               color: '#fff',
               fontFamily: 'inherit',
               fontSize: '15px',
