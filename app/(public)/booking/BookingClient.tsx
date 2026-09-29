@@ -1366,8 +1366,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               </>
                             ) : (
                               <>
-                                <div style={{ fontSize: '0.875rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
-                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>+ {delta! / 100}€</div>
+                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
+                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>{delta! / 100}€</div>
                               </>
                             )}
                           </div>
