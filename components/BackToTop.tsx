@@ -263,7 +263,7 @@ export default function BackToTop() {
                   </div>
                   <div>
                     <label style={labelStyle}>Poids {form.nb_passengers > 1 ? '(ex: 65 / 70 kg)' : '(kg)'}</label>
-                    <input type="text" value={form.weight_info} onChange={e => set('weight_info', e.target.value)} placeholder={form.nb_passengers > 1 ? '65 / 70 kg' : '65 kg'} style={inputStyle} />
+                    <input type="text" value={form.weight_info} onChange={e => set('weight_info', e.target.value)} placeholder={form.nb_passengers > 1 ? '65 / 70 / 45' : '65'} style={inputStyle} />
                   </div>
                 </div>
 
