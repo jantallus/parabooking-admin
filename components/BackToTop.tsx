@@ -129,14 +129,7 @@ export default function BackToTop() {
               onPointerEnter={() => setHovered('tel')} onPointerLeave={() => setHovered(null)}
               aria-label="Contact"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                {/* Combiné téléphone */}
-                <path d="M6.5 2h-2a2 2 0 0 0-2 2 16 16 0 0 0 16 16 2 2 0 0 0 2-2v-2a2 2 0 0 0-1.33-1.89l-2.5-.83a2 2 0 0 0-2.06.49l-.8.8a12 12 0 0 1-4.38-4.38l.8-.8a2 2 0 0 0 .49-2.06l-.83-2.5A2 2 0 0 0 8.5 2z"/>
-                {/* Bulle SMS */}
-                <path d="M15 2h5v4l-2 1-2-1V2z" strokeWidth="1.5"/>
-                {/* Bulle message */}
-                <path d="M15 8.5c0-.83.67-1.5 1.5-1.5h3c.83 0 1.5.67 1.5 1.5v2c0 .83-.67 1.5-1.5 1.5H17l-2 1.5V8.5z" strokeWidth="1.5"/>
-              </svg>
+              <img src="/phone-contact.svg" alt="" width="22" height="22" style={{ display: 'block' }} />
             </button>
             {phoneMenuOpen && (
               <>
