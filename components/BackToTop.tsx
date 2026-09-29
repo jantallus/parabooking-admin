@@ -5,7 +5,12 @@ const PHONE = '0677285102';
 const WHATSAPP = 'https://wa.me/33677285102';
 const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.parabooking.app';
 
-interface FlightType { id: number; name: string; price_cents: number; }
+interface FlightType { id: number; name: string; price_cents: number; season?: string; }
+
+const currentSeason = (): string => {
+  const m = new Date().getMonth() + 1; // 1-12
+  return m >= 5 && m <= 10 ? 'ete' : 'hiver';
+};
 
 const emptyForm = () => ({
   flight_type: '',
@@ -227,9 +232,22 @@ export default function BackToTop() {
                   <label style={labelStyle}>Type de vol</label>
                   <select value={form.flight_type} onChange={e => set('flight_type', e.target.value)} style={inputStyle}>
                     <option value="">— Choisir un vol —</option>
-                    {flightTypes.map(ft => (
-                      <option key={ft.id} value={ft.name}>{ft.name} — {ft.price_cents / 100}€</option>
-                    ))}
+                    {(() => {
+                      const saison = currentSeason();
+                      const labels: Record<string, string> = { hiver: '❄️ Hiver', ete: '☀️ Été' };
+                      const ordre = saison === 'hiver' ? ['hiver', 'ete'] : ['ete', 'hiver'];
+                      return ordre.map(s => {
+                        const vols = flightTypes.filter(ft => (ft.season ?? 'ete') === s);
+                        if (!vols.length) return null;
+                        return (
+                          <optgroup key={s} label={labels[s]}>
+                            {vols.map(ft => (
+                              <option key={ft.id} value={ft.name}>{ft.name} — {ft.price_cents / 100}€</option>
+                            ))}
+                          </optgroup>
+                        );
+                      });
+                    })()}
                   </select>
                 </div>
 
