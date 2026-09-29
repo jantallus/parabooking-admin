@@ -1302,7 +1302,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                 <span
                                   key={key}
                                   className="relative group cursor-default"
-                                  onClick={e => { e.stopPropagation(); setActiveTooltip(isActive ? null : tipKey); }}
+                                  onClick={e => { e.stopPropagation(); setActiveTooltip(tipKey); setTimeout(() => setActiveTooltip(t => t === tipKey ? null : t), 2000); }}
                                 >
                                   {Icon}
                                   <span
