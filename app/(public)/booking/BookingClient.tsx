@@ -170,6 +170,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [cartOpen, setCartOpen] = useState(false);
   const [cartPopup, setCartPopup] = useState(false);
   const cartPopupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pendingComplements, setPendingComplements] = useState<Record<number, number>>({});
+  const pendingComplementsRef = useRef<Record<number, number>>({});
 
   const { setCartSummary, registerOpenCart } = useCart();
 
@@ -353,52 +355,58 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   useEffect(() => {
     if (step === 3) {
       const newPassengers: BookingPassenger[] = [];
-      
-      // 🎯 1. RECHERCHE ROBUSTE : On cherche l'option peu importe son nom (photo, vidéo, gopro...)
-      const photoOption = complementsList.find(c => 
-        c.name.toLowerCase().includes('photo') || 
-        c.name.toLowerCase().includes('vidéo') || 
-        c.name.toLowerCase().includes('video') || 
-        c.name.toLowerCase().includes('gopro')
-      );
 
       Object.entries(cart).forEach(([key, qty]) => {
         const [fId, dStr, tStr] = key.split('|');
         const flight = flights.find(f => f.id.toString() === fId);
-        
+
         for (let i = 0; i < qty; i++) {
           newPassengers.push({
             id: `${key}-${i}`,
-            flightKey: key, 
+            flightKey: key,
             flightId: fId,
             flightName: flight?.name || 'Vol',
             date: dStr,
             time: tStr,
             firstName: '',
             weightChecked: false,
-            selectedComplements: [], 
+            selectedComplements: [],
             weight_min: flight?.weight_min ?? 20,
             weight_max: flight?.weight_max ?? 110,
           });
         }
       });
-      
+
+      const pendingCounts = { ...pendingComplementsRef.current };
+      const assignedCounts: Record<number, number> = {};
+
       setPassengers(prev => newPassengers.map((nP) => {
         const existing = prev.find(p => p.id === nP.id);
         const flight = flights.find(f => f.id.toString() === nP.flightId);
-        
-        // On récupère ce qui est déjà coché par l'utilisateur
+
         let currentComplements = existing ? [...(existing.selectedComplements || [])] : [];
-        
+
+        // Apply pending complements (pre-selected in cart before step 3)
+        if (!existing) {
+          Object.entries(pendingCounts).forEach(([idStr, qty]) => {
+            const compId = parseInt(idStr);
+            if (!assignedCounts[compId]) assignedCounts[compId] = 0;
+            if (assignedCounts[compId] < qty && !currentComplements.includes(compId)) {
+              currentComplements.push(compId);
+              assignedCounts[compId]++;
+            }
+          });
+        }
+
         // GoPro incluse dans le vol : auto-sélection
         if (flight?.activity_gopro && photoOption && !currentComplements.includes(photoOption.id)) {
           currentComplements.push(photoOption.id);
         }
 
-        return { 
-          ...nP, 
-          firstName: existing?.firstName || '', 
-          weightChecked: existing?.weightChecked || false, 
+        return {
+          ...nP,
+          firstName: existing?.firstName || '',
+          weightChecked: existing?.weightChecked || false,
           selectedComplements: currentComplements
         };
       }));
@@ -742,11 +750,66 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const handleClearCart = () => {
     setCart({});
     setCartOpen(false);
+    setPendingComplements({});
+    pendingComplementsRef.current = {};
   };
 
 
   let totalItems = 0;
   Object.values(cart).forEach(qty => { totalItems += qty; });
+
+  const photoOption = complementsList.find(c =>
+    c.name.toLowerCase().includes('photo') ||
+    c.name.toLowerCase().includes('vidéo') ||
+    c.name.toLowerCase().includes('video') ||
+    c.name.toLowerCase().includes('gopro')
+  );
+
+  const getComplementCartCount = (compId: number): number => {
+    if (passengers.length > 0) {
+      return Math.min(
+        passengers.filter(p => (p.selectedComplements || []).includes(compId)).length,
+        totalItems
+      );
+    }
+    return Math.min(pendingComplements[compId] || 0, totalItems);
+  };
+
+  const handleCartAddComplement = (compId: number) => {
+    if (getComplementCartCount(compId) >= totalItems) return;
+    if (passengers.length > 0) {
+      setPassengers(prev => {
+        const newP = [...prev];
+        const idx = newP.findIndex(p => !(p.selectedComplements || []).includes(compId));
+        if (idx !== -1) newP[idx] = { ...newP[idx], selectedComplements: [...(newP[idx].selectedComplements || []), compId] };
+        return newP;
+      });
+    } else {
+      const updated = { ...pendingComplementsRef.current, [compId]: (pendingComplementsRef.current[compId] || 0) + 1 };
+      pendingComplementsRef.current = updated;
+      setPendingComplements(updated);
+    }
+  };
+
+  const handleCartRemoveComplement = (compId: number) => {
+    if (getComplementCartCount(compId) <= 0) return;
+    if (passengers.length > 0) {
+      setPassengers(prev => {
+        const newP = [...prev];
+        for (let i = newP.length - 1; i >= 0; i--) {
+          if ((newP[i].selectedComplements || []).includes(compId)) {
+            newP[i] = { ...newP[i], selectedComplements: (newP[i].selectedComplements || []).filter((id: number) => id !== compId) };
+            break;
+          }
+        }
+        return newP;
+      });
+    } else {
+      const updated = { ...pendingComplementsRef.current, [compId]: Math.max(0, (pendingComplementsRef.current[compId] || 0) - 1) };
+      pendingComplementsRef.current = updated;
+      setPendingComplements(updated);
+    }
+  };
 
   // Hors-saison basée sur la date affichée dans la grille (pas la date réelle)
   const pickedMonth = new Date(pickedDate + 'T12:00:00').getMonth(); // 0 = janvier
@@ -2278,32 +2341,42 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 })}
               </div>
 
-              {/* Options sélectionnées */}
-              {step === 3 && (() => {
-                const compCounts: Record<number, number> = {};
-                passengers.forEach(p => {
-                  (p.selectedComplements || []).forEach((id: number) => {
-                    compCounts[id] = (compCounts[id] || 0) + 1;
-                  });
-                });
-                const entries = Object.entries(compCounts);
-                if (entries.length === 0) return null;
-                return (
-                  <div className="px-4 pb-2 flex flex-col gap-1.5">
-                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Options</span>
-                    {entries.map(([idStr, count]) => {
-                      const comp = complementsList.find(c => c.id === parseInt(idStr));
-                      if (!comp) return null;
-                      return (
-                        <div key={idStr} className="bg-slate-50 rounded-[10px] px-3 py-2 flex items-center justify-between gap-2 text-xs font-bold text-slate-700 border border-slate-200">
-                          <span className="flex-1 min-w-0 truncate">{comp.name} × <span style={{ color: '#009FE3' }}>{count}</span></span>
-                          <span style={{ color: '#94a3b8', fontWeight: 600 }}>+{(comp.price_cents / 100 * count).toFixed(0)} €</span>
+              {/* Options */}
+              {photoOption && (
+                <div className="px-4 pb-2">
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Options</span>
+                  <div className="mt-1 bg-slate-50 rounded-[10px] pl-3 pr-2 py-2 flex items-center justify-between gap-2 text-xs font-bold text-slate-700 border border-slate-200">
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate">{photoOption.name}</div>
+                      {getComplementCartCount(photoOption.id) > 0 && (
+                        <div style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.65rem' }}>
+                          +{(photoOption.price_cents / 100 * getComplementCartCount(photoOption.id)).toFixed(0)} €
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {getComplementCartCount(photoOption.id) > 0 ? (
+                        <button
+                          onClick={() => handleCartRemoveComplement(photoOption.id)}
+                          className="w-6 h-6 bg-white border border-slate-200 rounded-[5px] flex items-center justify-center hover:text-rose-500 transition-colors"
+                          title="Enlever une option"
+                        >−</button>
+                      ) : (
+                        <div className="w-6 h-6" />
+                      )}
+                      <span style={{ minWidth: '1rem', textAlign: 'center', color: getComplementCartCount(photoOption.id) > 0 ? '#E6007E' : '#94a3b8' }}>
+                        {getComplementCartCount(photoOption.id)}
+                      </span>
+                      <button
+                        onClick={() => handleCartAddComplement(photoOption.id)}
+                        disabled={getComplementCartCount(photoOption.id) >= totalItems}
+                        className={`w-6 h-6 bg-white border rounded-[5px] flex items-center justify-center transition-colors ${getComplementCartCount(photoOption.id) >= totalItems ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 hover:text-[#E6007E]'}`}
+                        title="Ajouter une option"
+                      ><Plus size={12} /></button>
+                    </div>
                   </div>
-                );
-              })()}
+                </div>
+              )}
 
               {/* Total + bouton */}
               <div className="px-4 pb-4 pt-2 border-t border-slate-100">
