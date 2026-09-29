@@ -24,7 +24,7 @@ export default function BackToTop() {
         borderRadius: '100%',
         position: 'fixed',
         bottom: '20px',
-        left: '20px',
+        right: '20px',
         cursor: 'pointer',
         zIndex: 1000,
         opacity: visible ? 1 : 0,
