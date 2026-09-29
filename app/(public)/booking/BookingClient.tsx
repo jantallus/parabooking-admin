@@ -2333,7 +2333,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             const fabBg = step === 3 ? (isFormValid ? '#E6007E' : '#94a3b8') : '#E6007E';
             const hasDiscount = discountAmount > 0;
             return (
-              <div className="fixed z-[9999]" style={{ bottom: '20px', right: '16px' }}>
+              <div className={`fixed z-[9999]${!isEmbed ? ' lg:hidden' : ''}`} style={{ bottom: '20px', right: '16px' }}>
                 <div className="flex items-center gap-2">
                   {step === 3 && !cartOpen && (
                     <button
