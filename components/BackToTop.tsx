@@ -9,7 +9,7 @@ interface FlightType { id: number; name: string; price_cents: number; season?: s
 
 const currentSeason = (): string => {
   const m = new Date().getMonth() + 1; // 1-12
-  return m >= 5 && m <= 10 ? 'ete' : 'hiver';
+  return m >= 5 && m <= 10 ? 'SUMMER' : 'WINTER';
 };
 
 const emptyForm = () => ({
@@ -234,10 +234,14 @@ export default function BackToTop() {
                     <option value="">— Choisir un vol —</option>
                     {(() => {
                       const saison = currentSeason();
-                      const labels: Record<string, string> = { hiver: '❄️ Hiver', ete: '☀️ Été' };
-                      const ordre = saison === 'hiver' ? ['hiver', 'ete'] : ['ete', 'hiver'];
+                      const labels: Record<string, string> = { WINTER: '❄️ Hiver', SUMMER: '☀️ Été' };
+                      const ordre = saison === 'WINTER' ? ['WINTER', 'SUMMER'] : ['SUMMER', 'WINTER'];
                       return ordre.map(s => {
-                        const vols = flightTypes.filter(ft => (ft.season ?? 'ete') === s);
+                        const vols = flightTypes.filter(ft => {
+                          const season = ft.season ?? 'ALL';
+                          if (season === 'ALL') return s === ordre[0]; // toute l'année → dans le 1er groupe
+                          return season === s;
+                        });
                         if (!vols.length) return null;
                         return (
                           <optgroup key={s} label={labels[s]}>
