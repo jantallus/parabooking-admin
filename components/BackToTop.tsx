@@ -199,7 +199,7 @@ export default function BackToTop() {
       {formOpen && (
         <div
           onClick={e => { if (e.target === e.currentTarget) closeForm(); }}
-          style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: 'rgba(49,39,131,0.45)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: 'rgba(0,0,0,0.15)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
         >
           <div ref={modalRef} style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
 
