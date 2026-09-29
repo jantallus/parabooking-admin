@@ -199,14 +199,14 @@ export default function BackToTop() {
       {formOpen && (
         <div
           onClick={e => { if (e.target === e.currentTarget) closeForm(); }}
-          style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: 'rgba(49,39,131,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: 'rgba(49,39,131,0.45)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
         >
           <div ref={modalRef} style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
 
             {/* En-tête */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 0' }}>
               <div>
-                <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 700, color: '#E6007E', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Parapente La Clusaz</p>
+                <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 700, color: '#E6007E', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Fluide Parapente</p>
                 <h2 style={{ margin: '2px 0 0', fontSize: '1.15rem', fontWeight: 800, color: '#312783' }}>Être rappelé</h2>
                 <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>Vous préférez qu'on s'occupe de tout&nbsp;? Laissez-nous vos disponibilités et on vous contacte sous 24h.</p>
               </div>
