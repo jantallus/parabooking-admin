@@ -173,7 +173,7 @@ export default function BackToTop() {
         {/* Bouton demande de vol — toujours visible */}
         <button onClick={openForm} style={btn('form', true)}
           onPointerEnter={() => setHovered('form')} onPointerLeave={() => setHovered(null)}
-          aria-label="Demande de réservation">
+          aria-label="Être rappelé">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
@@ -202,7 +202,8 @@ export default function BackToTop() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 0' }}>
               <div>
                 <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 700, color: '#E6007E', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Parapente La Clusaz</p>
-                <h2 style={{ margin: '2px 0 0', fontSize: '1.15rem', fontWeight: 800, color: '#312783' }}>Demande de réservation</h2>
+                <h2 style={{ margin: '2px 0 0', fontSize: '1.15rem', fontWeight: 800, color: '#312783' }}>Être rappelé</h2>
+                <p style={{ margin: '4px 0 0', fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>Vous préférez qu'on s'occupe de tout&nbsp;? Laissez-nous vos disponibilités et on vous contacte sous 24h.</p>
               </div>
               <button onClick={closeForm} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '4px', lineHeight: 1 }} aria-label="Fermer">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -301,6 +302,10 @@ export default function BackToTop() {
 
                 <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#94a3b8', marginTop: '10px', marginBottom: 0 }}>
                   Paiement sur place : Espèces · Chèques-Vacances · ANCV Connect · Chèque
+                </p>
+                <p style={{ textAlign: 'center', fontSize: '0.72rem', marginTop: '8px', marginBottom: 0 }}>
+                  Vous voulez choisir votre créneau vous-même&nbsp;?{' '}
+                  <a href="/booking" style={{ color: '#312783', fontWeight: 700, textDecoration: 'underline' }}>Réserver en ligne →</a>
                 </p>
               </form>
             )}
