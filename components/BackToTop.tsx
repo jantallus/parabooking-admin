@@ -8,8 +8,8 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.parabooking.app';
 interface FlightType { id: number; name: string; price_cents: number; season?: string; }
 
 const currentSeason = (): string => {
-  const m = new Date().getMonth() + 1; // 1-12
-  return m >= 5 && m <= 10 ? 'SUMMER' : 'WINTER';
+  const m = new Date().getMonth(); // 0-11, même logique que la page /booking
+  return (m >= 8 || m <= 3) ? 'WINTER' : 'SUMMER';
 };
 
 const emptyForm = () => ({
