@@ -1113,7 +1113,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   {(appliedVoucher || appliedPartner) ? (
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: appliedVoucher ? '10px' : 0 }}>
-                        <span style={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>
+                        <span style={{ color: '#E6007E', fontWeight: 700, fontSize: '0.9rem' }}>
                           ✅ {appliedPartner ? `Partenaire ${appliedPartner.name}` : `Code ${appliedVoucher!.code.toUpperCase()} activé`}
                         </span>
                         <button
@@ -1331,10 +1331,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             {voucherCents == null ? (
                               <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1 }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
                             ) : delta === 0 ? (
-                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
+                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#E6007E' }}>Inclus ✓</div>
                             ) : delta! < 0 ? (
                               <>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>Inclus ✓</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#E6007E' }}>Inclus ✓</div>
                                 <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783', marginTop: '2px' }}>{(-delta!) / 100}€ de solde pour les options (photos et vidéos)</div>
                               </>
                             ) : (
@@ -1866,40 +1866,40 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 </p>
 
                 {appliedPartner ? (
-                  <div className="bg-white border-2 border-emerald-500 rounded-[10px] p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm">
+                  <div className="bg-white border-2 rounded-[10px] p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm" style={{ borderColor: '#E6007E' }}>
                     <div>
-                      <p className="font-bold text-emerald-900 uppercase tracking-widest text-sm">
+                      <p className="font-bold uppercase tracking-widest text-sm" style={{ color: '#312783' }}>
                         🤝 Partenaire {appliedPartner.name} appliqué
                       </p>
-                      <p className="text-emerald-700 font-bold mt-1">
+                      <p className="font-bold mt-1" style={{ color: '#E6007E' }}>
                         Code : <span className="uppercase">{appliedPartner.code}</span> · Inscription gratuite
                       </p>
                     </div>
                     <div className="text-left md:text-right w-full md:w-auto">
-                      <p className="text-3xl font-bold text-emerald-600">Gratuit</p>
+                      <p className="text-3xl font-bold" style={{ color: '#E6007E' }}>Gratuit</p>
                       <button onClick={() => setAppliedPartner(null)} className="text-[10px] font-bold uppercase text-rose-500 mt-2 hover:underline">
                         Retirer le code
                       </button>
                     </div>
                   </div>
                 ) : appliedVoucher ? (
-                  <div className="bg-white border-2 border-emerald-500 rounded-[10px] p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm">
+                  <div className="bg-white border-2 rounded-[10px] p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm" style={{ borderColor: '#E6007E' }}>
                     <div>
-                      <p className="font-bold text-emerald-900 uppercase tracking-widest text-sm">
+                      <p className="font-bold uppercase tracking-widest text-sm" style={{ color: '#312783' }}>
                         ✅ {appliedVoucher.type === 'promo' ? 'Code Promo appliqué' : 'Bon cadeau activé !'}
                       </p>
-                      <p className="text-emerald-700 font-bold mt-1">
+                      <p className="font-bold mt-1" style={{ color: '#E6007E' }}>
                         Code : <span className="uppercase">{appliedVoucher.code}</span>
                       </p>
                     </div>
                     <div className="text-left md:text-right w-full md:w-auto">
-                      <p className="text-3xl font-bold text-emerald-600">
+                      <p className="text-3xl font-bold" style={{ color: '#E6007E' }}>
                         - {discountAmount.toFixed(2)} €
                       </p>
                       {appliedVoucher.type === 'gift_card' && (() => {
                         const remaining = Number(appliedVoucher.price_paid_cents) / 100 - discountAmount;
                         return remaining > 0.009 ? (
-                          <p className="text-xs font-semibold text-emerald-700 mt-1">
+                          <p className="text-xs font-semibold mt-1" style={{ color: '#312783' }}>
                             + {remaining.toFixed(2).replace('.00', '')} € de solde utilisable sur les options
                           </p>
                         ) : null;
@@ -2061,10 +2061,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       )}
 
                       {needsWeight ? (
-                      <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors mb-4 ${p.weightChecked ? 'bg-emerald-50 border-emerald-200' : hasAttemptedSubmit ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200'}`}>
+                      <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors mb-4 ${p.weightChecked ? 'border-[#E6007E] bg-white' : hasAttemptedSubmit ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200'}`}>
                         <input
                           type="checkbox"
-                          className={`w-6 h-6 mt-0.5 ${p.weightChecked ? 'accent-emerald-500' : hasAttemptedSubmit ? 'accent-rose-500' : 'accent-slate-400'}`}
+                          className={`w-6 h-6 mt-0.5 ${p.weightChecked ? 'accent-[#E6007E]' : hasAttemptedSubmit ? 'accent-rose-500' : 'accent-slate-400'}`}
                           checked={p.weightChecked}
                           onChange={e => {
                             const newP = [...passengers];
@@ -2073,10 +2073,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           }}
                         />
                         <div>
-                          <span className={`font-bold block ${p.weightChecked ? 'text-emerald-900' : hasAttemptedSubmit ? 'text-rose-900' : 'text-slate-700'}`}>
+                          <span className={`font-bold block ${p.weightChecked ? 'text-[#312783]' : hasAttemptedSubmit ? 'text-rose-900' : 'text-slate-700'}`}>
                             Je certifie peser entre {p.weight_min} et {p.weight_max} kg *
                           </span>
-                          <span className={`text-xs ${p.weightChecked ? 'text-emerald-600' : hasAttemptedSubmit ? 'text-rose-500' : 'text-slate-500'}`}>
+                          <span className={`text-xs ${p.weightChecked ? 'text-[#E6007E]' : hasAttemptedSubmit ? 'text-rose-500' : 'text-slate-500'}`}>
                             Information obligatoire pour des raisons de sécurité.
                           </span>
                         </div>
@@ -2139,7 +2139,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
                                     <div>
                                       <span className={`font-bold block ${isSelected ? 'text-sky-900' : 'text-slate-700'}`}>
-                                        {comp.name} <span className={isLocked ? 'text-emerald-600' : ''}>
+                                        {comp.name} <span className={isLocked ? 'text-[#E6007E]' : ''}>
                                           {isLockedByActivity ? '(Inclus dans le vol)' : `(+${comp.price_cents / 100}€)`}
                                         </span>
                                       </span>
@@ -2240,7 +2240,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       <span className="flex-1 min-w-0 truncate">{f?.name} <span className="text-slate-400 font-normal">({tStr})</span> × <span style={{ color: '#009FE3' }}>{qty}</span></span>
                       <div className="flex items-center gap-1 shrink-0">
                         <button onClick={() => handleDecrementCart(key)} className="w-6 h-6 bg-white border border-slate-200 rounded-[5px] flex items-center justify-center hover:text-rose-500 transition-colors" title="Enlever 1">−</button>
-                        <button onClick={() => handleIncrementCart(key)} disabled={atCapacity} className={`w-6 h-6 bg-white border rounded-[5px] flex items-center justify-center transition-colors ${atCapacity ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 hover:text-emerald-500'}`} title="Ajouter 1"><Plus size={12} /></button>
+                        <button onClick={() => handleIncrementCart(key)} disabled={atCapacity} className={`w-6 h-6 bg-white border rounded-[5px] flex items-center justify-center transition-colors ${atCapacity ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 hover:text-[#E6007E]'}`} title="Ajouter 1"><Plus size={12} /></button>
                         <button onClick={() => handleDeleteCartItem(key)} className="w-6 h-6 bg-rose-50 rounded-[5px] flex items-center justify-center text-rose-400 hover:bg-rose-500 hover:text-white transition-colors" title="Supprimer cette ligne"><Trash2 size={12} /></button>
                       </div>
                     </div>
@@ -2291,7 +2291,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   <button
                     onClick={handleSubmit}
                     disabled={!isFormValid || isCheckingOut}
-                    className={`w-full py-3 rounded-[8px] font-bold uppercase text-xs tracking-widest transition-all shadow-md ${isFormValid && !isCheckingOut ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/30' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                    className={`w-full py-3 rounded-[8px] font-bold uppercase text-xs tracking-widest transition-all shadow-md ${isFormValid && !isCheckingOut ? 'text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                    style={isFormValid && !isCheckingOut ? { backgroundColor: '#E6007E' } : {}}
                   >
                     {isCheckingOut ? 'Validation...' : (finalPrice === 0 ? '✨ Valider (Gratuit)' : '🔒 Payer la réservation')}
                   </button>
