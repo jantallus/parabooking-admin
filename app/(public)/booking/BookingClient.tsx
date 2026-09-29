@@ -1345,12 +1345,13 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           <div className="mb-3">
                             {voucherCents == null ? (
                               <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1 }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
-                            ) : delta === 0 ? (
-                              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#E6007E' }}>Inclus ✓</div>
-                            ) : delta! < 0 ? (
+                            ) : delta! <= 0 ? (
                               <>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#E6007E' }}>Inclus ✓</div>
-                                <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783', marginTop: '2px' }}>{(-delta!) / 100}€ de solde pour les options (photos et vidéos)</div>
+                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
+                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>0€</div>
+                                {delta! < 0 && (
+                                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783', marginTop: '2px' }}>{(-delta!) / 100}€ de solde pour les options</div>
+                                )}
                               </>
                             ) : (
                               <>
