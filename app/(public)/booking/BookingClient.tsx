@@ -26,7 +26,7 @@ import { getSeasonMessage } from '@/lib/season-schedule';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { calculateBookingPrice } from '@/lib/price-utils';
 import { useCart } from '@/lib/CartContext';
-import { Gift, Camera, Zap, Clock, Weight, FileText, Mountain, Wind, Sun, Snowflake, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, ShoppingCart, X, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Gift, Camera, Zap, Clock, Weight, FileText, Mountain, Wind, Sun, Snowflake, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, X, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { SkiIcon, SnowboardIcon, PedestrianIcon, ChildrenIcon, GoproIcon } from '@/components/icons/ActivityIcons';
 
 function cloudinaryOptimize(url: string, w = 600, h = 300): string {
@@ -2451,64 +2451,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             </div>
           )}
 
-          {/* FAB */}
-          {(() => {
-            const fabBg = step === 3 ? (isFormValid ? '#E6007E' : '#94a3b8') : '#E6007E';
-            const hasDiscount = discountAmount > 0;
-            return (
-              <div className={`fixed z-[9999]${!isEmbed ? ' hidden' : ''}`} style={{ bottom: '20px', right: '16px' }}>
-                <div className="flex items-center gap-2">
-                  {step === 3 && !cartOpen && (
-                    <button
-                      onClick={isFormValid ? handleSubmit : () => setCartOpen(true)}
-                      disabled={!!isFormValid && isCheckingOut}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-full shadow-lg transition-all active:scale-95 whitespace-nowrap"
-                      style={{ backgroundColor: isFormValid ? '#E6007E' : '#94a3b8', color: 'white', fontSize: '13px', fontWeight: 700, border: 'none', cursor: 'pointer' }}
-                    >
-                      {isCheckingOut ? 'Validation...' : isFormValid
-                        ? finalPrice === 0
-                          ? `Valider (Gratuit${remainingBalance > 0.009 ? ` · ${remainingBalance % 1 === 0 ? remainingBalance : remainingBalance.toFixed(2)}€ de solde` : ''}) →`
-                          : 'Payer la réservation →'
-                        : 'Voir le récapitulatif →'}
-                    </button>
-                  )}
-                  <div className="relative">
-                    {step === 3 && !cartOpen && (
-                      <svg
-                        width="96"
-                        height={hasDiscount ? 60 : 50}
-                        viewBox={`-1 ${hasDiscount ? 4 : 5} 26 ${hasDiscount ? 16 : 14}`}
-                        style={{ display: 'block', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.08))', cursor: 'pointer', position: 'absolute', bottom: 'calc(100% + 4px)', left: '50%', transform: 'translateX(-50%)' }}
-                        onClick={isFormValid ? handleSubmit : () => setCartOpen(true)}
-                      >
-                        <g transform="rotate(45 12 12)">
-                          <path d="m4 20c1.88 1.88 4.54 1 6 2.5l12.5-12.5c-1.5-1.46-.62-4.12-2.5-6s-4.54-1-6-2.5l-12.5 12.5c1.5 1.46.62 4.12 2.5 6z" fill="#e8eaed" stroke="#94a3b8" strokeOpacity={0.4} strokeWidth="0.5" strokeLinejoin="round" strokeLinecap="round" />
-                        </g>
-                        {hasDiscount && (
-                          <text x="12" y="9.5" textAnchor="middle" dominantBaseline="middle" fontSize="2.8" fontWeight="700" fill="#94a3b8" style={{ textDecoration: 'line-through' }}>{originalPrice.toFixed(2)} €</text>
-                        )}
-                        <text x="12" y={hasDiscount ? 14 : 12} textAnchor="middle" dominantBaseline="middle" fontSize="4" fontWeight="800" fill="#E6007E">{finalPrice.toFixed(2)} €</text>
-                      </svg>
-                    )}
-                    <button
-                      onClick={step === 3 && isFormValid ? handleSubmit : () => setCartOpen(o => !o)}
-                      disabled={step === 3 && !!isFormValid && isCheckingOut}
-                      className="relative flex items-center justify-center shadow-xl transition-all active:scale-95"
-                      style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: fabBg, border: 'none', cursor: 'pointer' }}
-                      aria-label={step === 3 && isFormValid ? 'Payer la réservation' : 'Voir le panier'}
-                    >
-                      <ShoppingCart size={24} color="white" strokeWidth={2} />
-                      {step !== 3 && (
-                        <span className="absolute flex items-center justify-center font-bold" style={{ top: '-4px', right: '-4px', minWidth: '20px', height: '20px', borderRadius: '10px', backgroundColor: '#312783', color: 'white', fontSize: '11px', padding: '0 4px' }}>
-                          {totalItems}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
         </>
       )}
       {/* Popup éphémère "Ajouté au panier" */}
