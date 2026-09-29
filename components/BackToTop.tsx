@@ -172,11 +172,7 @@ export default function BackToTop() {
         <button onClick={openForm} style={btn('form', true)}
           onPointerEnter={() => setHovered('form')} onPointerLeave={() => setHovered(null)}
           aria-label="Demande de réservation">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2"/>
-            <path d="M16 2v4M8 2v4M3 10h18"/>
-            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
-          </svg>
+          <img src="/form-request.svg" alt="" width="20" height="20" style={{ display: 'block' }} />
         </button>
 
         {/* Retour en haut — visible après scroll */}
