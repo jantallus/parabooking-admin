@@ -1900,9 +1900,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 ) : appliedVoucher ? (
                   <div className="bg-white border-2 rounded-[10px] p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10 shadow-sm" style={{ borderColor: '#E6007E' }}>
                     <div>
-                      <p className="font-bold uppercase tracking-widest text-sm flex items-center gap-2" style={{ color: '#312783' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E6007E" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        {appliedVoucher.type === 'promo' ? 'Code Promo appliqué' : 'Bon cadeau activé !'}
+                      <p className="font-bold uppercase tracking-widest text-sm" style={{ color: '#312783' }}>
+                        {appliedVoucher.type === 'promo' ? 'Code Promo appliqué' : 'Bon cadeau activé'}
                       </p>
                       <p className="font-bold mt-1" style={{ color: '#E6007E' }}>
                         Code : <span className="uppercase">{appliedVoucher.code}</span>
