@@ -24,7 +24,7 @@ export default function BackToTop() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  const btn = (id: string): React.CSSProperties => ({
+  const btn = (id: string, alwaysVisible = false): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -33,8 +33,8 @@ export default function BackToTop() {
     height: '40px',
     borderRadius: '100%',
     cursor: 'pointer',
-    opacity: visible ? 1 : 0,
-    visibility: visible ? 'visible' : 'hidden',
+    opacity: alwaysVisible || visible ? 1 : 0,
+    visibility: alwaysVisible || visible ? 'visible' : 'hidden',
     transition: 'background-color 0.3s, opacity 0.5s, visibility 0.5s',
     border: 'none',
     textDecoration: 'none',
@@ -47,7 +47,7 @@ export default function BackToTop() {
       {/* Téléphone (mobile) → Mail (desktop) */}
       <a
         href={isDesktop ? `mailto:${EMAIL}` : `tel:${PHONE}`}
-        style={btn('contact')}
+        style={btn('contact', true)}
         onPointerEnter={() => setHovered('contact')}
         onPointerLeave={() => setHovered(null)}
         aria-label={isDesktop ? 'Envoyer un email' : 'Appeler'}
@@ -69,7 +69,7 @@ export default function BackToTop() {
         href={WHATSAPP}
         target="_blank"
         rel="noopener noreferrer"
-        style={btn('wa')}
+        style={btn('wa', true)}
         onPointerEnter={() => setHovered('wa')}
         onPointerLeave={() => setHovered(null)}
         aria-label="WhatsApp"
