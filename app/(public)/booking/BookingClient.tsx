@@ -848,7 +848,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const flightIds = [...new Set(Object.keys(cart).map(k => k.split('|')[0]))];
     const flightName = flightIds.length === 1 ? (flights.find(f => f.id.toString() === flightIds[0])?.name ?? '') : '';
     setCartSummary({ totalItems, finalPrice, originalPrice, discountAmount, flightName, step, isFormValid: !!isFormValid });
-  }, [totalItems, finalPrice, originalPrice, discountAmount, step, isFormValid]);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [totalItems, finalPrice, originalPrice, discountAmount, step, isFormValid, contact, passengers]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const missingFields: string[] = step === 3 ? [
     needsName  && !contact.firstName ? 'Prénom du contact' : null,
