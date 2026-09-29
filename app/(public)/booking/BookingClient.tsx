@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { FlightType, GiftCard, Partner, PublicSlot } from '@/lib/types';
+import type { FlightType, GiftCard, Partner, PublicSlot, Passenger } from '@/lib/types';
 import { useBookingData } from '@/hooks/useBookingData';
 import { useAvailabilities } from '@/hooks/useAvailabilities';
 
@@ -816,7 +816,27 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const isWinterOffSeason = pickedMonth >= 4 && pickedMonth <= 10;
   const isSummerOffSeason = pickedMonth <= 3 || pickedMonth >= 10;
 
-  const rawPrices = calculateBookingPrice(cart, flights, passengers, complementsList, appliedVoucher);
+  // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
+  // dans des passagers virtuels pour que le calcul de prix reflète les options pré-sélectionnées.
+  const passengersForPricing: { flightId?: string; selectedComplements?: number[] }[] = passengers.length > 0
+    ? passengers
+    : (() => {
+        const assigned: Record<number, number> = {};
+        return Object.entries(cart).flatMap(([key, qty]) => {
+          const [fId] = key.split('|');
+          return Array.from({ length: qty }, () => {
+            const comps: number[] = [];
+            Object.entries(pendingComplements).forEach(([idStr, pendQty]) => {
+              const cId = parseInt(idStr);
+              assigned[cId] = assigned[cId] || 0;
+              if (assigned[cId] < pendQty) { comps.push(cId); assigned[cId]++; }
+            });
+            return { flightId: fId, selectedComplements: comps };
+          });
+        });
+      })();
+
+  const rawPrices = calculateBookingPrice(cart, flights, passengersForPricing as Passenger[], complementsList, appliedVoucher);
   const { originalPrice } = rawPrices;
   const discountAmount = appliedPartner ? originalPrice : rawPrices.discountAmount;
   const finalPrice = appliedPartner ? 0 : rawPrices.finalPrice;
@@ -2409,7 +2429,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}
                   >
-                    Passer à l'inscription
+                    {remainingBalance > 0.009
+                      ? `Passer à l'inscription · ${remainingBalance % 1 === 0 ? remainingBalance : remainingBalance.toFixed(2)}€ de solde`
+                      : "Passer à l'inscription"}
                   </button>
                 )}
 
