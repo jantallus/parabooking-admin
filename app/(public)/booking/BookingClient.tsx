@@ -2104,10 +2104,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               return (
                                 <label
                                   key={comp.id}
-                                  className={`flex items-start gap-3 p-4 rounded-[10px] border transition-colors ${isLocked ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer'} ${isSelected && !isLocked ? 'bg-slate-50' : (!isLocked ? 'bg-slate-50 border-slate-100' : '')}`}
+                                  className={`flex items-start gap-3 p-4 rounded-[10px] border transition-colors ${isLocked ? 'opacity-80 cursor-not-allowed' : 'cursor-pointer'}`}
                                   style={
                                     isLocked ? { backgroundColor: 'rgba(49,39,131,0.04)', borderColor: 'rgba(49,39,131,0.2)' } :
-                                    isSelected ? { borderColor: '#312783', backgroundColor: 'rgba(49,39,131,0.05)' } : {}
+                                    isSelected ? { borderColor: '#312783', backgroundColor: '#fff' } :
+                                    { borderColor: '#e2e8f0', backgroundColor: '#fff' }
                                   }
                                 >
                                   <input
