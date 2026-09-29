@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState, useLayoutEffect, useRef } from 'react';
-import { Sun, Snowflake } from 'lucide-react';
 
 const PHONE = '0677285102';
 const WHATSAPP = 'https://wa.me/33677285102';
@@ -33,7 +32,6 @@ export default function BackToTop() {
   const [formOpen, setFormOpen] = useState(false);
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [flightTypes, setFlightTypes] = useState<FlightType[]>([]);
-  const [formSeason, setFormSeason] = useState<'SUMMER' | 'WINTER'>(currentSeason() as 'SUMMER' | 'WINTER');
   const [form, setForm] = useState(emptyForm());
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -229,28 +227,28 @@ export default function BackToTop() {
             ) : (
               <form onSubmit={handleSubmit} style={{ padding: '16px 20px 24px' }}>
 
-                {/* Saison + Type de vol */}
+                {/* Type de vol */}
                 <div style={{ marginBottom: '14px' }}>
                   <label style={labelStyle}>Type de vol</label>
-                  {/* Toggle saison */}
-                  <div style={{ display: 'flex', background: '#f1f5f9', borderRadius: '10px', padding: '3px', marginBottom: '8px' }}>
-                    {(['SUMMER', 'WINTER'] as const).map(s => {
-                      const active = formSeason === s;
-                      return (
-                        <button key={s} type="button" onClick={() => { setFormSeason(s); set('flight_type', ''); }}
-                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.9rem', fontWeight: active ? 700 : 500, color: active ? 'white' : '#64748b', backgroundColor: active ? '#312783' : 'transparent', transition: 'all 0.2s' }}>
-                          {s === 'SUMMER' ? <Sun size={15} strokeWidth={1.5} /> : <Snowflake size={15} strokeWidth={1.5} />}
-                          {s === 'SUMMER' ? 'été' : 'hiver'}
-                        </button>
-                      );
-                    })}
-                  </div>
                   <select value={form.flight_type} onChange={e => set('flight_type', e.target.value)} style={inputStyle}>
                     <option value="">— Choisir un vol —</option>
-                    {flightTypes
-                      .filter(ft => { const s = (ft.season ?? 'ALL').toUpperCase(); return s === formSeason || s === 'ALL'; })
-                      .map(ft => <option key={ft.id} value={ft.name}>{ft.name} — {ft.price_cents / 100}€</option>)
-                    }
+                    {(() => {
+                      const saison = currentSeason();
+                      const ordre = saison === 'WINTER' ? ['WINTER', 'SUMMER'] : ['SUMMER', 'WINTER'];
+                      const labels: Record<string, string> = { WINTER: 'Hiver', SUMMER: 'Été' };
+                      return ordre.map(s => {
+                        const vols = flightTypes.filter(ft => {
+                          const fs = (ft.season ?? 'ALL').toUpperCase();
+                          return fs === s || (fs === 'ALL' && s === ordre[0]);
+                        });
+                        if (!vols.length) return null;
+                        return (
+                          <optgroup key={s} label={labels[s]}>
+                            {vols.map(ft => <option key={ft.id} value={ft.name}>{ft.name} — {ft.price_cents / 100}€</option>)}
+                          </optgroup>
+                        );
+                      });
+                    })()}
                   </select>
                 </div>
 
