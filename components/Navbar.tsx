@@ -98,7 +98,9 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
               right: '29px',
               top: '50%',
               transform: 'translateY(-50%)',
-              backgroundColor: ctaHovered ? '#2a2070' : '#312783',
+              backgroundColor: ctaHovered
+                ? (cartSummary.isFormValid && cartSummary.step === 3 ? '#c2006a' : 'rgba(230,0,126,0.55)')
+                : (cartSummary.isFormValid && cartSummary.step === 3 ? '#E6007E' : 'rgba(230,0,126,0.3)'),
               color: '#fff',
               fontFamily: 'inherit',
               fontSize: '15px',
@@ -106,7 +108,7 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
               lineHeight: '24px',
               padding: '10px 17px',
               borderRadius: '5px',
-              border: '2px solid rgba(230,0,126,0.7)',
+              border: 'none',
               whiteSpace: 'nowrap',
               transition: 'background-color 0.2s ease',
               cursor: 'pointer',
