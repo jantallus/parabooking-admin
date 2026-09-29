@@ -168,6 +168,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [cartPopup, setCartPopup] = useState(false);
+  const cartPopupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { setCartSummary, registerOpenCart } = useCart();
 
@@ -699,6 +701,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     if (!selectedFlight) return;
     const key = `${selectedFlight.id}|${date}|${time}`;
     setCart(prev => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
+    if (cartPopupTimer.current) clearTimeout(cartPopupTimer.current);
+    setCartPopup(true);
+    cartPopupTimer.current = setTimeout(() => setCartPopup(false), 2500);
   };
   const handleRemove = (date: string, time: string) => {
     if (!selectedFlight) return;
@@ -2398,6 +2403,33 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
           })()}
         </>
       )}
+      {/* Popup éphémère "Ajouté au panier" */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '100px',
+          right: '24px',
+          zIndex: 10000,
+          backgroundColor: '#312783',
+          color: '#fff',
+          padding: '10px 18px',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          fontWeight: 700,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          pointerEvents: 'none',
+          transition: 'opacity 0.3s ease, transform 0.3s ease',
+          opacity: cartPopup ? 1 : 0,
+          transform: cartPopup ? 'translateY(0)' : 'translateY(-8px)',
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E6007E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Ajouté au panier
+      </div>
+
       {/* 🎯 POPUP D'INFORMATION SUR LE VOL */}
       {infoFlight && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setInfoFlight(null)}>
