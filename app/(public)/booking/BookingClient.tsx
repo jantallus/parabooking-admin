@@ -1306,8 +1306,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                 >
                                   {Icon}
                                   <span
-                                    className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-28 text-center rounded px-2 py-1 text-xs font-semibold text-white transition-opacity group-hover:opacity-100"
-                                    style={{ backgroundColor: '#312783', opacity: isActive ? 1 : undefined, whiteSpace: 'normal' }}
+                                    className={`pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-28 text-center rounded px-2 py-1 text-xs font-semibold text-white transition-opacity group-hover:opacity-100 ${isActive ? '' : 'opacity-0'}`}
+                                    style={{ backgroundColor: '#312783', whiteSpace: 'normal' }}
                                   >{label}</span>
                                 </span>
                               );
