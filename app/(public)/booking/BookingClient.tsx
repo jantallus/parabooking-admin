@@ -2012,7 +2012,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 </div>
 
                 <label className="flex items-center gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors" style={{ backgroundColor: 'rgba(0,159,227,0.06)', borderColor: 'rgba(0,159,227,0.2)' }}>
-                  <input type="checkbox" className="w-5 h-5" style={{ accentColor: '#009FE3' }} checked={contact.isPassenger} onChange={e => setContact({...contact, isPassenger: e.target.checked})} />
+                  <input type="checkbox" className="cb-white" checked={contact.isPassenger} onChange={e => setContact({...contact, isPassenger: e.target.checked})} />
                   <span style={{ fontSize: '1rem', fontWeight: 700, color: '#312783' }}>Je suis aussi l'un des passagers (m'ajouter au vol)</span>
                 </label>
               </div>
@@ -2064,7 +2064,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors mb-4 ${p.weightChecked ? 'border-[#E6007E] bg-white' : hasAttemptedSubmit ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-200'}`}>
                         <input
                           type="checkbox"
-                          className={`w-6 h-6 mt-0.5 ${p.weightChecked ? 'accent-[#E6007E]' : hasAttemptedSubmit ? 'accent-rose-500' : 'accent-slate-400'}`}
+                          className={`cb-white mt-0.5 ${hasAttemptedSubmit && !p.weightChecked ? 'cb-error' : ''}`}
                           checked={p.weightChecked}
                           onChange={e => {
                             const newP = [...passengers];
@@ -2113,7 +2113,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                 >
                                   <input
                                     type="checkbox"
-                                    className={`w-6 h-6 mt-0.5 accent-sky-500 ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                    className={`cb-white mt-0.5 ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                     checked={isSelected}
                                     disabled={isLocked}
                                     onChange={(e) => {

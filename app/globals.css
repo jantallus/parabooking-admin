@@ -134,3 +134,25 @@ body, *:not(.font-georgia) {
 .no-spinner::-webkit-outer-spin-button,
 .no-spinner::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .no-spinner { -moz-appearance: textfield; }
+
+/* Checkbox fond blanc avec coche fuschia */
+.cb-white {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  min-width: 1.5rem;
+  border: 2px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  flex-shrink: 0;
+}
+.cb-white:checked {
+  border-color: #E6007E;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8l4 4 8-8' stroke='%23E6007E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") center/70% no-repeat;
+}
+.cb-white:disabled { cursor: not-allowed; opacity: 0.5; }
+.cb-white.cb-error { border-color: #fca5a5; }
+.cb-white.cb-error:checked { border-color: #f87171; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8l4 4 8-8' stroke='%23f87171' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E"); }
