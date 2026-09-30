@@ -22,7 +22,6 @@ const emptyForm = () => ({
   phone: '',
   email: '',
   notes: '',
-  cgv: false,
 });
 
 export default function BackToTop() {
@@ -74,7 +73,6 @@ export default function BackToTop() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.cgv) { setError('Veuillez accepter les CGV pour continuer.'); return; }
     if (!form.name && !form.phone && !form.email) { setError('Merci de renseigner au moins votre nom, téléphone ou email.'); return; }
     setSending(true);
     setError('');
@@ -302,16 +300,6 @@ export default function BackToTop() {
                   <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Questions, préférences d'horaire…" rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
                 </div>
 
-                {/* CGV */}
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer', marginBottom: '16px' }}>
-                  <input type="checkbox" checked={form.cgv} onChange={e => set('cgv', e.target.checked)} style={{ marginTop: '2px', accentColor: '#E6007E', flexShrink: 0 }} />
-                  <span style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4 }}>
-                    J'ai lu et j'accepte les{' '}
-                    <a href="https://www.fluide-parapente.fr/cgv/" target="_blank" rel="noopener" style={{ color: '#312783', fontWeight: 700 }}>CGV</a>
-                    {' '}et je confirme être en bonne condition physique.
-                  </span>
-                </label>
-
                 {error && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginBottom: '12px', fontWeight: 600 }}>{error}</p>}
 
                 {/* Bouton + rappel paiement */}
@@ -321,6 +309,9 @@ export default function BackToTop() {
 
                 <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#94a3b8', marginTop: '10px', marginBottom: 0 }}>
                   Paiement sur place : Espèces · Chèques-Vacances · ANCV Connect · Chèque
+                </p>
+                <p style={{ textAlign: 'center', fontSize: '0.68rem', color: '#cbd5e1', marginTop: '6px', marginBottom: 0 }}>
+                  En soumettant ce formulaire, vous acceptez d'être recontacté par Fluide Parapente.
                 </p>
                 <p style={{ textAlign: 'center', fontSize: '0.72rem', marginTop: '8px', marginBottom: 0 }}>
                   Vous voulez choisir votre créneau vous-même&nbsp;?{' '}
