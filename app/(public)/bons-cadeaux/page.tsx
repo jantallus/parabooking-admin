@@ -448,7 +448,7 @@ export default function CadeauPage() {
 
                       if (quantity === 1) {
                         return (
-                          <label key={comp.id} className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all bg-white ${isSelected ? 'shadow-md' : 'border-slate-200'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783' } : {}) }}>
+                          <label key={comp.id} className="flex items-center gap-4 p-4 cursor-pointer transition-all" style={{ borderRadius: '10px', border: `2px solid ${isSelected ? '#312783' : '#e2e8f0'}`, backgroundColor: 'white' }}>
                             <input type="checkbox" className="w-5 h-5 accent-sky-500" checked={isSelected} onChange={e => setCompQty(e.target.checked ? 1 : 0)} />
                             <div className="flex-1">
                               <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', display: 'block', marginBottom: '2px' }}>{comp.name}</span>
@@ -460,7 +460,7 @@ export default function CadeauPage() {
                       }
 
                       return (
-                        <div key={comp.id} className={`flex items-center gap-4 p-4 border-2 transition-all bg-white ${isSelected ? 'shadow-md' : 'border-slate-200'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783' } : {}) }}>
+                        <div key={comp.id} className="flex items-center gap-4 p-4 transition-all" style={{ borderRadius: '10px', border: `2px solid ${isSelected ? '#312783' : '#e2e8f0'}`, backgroundColor: 'white' }}>
                           <div className="flex-1">
                             <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', display: 'block', marginBottom: '2px' }}>{comp.name}</span>
                             {comp.description && <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#64748b' }}>{comp.description}</span>}
