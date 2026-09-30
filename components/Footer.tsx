@@ -114,10 +114,10 @@ export default function Footer() {
             </li>
             <li style={{ paddingTop: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/mastercard.svg" alt="Mastercard" style={{ height: '33px', width: 'auto', display: 'block' }} />
-                <img src="/visa.svg" alt="Visa" style={{ height: '33px', width: 'auto', display: 'block' }} />
-                <img src="/stripe.svg" alt="Stripe" style={{ height: '33px', width: 'auto', display: 'block' }} />
-                <img src="/ancv.png" alt="ANCV Chèque-Vacances" style={{ height: '46px', width: 'auto', display: 'block' }} />
+                <img src="/mastercard.svg" alt="Mastercard" style={{ height: '44px', width: 'auto', display: 'block' }} />
+                <img src="/visa.svg" alt="Visa" style={{ height: '44px', width: 'auto', display: 'block' }} />
+                <img src="/stripe.svg" alt="Stripe" style={{ height: '44px', width: 'auto', display: 'block' }} />
+                <img src="/ancv.png" alt="ANCV Chèque-Vacances" style={{ height: '56px', width: 'auto', display: 'block' }} />
               </div>
             </li>
           </ul>
