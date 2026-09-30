@@ -487,7 +487,7 @@ export default function CadeauPage() {
                 <div className="mb-8 p-6 rounded-[10px] transition-all" style={{ backgroundColor: '#E8F5FC', border: '2px solid #B8DFF0' }}>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" className="w-5 h-5 accent-[#009FE3]" checked={wantsShipping} onChange={e => setWantsShipping(e.target.checked)} />
-                    <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Package size={20} strokeWidth={1.5} />Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)</span>
+                    <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Package size={20} strokeWidth={1.5} />Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier{quantity > 1 ? <span style={{ fontWeight: 400, fontSize: '1rem' }}>&nbsp;— une par bon</span> : ''} (+{shippingSettings.price}€)</span>
                   </label>
                   
                   {wantsShipping && (
