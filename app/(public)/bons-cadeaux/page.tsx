@@ -20,7 +20,7 @@ export default function CadeauPage() {
   const [address, setAddress] = useState({ street: '', zip: '', city: '' });
   // 🎯 NOUVEAU : Gestion des options additionnelles
   const [complements, setComplements] = useState<Complement[]>([]);
-  const [selectedComplements, setSelectedComplements] = useState<Complement[]>([]);
+  const [complementQuantities, setComplementQuantities] = useState<Record<number, number>>({});
 
   const [quantity, setQuantity] = useState(1);
   const [infoTemplate, setInfoTemplate] = useState<GiftCardShopTemplate | null>(null);
@@ -154,6 +154,9 @@ export default function CadeauPage() {
 
     try {
       const shippingPayload = wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null;
+      const selectedComplements = complements
+        .filter(c => (complementQuantities[c.id] ?? 0) > 0)
+        .map(c => ({ id: c.id, quantity: complementQuantities[c.id] }));
       const payload = selectedTemplate
         ? { template: selectedTemplate, buyer, physicalShipping: shippingPayload, selectedComplements, quantity }
         : { flight_type_id: directFlightId, buyer, physicalShipping: shippingPayload, selectedComplements, quantity };
@@ -216,9 +219,9 @@ export default function CadeauPage() {
   const inputStyle = { width: '100%', padding: '15px', borderRadius: '10px', border: '2px solid #e2e8f0', fontSize: '1rem', fontWeight: 700, outline: 'none' };
   
   // Calcul du prix total affiché sur le bouton
-  const optionsPrice = selectedComplements.reduce((sum, c) => sum + (c.price_cents / 100), 0);
+  const optionsTotal = complements.reduce((sum, c) => sum + (c.price_cents / 100) * (complementQuantities[c.id] ?? 0), 0);
   const basePriceCents = selectedTemplate ? selectedTemplate.price_cents : (directFlightPrice ?? 0);
-  const totalPrice = ((basePriceCents / 100) + optionsPrice) * quantity + (wantsShipping ? shippingSettings.price : 0);
+  const totalPrice = (basePriceCents / 100) * quantity + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
 
   return (
     <main className="main-bons-cadeaux" style={{ width: '100%', overflowX: 'hidden', position: 'relative' }}>
@@ -380,7 +383,7 @@ export default function CadeauPage() {
                   <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{tpl.price_cents / 100}€</div>
                     <button
-                      onClick={() => { setSelectedTemplate(tpl); setSelectedComplements([]); setUrlFlightName(null); setQuantity(1); scrollToForm(); }}
+                      onClick={() => { setSelectedTemplate(tpl); setComplementQuantities({}); setUrlFlightName(null); setQuantity(1); scrollToForm(); }}
                       className="btn-choisir cursor-pointer px-6 py-4 rounded-[5px] text-white"
                       style={{ fontSize: '1.125rem', fontWeight: 700, ...(selectedTemplate?.id === tpl.id ? { backgroundColor: '#312783' } : {}) }}
                     >
@@ -439,20 +442,41 @@ export default function CadeauPage() {
                   <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#312783', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}><Sparkles size={16} strokeWidth={1.5} />Ajouter des options au bon cadeau</h4>
                   <div className="flex flex-col gap-3">
                     {complements.map(comp => {
-                      const isSelected = selectedComplements.some(c => c.id === comp.id);
+                      const compQty = complementQuantities[comp.id] ?? 0;
+                      const isSelected = compQty > 0;
+                      const setCompQty = (n: number) => setComplementQuantities(prev => ({ ...prev, [comp.id]: Math.max(0, Math.min(quantity, n)) }));
+
+                      if (quantity === 1) {
+                        return (
+                          <label key={comp.id} className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all ${isSelected ? 'shadow-md' : 'border-slate-200 bg-white'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783', backgroundColor: 'rgba(49,39,131,0.05)' } : {}) }}>
+                            <input type="checkbox" className="w-5 h-5 accent-sky-500" checked={isSelected} onChange={e => setCompQty(e.target.checked ? 1 : 0)} />
+                            <div className="flex-1">
+                              <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', display: 'block', marginBottom: '2px' }}>{comp.name}</span>
+                              {comp.description && <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#64748b' }}>{comp.description}</span>}
+                            </div>
+                            <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#312783' }}>+{comp.price_cents / 100}€</span>
+                          </label>
+                        );
+                      }
+
                       return (
-                        <label key={comp.id} className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all ${isSelected ? 'shadow-md' : 'border-slate-200 bg-white'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783', backgroundColor: 'rgba(49,39,131,0.05)' } : {}) }}>
-                          <input type="checkbox" className="w-5 h-5 accent-sky-500" checked={isSelected} onChange={(e) => {
-                            if (e.target.checked) setSelectedComplements([...selectedComplements, comp]);
-                            else setSelectedComplements(selectedComplements.filter(c => c.id !== comp.id));
-                          }} />
+                        <div key={comp.id} className={`flex items-center gap-4 p-4 border-2 transition-all ${isSelected ? 'shadow-md' : 'border-slate-200 bg-white'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783', backgroundColor: 'rgba(49,39,131,0.05)' } : {}) }}>
                           <div className="flex-1">
                             <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', display: 'block', marginBottom: '2px' }}>{comp.name}</span>
                             {comp.description && <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#64748b' }}>{comp.description}</span>}
                           </div>
-                          <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#312783' }}>+{comp.price_cents / 100}€{quantity > 1 ? ` × ${quantity}` : ''}</span>
-                        </label>
-                      )
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                            <span style={{ fontSize: '1rem', fontWeight: 700, color: isSelected ? '#312783' : '#94a3b8', minWidth: '52px', textAlign: 'right' }}>
+                              {isSelected ? `+${(comp.price_cents / 100) * compQty}€` : `+${comp.price_cents / 100}€`}
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                              <button type="button" onClick={() => setCompQty(compQty - 1)} disabled={compQty <= 0} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty <= 0 ? 'not-allowed' : 'pointer', color: compQty <= 0 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                              <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: '#312783' }}>{compQty}</span>
+                              <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= quantity} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= quantity ? 'not-allowed' : 'pointer', color: compQty >= quantity ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            </div>
+                          </div>
+                        </div>
+                      );
                     })}
                   </div>
                 </div>
