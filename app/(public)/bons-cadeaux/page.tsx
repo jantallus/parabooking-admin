@@ -218,7 +218,7 @@ export default function CadeauPage() {
   // Calcul du prix total affiché sur le bouton
   const optionsPrice = selectedComplements.reduce((sum, c) => sum + (c.price_cents / 100), 0);
   const basePriceCents = selectedTemplate ? selectedTemplate.price_cents : (directFlightPrice ?? 0);
-  const totalPrice = ((basePriceCents / 100) + (wantsShipping ? shippingSettings.price : 0) + optionsPrice) * quantity;
+  const totalPrice = ((basePriceCents / 100) + optionsPrice) * quantity + (wantsShipping ? shippingSettings.price : 0);
 
   return (
     <main className="main-bons-cadeaux" style={{ width: '100%', overflowX: 'hidden', position: 'relative' }}>
@@ -463,7 +463,7 @@ export default function CadeauPage() {
                 <div className="mb-8 p-6 rounded-[10px] transition-all" style={{ backgroundColor: '#E8F5FC', border: '2px solid #B8DFF0' }}>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" className="w-5 h-5 accent-[#009FE3]" checked={wantsShipping} onChange={e => setWantsShipping(e.target.checked)} />
-                    <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Package size={20} strokeWidth={1.5} />Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price * quantity}€)</span>
+                    <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Package size={20} strokeWidth={1.5} />Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)</span>
                   </label>
                   
                   {wantsShipping && (
