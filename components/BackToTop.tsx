@@ -233,7 +233,7 @@ export default function BackToTop() {
                     {(() => {
                       const saison = currentSeason();
                       const ordre = saison === 'WINTER' ? ['WINTER', 'SUMMER'] : ['SUMMER', 'WINTER'];
-                      const labels: Record<string, string> = { WINTER: '❄ Hiver', SUMMER: '☀ Été' };
+                      const labels: Record<string, string> = { WINTER: 'Hiver', SUMMER: 'Été' };
                       return ordre.map(s => {
                         const vols = flightTypes.filter(ft => {
                           const fs = (ft.season ?? 'ALL').toUpperCase();
