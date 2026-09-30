@@ -117,7 +117,7 @@ export default function Footer() {
                 <img src="/mastercard.png" alt="Mastercard" style={{ height: '33px', width: 'auto', display: 'block' }} />
                 <img src="/visa.gif" alt="Visa" style={{ height: '33px', width: 'auto', display: 'block' }} />
                 <img src="/stripe.png" alt="Stripe" style={{ height: '33px', width: 'auto', display: 'block' }} />
-                <img src="/ancv.png" alt="ANCV Chèque-Vacances" style={{ height: '33px', width: 'auto', display: 'block' }} />
+                <img src="/ancv.png" alt="ANCV Chèque-Vacances" style={{ height: '46px', width: 'auto', display: 'block' }} />
               </div>
             </li>
           </ul>
