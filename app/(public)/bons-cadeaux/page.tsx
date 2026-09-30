@@ -448,7 +448,7 @@ export default function CadeauPage() {
 
                       if (quantity === 1) {
                         return (
-                          <label key={comp.id} className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all ${isSelected ? 'shadow-md' : 'border-slate-200 bg-white'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783', backgroundColor: 'rgba(49,39,131,0.05)' } : {}) }}>
+                          <label key={comp.id} className={`flex items-center gap-4 p-4 border-2 cursor-pointer transition-all bg-white ${isSelected ? 'shadow-md' : 'border-slate-200'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783' } : {}) }}>
                             <input type="checkbox" className="w-5 h-5 accent-sky-500" checked={isSelected} onChange={e => setCompQty(e.target.checked ? 1 : 0)} />
                             <div className="flex-1">
                               <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', display: 'block', marginBottom: '2px' }}>{comp.name}</span>
@@ -460,7 +460,7 @@ export default function CadeauPage() {
                       }
 
                       return (
-                        <div key={comp.id} className={`flex items-center gap-4 p-4 border-2 transition-all ${isSelected ? 'shadow-md' : 'border-slate-200 bg-white'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783', backgroundColor: 'rgba(49,39,131,0.05)' } : {}) }}>
+                        <div key={comp.id} className={`flex items-center gap-4 p-4 border-2 transition-all bg-white ${isSelected ? 'shadow-md' : 'border-slate-200'}`} style={{ borderRadius: '10px', ...(isSelected ? { borderColor: '#312783' } : {}) }}>
                           <div className="flex-1">
                             <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', display: 'block', marginBottom: '2px' }}>{comp.name}</span>
                             {comp.description && <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#64748b' }}>{comp.description}</span>}
@@ -484,7 +484,7 @@ export default function CadeauPage() {
 
               {/* 🎯 LA NOUVELLE OPTION POSTALE ! */}
               {shippingSettings.enabled && (
-                <div className="mb-8 p-6 rounded-[10px] transition-all" style={{ backgroundColor: '#E8F5FC', border: '2px solid #B8DFF0' }}>
+                <div className="mb-8 p-6 rounded-[10px] transition-all" style={{ backgroundColor: 'white', border: `2px solid ${wantsShipping ? '#009FE3' : '#e2e8f0'}` }}>
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" className="w-5 h-5 accent-[#009FE3]" checked={wantsShipping} onChange={e => setWantsShipping(e.target.checked)} />
                     <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Package size={20} strokeWidth={1.5} />Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier{quantity > 1 ? <span style={{ fontWeight: 400, fontSize: '1rem' }}>&nbsp;— une par bon</span> : ''} (+{shippingSettings.price}€)</span>
