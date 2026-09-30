@@ -202,7 +202,7 @@ export default function BackToTop() {
           <div ref={modalRef} style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
 
             {/* En-tête */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 20px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '20px 20px 0' }}>
               <div>
                 <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 700, color: '#E6007E', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Fluide Parapente</p>
                 <h2 style={{ margin: '2px 0 0', fontSize: '1.15rem', fontWeight: 800, color: '#312783' }}>Être rappelé</h2>
