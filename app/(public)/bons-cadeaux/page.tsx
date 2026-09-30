@@ -22,6 +22,7 @@ export default function CadeauPage() {
   const [complements, setComplements] = useState<Complement[]>([]);
   const [selectedComplements, setSelectedComplements] = useState<Complement[]>([]);
 
+  const [quantity, setQuantity] = useState(1);
   const [infoTemplate, setInfoTemplate] = useState<GiftCardShopTemplate | null>(null);
   const [redemptionCode, setRedemptionCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
@@ -152,9 +153,10 @@ export default function CadeauPage() {
     setIsCheckingOut(true);
 
     try {
+      const shippingPayload = wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null;
       const payload = selectedTemplate
-        ? { template: selectedTemplate, buyer, physicalShipping: wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null, selectedComplements }
-        : { flight_type_id: directFlightId, buyer, physicalShipping: wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null, selectedComplements };
+        ? { template: selectedTemplate, buyer, physicalShipping: shippingPayload, selectedComplements, quantity }
+        : { flight_type_id: directFlightId, buyer, physicalShipping: shippingPayload, selectedComplements, quantity };
 
       const res = await fetch(`/api/proxy/public/checkout-gift-card`, {
         method: 'POST',
@@ -216,7 +218,7 @@ export default function CadeauPage() {
   // Calcul du prix total affiché sur le bouton
   const optionsPrice = selectedComplements.reduce((sum, c) => sum + (c.price_cents / 100), 0);
   const basePriceCents = selectedTemplate ? selectedTemplate.price_cents : (directFlightPrice ?? 0);
-  const totalPrice = (basePriceCents / 100) + (wantsShipping ? shippingSettings.price : 0) + optionsPrice;
+  const totalPrice = (basePriceCents / 100) * quantity + (wantsShipping ? shippingSettings.price : 0) + optionsPrice;
 
   return (
     <main className="main-bons-cadeaux" style={{ width: '100%', overflowX: 'hidden', position: 'relative' }}>
@@ -378,7 +380,7 @@ export default function CadeauPage() {
                   <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between">
                     <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{tpl.price_cents / 100}€</div>
                     <button
-                      onClick={() => { setSelectedTemplate(tpl); setSelectedComplements([]); setUrlFlightName(null); scrollToForm(); }}
+                      onClick={() => { setSelectedTemplate(tpl); setSelectedComplements([]); setUrlFlightName(null); setQuantity(1); scrollToForm(); }}
                       className="btn-choisir cursor-pointer px-6 py-4 rounded-[5px] text-white"
                       style={{ fontSize: '1.125rem', fontWeight: 700, ...(selectedTemplate?.id === tpl.id ? { backgroundColor: '#312783' } : {}) }}
                     >
@@ -393,12 +395,30 @@ export default function CadeauPage() {
           {(selectedTemplate || directFlightId) && (
             <div id="achat-form" style={{ marginTop: '60px', backgroundColor: 'white', borderRadius: '10px', padding: '40px', boxShadow: 'none', border: '1px solid #e2e8f0', scrollMarginTop: '100px' }}>
               <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#312783', marginBottom: '10px' }}>Personnalisez votre bon</h3>
-              <p style={{ color: '#E6007E', fontSize: '1.5rem', fontWeight: 900, marginBottom: '30px' }}>
-                {directFlightId
-                  ? `Bon ${directFlightName || 'vol'} - ${directFlightPrice ? directFlightPrice / 100 : '?'}€`
-                  : `${urlFlightName ? `Bon ${urlFlightName}` : selectedTemplate!.title} - ${selectedTemplate!.price_cents / 100}€`}
-              </p>
-              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
+                <p style={{ color: '#E6007E', fontSize: '1.5rem', fontWeight: 900, margin: 0 }}>
+                  {directFlightId
+                    ? `Bon ${directFlightName || 'vol'} - ${directFlightPrice ? directFlightPrice / 100 : '?'}€`
+                    : `${urlFlightName ? `Bon ${urlFlightName}` : selectedTemplate!.title} - ${selectedTemplate!.price_cents / 100}€`}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0', border: '2px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    style={{ width: '44px', height: '44px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: quantity <= 1 ? 'not-allowed' : 'pointer', color: quantity <= 1 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >−</button>
+                  <span style={{ minWidth: '36px', textAlign: 'center', fontSize: '1.125rem', fontWeight: 700, color: '#312783', padding: '0 4px' }}>{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(q => Math.min(10, q + 1))}
+                    disabled={quantity >= 10}
+                    style={{ width: '44px', height: '44px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: quantity >= 10 ? 'not-allowed' : 'pointer', color: quantity >= 10 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >+</button>
+                </div>
+                {quantity > 1 && <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#64748b' }}>{quantity} bons cadeaux</span>}
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
                 <div>
                   <label htmlFor="gc-buyer-name" style={{ display: 'block', fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', marginBottom: '8px' }}>Qui offre ? (acheteur)</label>
