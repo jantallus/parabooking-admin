@@ -460,21 +460,21 @@ export default function CadeauPage() {
                       }
 
                       return (
-                        <div key={comp.id} className="flex items-center gap-4 p-4 transition-all" style={{ borderRadius: '10px', border: `2px solid ${isSelected ? '#312783' : '#e2e8f0'}`, backgroundColor: 'white' }}>
-                          <div className="flex-1">
-                            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B', display: 'block', marginBottom: '2px' }}>{comp.name}</span>
-                            {comp.description && <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#64748b' }}>{comp.description}</span>}
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                            <span style={{ fontSize: '1rem', fontWeight: 700, color: isSelected ? '#312783' : '#94a3b8', minWidth: '52px', textAlign: 'right' }}>
-                              {isSelected ? `+${(comp.price_cents / 100) * compQty}€` : `+${comp.price_cents / 100}€`}
-                            </span>
-                            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                              <button type="button" onClick={() => setCompQty(compQty - 1)} disabled={compQty <= 0} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty <= 0 ? 'not-allowed' : 'pointer', color: compQty <= 0 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                              <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: '#312783' }}>{compQty}</span>
-                              <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= quantity} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= quantity ? 'not-allowed' : 'pointer', color: compQty >= quantity ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                        <div key={comp.id} className="transition-all" style={{ borderRadius: '10px', border: `2px solid ${isSelected ? '#312783' : '#e2e8f0'}`, backgroundColor: 'white', padding: '12px 16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1D1D1B' }}>{comp.name}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                              <span style={{ fontSize: '1rem', fontWeight: 700, color: isSelected ? '#312783' : '#94a3b8' }}>
+                                {isSelected ? `+${(comp.price_cents / 100) * compQty}€` : `+${comp.price_cents / 100}€`}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                                <button type="button" onClick={() => setCompQty(compQty - 1)} disabled={compQty <= 0} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty <= 0 ? 'not-allowed' : 'pointer', color: compQty <= 0 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: '#312783' }}>{compQty}</span>
+                                <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= quantity} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= quantity ? 'not-allowed' : 'pointer', color: compQty >= quantity ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                              </div>
                             </div>
                           </div>
+                          {comp.description && <span style={{ fontSize: '0.875rem', fontWeight: 400, color: '#64748b', display: 'block', marginTop: '4px' }}>{comp.description}</span>}
                         </div>
                       );
                     })}
@@ -485,9 +485,15 @@ export default function CadeauPage() {
               {/* 🎯 LA NOUVELLE OPTION POSTALE ! */}
               {shippingSettings.enabled && (
                 <div className="mb-8 p-6 rounded-[10px] transition-all" style={{ backgroundColor: 'white', border: `2px solid ${wantsShipping ? '#009FE3' : '#e2e8f0'}` }}>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" className="cb-white" checked={wantsShipping} onChange={e => setWantsShipping(e.target.checked)} />
-                    <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Package size={20} strokeWidth={1.5} />Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier{quantity > 1 ? <span style={{ fontWeight: 400, fontSize: '1rem' }}>&nbsp;— une par bon</span> : ''} (+{shippingSettings.price}€)</span>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" className="cb-white" style={{ marginTop: '2px' }} checked={wantsShipping} onChange={e => setWantsShipping(e.target.checked)} />
+                    <div>
+                      <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <Package size={20} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+                        Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)
+                      </span>
+                      {quantity > 1 && <span style={{ fontSize: '0.9rem', fontWeight: 400, color: '#64748b', display: 'block', marginTop: '2px' }}>Une par bon commandé</span>}
+                    </div>
                   </label>
                   
                   {wantsShipping && (
