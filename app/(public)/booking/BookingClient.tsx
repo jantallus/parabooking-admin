@@ -432,10 +432,15 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
       } else {
         // 🧭 NAVIGATION CLASSIQUE (Flèches ou calendrier)
+        // On s'assure que le body est visible — il peut avoir été remonté depuis le message hors-saison avec opacity-0
+        container.classList.remove('opacity-0');
         if (headerContainer) headerContainer.classList.remove('opacity-0');
         setTimeout(() => {
           const targetEl = document.getElementById(`mobile-col-${pickedDate}`);
-          if (targetEl) centerHorizontally(targetEl, 'smooth');
+          if (targetEl) {
+            // 'auto' si le container vient d'être remonté (scroll à 0), 'smooth' sinon
+            centerHorizontally(targetEl, container.scrollLeft === 0 ? 'auto' : 'smooth');
+          }
           setTimeout(() => { setIsGridExpanded(true); }, 100);
         }, 20);
       }
