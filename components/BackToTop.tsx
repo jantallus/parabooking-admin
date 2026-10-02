@@ -68,8 +68,22 @@ export default function BackToTop() {
     return () => window.removeEventListener('keydown', onKey);
   }, [formOpen]);
 
-  const openForm = () => { setForm(emptyForm()); setSent(false); setError(''); setFormOpen(true); };
+  const openForm = (prefill?: { flight_type?: string }) => {
+    setForm({ ...emptyForm(), ...(prefill?.flight_type ? { flight_type: prefill.flight_type } : {}) });
+    setSent(false); setError(''); setFormOpen(true);
+  };
   const closeForm = () => setFormOpen(false);
+
+  // Permet d'ouvrir la modale depuis n'importe quel composant (ex: colonnes du planning)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ flight_type?: string }>).detail;
+      openForm(detail);
+    };
+    window.addEventListener('openFlightForm', handler);
+    return () => window.removeEventListener('openFlightForm', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
