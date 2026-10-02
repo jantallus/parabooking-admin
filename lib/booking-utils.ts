@@ -3,13 +3,13 @@ export const getLocalYYYYMMDD = (d: Date) => {
 };
 
 export const getDayName = (dateStr: string) => {
-  const d = new Date(dateStr);
+  const d = new Date(dateStr + 'T12:00:00');
   return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 };
 
 export const calculateGridStart = (dateStr: string, count: number) => {
-  const start = new Date(dateStr);
-  start.setHours(0, 0, 0, 0);
+  // 'T12:00:00' évite le décalage timezone : minuit UTC = veille en UTC-N
+  const start = new Date(dateStr + 'T12:00:00');
   if (count === 7) {
     const day = start.getDay();
     const diff = day === 6 ? 0 : day + 1;

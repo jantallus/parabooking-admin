@@ -543,7 +543,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     
     // 🎯 2. LE MOTEUR CONSTRUIT 71 JOURS (-10 à +60)
     const weekDays = Array.from({ length: 71 }).map((_, i) => {
-      const d = new Date(gridStartDate);
+      const d = new Date(gridStartDate + 'T12:00:00');
       d.setDate(d.getDate() - 10 + i);
       return getLocalYYYYMMDD(d);
     });
@@ -626,11 +626,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   };
 
   const shiftDays = (offset: number) => {
-    const d = new Date(gridStartDate);
+    const d = new Date(gridStartDate + 'T12:00:00');
     d.setDate(d.getDate() + offset);
     setGridStartDate(getLocalYYYYMMDD(d));
-    
-    const p = new Date(pickedDate);
+
+    const p = new Date(pickedDate + 'T12:00:00');
     p.setDate(p.getDate() + offset);
     setPickedDate(getLocalYYYYMMDD(p));
   };
@@ -802,7 +802,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   // 🎯 3. LA VARIABLE POUR DESSINER L'ÉCRAN (71 JOURS)
   const weekDays = Array.from({ length: 71 }).map((_, i) => {
-    const d = new Date(gridStartDate);
+    const d = new Date(gridStartDate + 'T12:00:00');
     d.setDate(d.getDate() - 10 + i);
     return getLocalYYYYMMDD(d);
   });
@@ -1646,21 +1646,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       </div>
                     </div>
 
-                    {/* Bandeau prochaine disponibilité (ex: fermeture remontées début décembre) */}
-                    {showNextAvailBanner && nextAvailableDate && (
-                      <div className="text-center py-4 px-6 mt-2 bg-slate-50 rounded-[10px] border border-slate-100 mx-4 md:mx-0">
-                        <p style={{ fontSize: '0.95rem', fontWeight: 400, color: '#1D1D1B' }}>
-                          Pas de créneaux disponibles avant le{' '}
-                          <button
-                            onClick={() => { setPickedDate(nextAvailableDate); setGridStartDate(calculateGridStart(nextAvailableDate, displayDaysCount)); }}
-                            style={{ color: '#E6007E', fontWeight: 700, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}
-                          >
-                            {new Date(nextAvailableDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
-                          </button>
-                        </p>
-                      </div>
-                    )}
-
                     {/* 🎯 LA ZONE DES CRÉNEAUX (Unique et Corrigée) */}
                     <div
                       ref={bodyScrollRef}
@@ -1778,7 +1763,21 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                         </>
                                       )}
                                       {(!msg || msg.offSeason) && (
-                                        <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>En période de fermeture des remontées mécaniques, appelez le :</p>
+                                        <>
+                                          {showNextAvailBanner && nextAvailableDate && (
+                                            <button
+                                              onClick={() => { setPickedDate(nextAvailableDate); setGridStartDate(calculateGridStart(nextAvailableDate, displayDaysCount)); }}
+                                              className="flex flex-col items-center gap-0.5 group cursor-pointer"
+                                              style={{ background: 'none', border: 'none', padding: 0 }}
+                                            >
+                                              <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>Prochaine dispo</p>
+                                              <p className="text-[10px] font-black leading-tight group-hover:underline" style={{ color: '#E6007E' }}>
+                                                {new Date(nextAvailableDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                                              </p>
+                                            </button>
+                                          )}
+                                          <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>En période de fermeture des remontées mécaniques, appelez le :</p>
+                                        </>
                                       )}
                                       <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
                                     </div>
