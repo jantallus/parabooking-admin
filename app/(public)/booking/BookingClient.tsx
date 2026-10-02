@@ -738,7 +738,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   // Hors-saison basée sur la date affichée dans la grille (pas la date réelle)
   const pickedMonth = new Date(pickedDate + 'T12:00:00').getMonth(); // 0 = janvier
-  const isWinterOffSeason = pickedMonth >= 4 && pickedMonth <= 10;
+  // Décembre avant la première dispo = traité comme hors-saison (fermeture remontées)
+  const isEarlyDecember = pickedMonth === 11 && !!nextAvailableDate && pickedDate < nextAvailableDate;
+  const isWinterOffSeason = (pickedMonth >= 4 && pickedMonth <= 10) || isEarlyDecember;
   const isSummerOffSeason = pickedMonth <= 3 || pickedMonth >= 10;
 
   // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
