@@ -414,12 +414,17 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
                 setTimeout(() => {
                   container.style.scrollSnapType = '';
-                  // Sync header à la position finale puis le révéler
-                  if (headerContainer) {
-                    headerContainer.scrollLeft = container.scrollLeft;
-                    headerContainer.classList.remove('opacity-0');
-                  }
                   setIsGridExpanded(true);
+                  // Sync header après que le scroll ET le snap soient stabilisés
+                  const syncHeaderFinal = () => {
+                    if (headerContainer) {
+                      headerContainer.scrollLeft = container.scrollLeft;
+                      headerContainer.classList.remove('opacity-0');
+                    }
+                  };
+                  container.addEventListener('scrollend', syncHeaderFinal, { once: true });
+                  // Fallback si scrollend non supporté ou scroll déjà terminé
+                  setTimeout(syncHeaderFinal, 400);
                 }, 300);
               }, 50);
             });
