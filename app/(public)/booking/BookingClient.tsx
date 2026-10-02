@@ -55,6 +55,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [infoFlight, setInfoFlight] = useState<FlightType | null>(null);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSwipingRef = useRef(false);
+  const isProgrammaticScrollRef = useRef(false); // Coupe le debounce onScroll pendant les scrolls programmés
   const [isGridExpanded, setIsGridExpanded] = useState(false); // 🚀 LE TURBO : Mémoire d'expansion
   const skipInitialScroll = useRef(isDirect); // sur les pages /vols, pas de scroll auto à l'ouverture
 
@@ -447,14 +448,18 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
       } else {
         // 🧭 NAVIGATION CLASSIQUE (Flèches ou calendrier)
-        // On s'assure que le body est visible — il peut avoir été remonté depuis le message hors-saison avec opacity-0
         container.classList.remove('opacity-0');
         if (headerContainer) headerContainer.classList.remove('opacity-0');
         setTimeout(() => {
           const targetEl = document.getElementById(`mobile-col-${pickedDate}`);
           if (targetEl) {
-            // 'auto' si le container vient d'être remonté (scroll à 0), 'smooth' sinon
-            centerHorizontally(targetEl, container.scrollLeft === 0 ? 'auto' : 'smooth');
+            const behavior = container.scrollLeft === 0 ? 'auto' : 'smooth';
+            // Bloquer onScroll pendant le scroll programmé pour éviter qu'il écrase pickedDate
+            isProgrammaticScrollRef.current = true;
+            centerHorizontally(targetEl, behavior);
+            const releaseLock = () => { isProgrammaticScrollRef.current = false; };
+            container.addEventListener('scrollend', releaseLock, { once: true });
+            setTimeout(releaseLock, 500); // fallback si scrollend non déclenché
           }
           setTimeout(() => { setIsGridExpanded(true); }, 100);
         }, 20);
@@ -1665,6 +1670,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                         
                         // 🎯 NOUVEAU : Synchronisation magique du Swipe (Uniquement sur mobile)
                         if (window.innerWidth < 768) {
+                          // Scroll programmé en cours → ignorer
+                          if (isProgrammaticScrollRef.current) {
+                            clearTimeout(scrollTimeout.current ?? undefined);
+                            return;
+                          }
                           clearTimeout(scrollTimeout.current ?? undefined);
                           scrollTimeout.current = setTimeout(() => {
                             if (!bodyScrollRef.current) return;
