@@ -188,7 +188,7 @@ export default function BackToTop() {
         )}
 
         {/* Bouton demande de vol — toujours visible */}
-        <button onClick={openForm} style={btn('form', true)}
+        <button onClick={() => openForm()} style={btn('form', true)}
           onPointerEnter={() => setHovered('form')} onPointerLeave={() => setHovered(null)}
           aria-label="Être rappelé">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
