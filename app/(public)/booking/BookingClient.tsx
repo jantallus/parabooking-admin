@@ -352,8 +352,18 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     // 🛑 SÉCURITÉ ABSOLUE : On refuse de jouer l'animation si on n'est pas sur l'étape 2
     if (step !== 2) return;
 
-    if (!isSearchingTimes && rawSlots.length > 0 && bodyScrollRef.current) {
-      
+    if (!isSearchingTimes && bodyScrollRef.current) {
+
+      // Aucun créneau dans cette période (hors-saison) — révéler la grille directement sans animation
+      if (rawSlots.length === 0) {
+        const container = bodyScrollRef.current;
+        container.classList.remove('opacity-0');
+        if (headerScrollRef.current) headerScrollRef.current.classList.remove('opacity-0');
+        hasAnimatedIntro.current = true; // Navigation classique ensuite si l'utilisateur change de date
+        setIsGridExpanded(true);
+        return;
+      }
+
       // 🛑 SÉCURITÉ SWIPE : Si le client a glissé au doigt, on ne force pas le recentrage horizontal !
       if (isSwipingRef.current) {
         isSwipingRef.current = false; // On désarme le verrou
