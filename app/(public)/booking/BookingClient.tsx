@@ -741,13 +741,13 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     }
   };
 
-  // Hors-saison basée sur la date affichée dans la grille (pas la date réelle)
-  const pickedMonth = new Date(pickedDate + 'T12:00:00').getMonth(); // 0 = janvier
-  // Mai–Octobre = hors-saison hiver ; Novembre et Décembre affichent la grille (fermeture remontées → showNextAvailBanner)
-  const isWinterOffSeason = pickedMonth >= 4 && pickedMonth <= 9;
-  const isSummerOffSeason = pickedMonth <= 3 || pickedMonth >= 10;
-  // Info "prochaine dispo" dans chaque colonne quand on est avant la première dispo réelle
-  const showNextAvailBanner = !isWinterOffSeason && !!nextAvailableDate && pickedDate < nextAvailableDate;
+  // La grille s'affiche toujours, peu importe le mois.
+  // showNextAvailBanner gère le message "prochaine dispo" colonne par colonne.
+  const pickedMonth = new Date(pickedDate + 'T12:00:00').getMonth(); // 0 = janvier — conservé pour isSummerOffSeason
+  const isWinterOffSeason = false;
+  const isSummerOffSeason = false;
+  // "Prochaine dispo en ligne" dans chaque colonne quand on est avant la première dispo réelle
+  const showNextAvailBanner = !!nextAvailableDate && pickedDate < nextAvailableDate;
 
   // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
   // dans des passagers virtuels pour que le calcul de prix reflète les options pré-sélectionnées.
