@@ -743,10 +743,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   // Hors-saison basée sur la date affichée dans la grille (pas la date réelle)
   const pickedMonth = new Date(pickedDate + 'T12:00:00').getMonth(); // 0 = janvier
-  // Décembre avant la première dispo = traité comme hors-saison (fermeture remontées)
-  const isEarlyDecember = pickedMonth === 11 && !!nextAvailableDate && pickedDate < nextAvailableDate;
-  const isWinterOffSeason = (pickedMonth >= 4 && pickedMonth <= 10) || isEarlyDecember;
+  const isWinterOffSeason = pickedMonth >= 4 && pickedMonth <= 10;
   const isSummerOffSeason = pickedMonth <= 3 || pickedMonth >= 10;
+  // Bandeau "prochaine dispo" en décembre avant l'ouverture (ex: fermeture des remontées)
+  const showNextAvailBanner = !isWinterOffSeason && !!nextAvailableDate && pickedDate < nextAvailableDate;
 
   // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
   // dans des passagers virtuels pour que le calcul de prix reflète les options pré-sélectionnées.
@@ -1646,8 +1646,23 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       </div>
                     </div>
 
+                    {/* Bandeau prochaine disponibilité (ex: fermeture remontées début décembre) */}
+                    {showNextAvailBanner && nextAvailableDate && (
+                      <div className="text-center py-4 px-6 mt-2 bg-slate-50 rounded-[10px] border border-slate-100 mx-4 md:mx-0">
+                        <p style={{ fontSize: '0.95rem', fontWeight: 400, color: '#1D1D1B' }}>
+                          Pas de créneaux disponibles avant le{' '}
+                          <button
+                            onClick={() => { setPickedDate(nextAvailableDate); setGridStartDate(calculateGridStart(nextAvailableDate, displayDaysCount)); }}
+                            style={{ color: '#E6007E', fontWeight: 700, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}
+                          >
+                            {new Date(nextAvailableDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                          </button>
+                        </p>
+                      </div>
+                    )}
+
                     {/* 🎯 LA ZONE DES CRÉNEAUX (Unique et Corrigée) */}
-                    <div 
+                    <div
                       ref={bodyScrollRef}
                       onScroll={(e) => { 
                         if (headerScrollRef.current) headerScrollRef.current.scrollLeft = e.currentTarget.scrollLeft; 
