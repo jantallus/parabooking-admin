@@ -1594,7 +1594,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             <>
                               Pas de créneaux disponibles pour ce vol avant le{' '}
                               <button
-                                onClick={() => { hasAnimatedIntro.current = false; setPickedDate(nextSeasonStr); setGridStartDate(calculateGridStart(nextSeasonStr, displayDaysCount)); }}
+                                onClick={() => { setPickedDate(nextSeasonStr); setGridStartDate(calculateGridStart(nextSeasonStr, displayDaysCount)); }}
                                 style={{ color: '#E6007E', fontWeight: 700, textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}
                               >
                                 {nextSeasonLabel}
