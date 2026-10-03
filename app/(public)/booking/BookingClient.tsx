@@ -773,11 +773,17 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   // La grille s'affiche toujours, peu importe le mois.
   // showNextAvailBanner gère le message "prochaine dispo" colonne par colonne.
-  const pickedMonth = new Date(pickedDate + 'T12:00:00').getMonth(); // 0 = janvier — conservé pour isSummerOffSeason
+  const pickedMonth = new Date(pickedDate + 'T12:00:00').getMonth(); // 0 = janvier
   const isWinterOffSeason = false;
   const isSummerOffSeason = false;
   // "Prochaine dispo en ligne" dans chaque colonne quand on est avant la première dispo réelle
   const showNextAvailBanner = !!nextAvailableDate && pickedDate < nextAvailableDate;
+  // Type de vol sélectionné (pour adapter le message dans les colonnes sans créneau)
+  const _flightSeason = String(selectedFlight?.season || 'ALL').toUpperCase().trim();
+  const isWinterFlight = _flightSeason === 'WINTER' || _flightSeason === 'HIVER';
+  const isSummerFlight = _flightSeason === 'SUMMER' || _flightSeason === 'ETE' || _flightSeason === 'ÉTÉ';
+  // Vol été affiché pendant la saison hiver (oct–mars) → suggérer les formules hiver
+  const isSummerInWinterPeriod = isSummerFlight && (pickedMonth >= 10 || pickedMonth <= 3);
 
   // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
   // dans des passagers virtuels pour que le calcul de prix reflète les options pré-sélectionnées.
@@ -1607,9 +1613,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   </div>
                 ) : (() => {
                     if (!selectedFlight || isSearchingTimes) return false;
-                    const s = String(selectedFlight.season || 'ALL').toUpperCase().trim();
-                    const isWinterFlight = s === 'WINTER' || s === 'HIVER';
-                    const isSummerFlight = s === 'SUMMER' || s === 'ETE' || s === 'ÉTÉ';
                     return (isWinterFlight && isWinterOffSeason) || (isSummerFlight && isSummerOffSeason);
                   })() ? (
                   /* Hors-saison pour ce vol — message saisonnier */
@@ -1800,19 +1803,27 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                       )}
                                       {(!msg || msg.offSeason) && (
                                         <>
-                                          {showNextAvailBanner && nextAvailableDate && (
-                                            <button
-                                              onClick={() => { setPickedDate(nextAvailableDate); setGridStartDate(calculateGridStart(nextAvailableDate, displayDaysCount)); }}
-                                              className="flex flex-col items-center gap-0.5 group cursor-pointer"
-                                              style={{ background: 'none', border: 'none', padding: 0 }}
-                                            >
-                                              <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>Prochaine dispo en ligne le</p>
-                                              <p className="text-[10px] font-black leading-tight group-hover:underline" style={{ color: '#E6007E' }}>
-                                                {new Date(nextAvailableDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
-                                              </p>
-                                            </button>
+                                          {isSummerInWinterPeriod ? (
+                                            <p className="text-[9px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
+                                              Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.
+                                            </p>
+                                          ) : (
+                                            <>
+                                              {showNextAvailBanner && nextAvailableDate && (
+                                                <button
+                                                  onClick={() => { setPickedDate(nextAvailableDate); setGridStartDate(calculateGridStart(nextAvailableDate, displayDaysCount)); }}
+                                                  className="flex flex-col items-center gap-0.5 group cursor-pointer"
+                                                  style={{ background: 'none', border: 'none', padding: 0 }}
+                                                >
+                                                  <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>Prochaine dispo en ligne le</p>
+                                                  <p className="text-[10px] font-black leading-tight group-hover:underline" style={{ color: '#E6007E' }}>
+                                                    {new Date(nextAvailableDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                                                  </p>
+                                                </button>
+                                              )}
+                                              <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>Si vous souhaitez voler avant cette date — appelez le :</p>
+                                            </>
                                           )}
-                                          <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>Si vous souhaitez voler avant cette date — appelez le :</p>
                                         </>
                                       )}
                                       <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
