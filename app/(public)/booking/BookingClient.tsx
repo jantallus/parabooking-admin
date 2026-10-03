@@ -782,8 +782,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const _flightSeason = String(selectedFlight?.season || 'ALL').toUpperCase().trim();
   const isWinterFlight = _flightSeason === 'WINTER' || _flightSeason === 'HIVER';
   const isSummerFlight = _flightSeason === 'SUMMER' || _flightSeason === 'ETE' || _flightSeason === 'ÉTÉ';
-  // Vol été affiché pendant la saison hiver (oct–mars) → suggérer les formules hiver
-  const isSummerInWinterPeriod = isSummerFlight && (pickedMonth >= 10 || pickedMonth <= 3);
+  // Période hiver active (nov–mars) : vol été sélectionné → suggérer formules hiver
+  const isSummerInWinterPeriod = isSummerFlight && showNextAvailBanner && (pickedMonth >= 10 || pickedMonth <= 3);
+  // Période été active (mai–oct) : vol hiver sélectionné → suggérer formules été
+  const isWinterInSummerPeriod = isWinterFlight && showNextAvailBanner && (pickedMonth >= 4 && pickedMonth <= 9);
 
   // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
   // dans des passagers virtuels pour que le calcul de prix reflète les options pré-sélectionnées.
@@ -1803,9 +1805,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                       )}
                                       {(!msg || msg.offSeason) && (
                                         <>
-                                          {isSummerInWinterPeriod ? (
+                                          {(isSummerInWinterPeriod || isWinterInSummerPeriod) ? (
                                             <p className="text-[9px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
-                                              Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.
+                                              {isSummerFlight
+                                                ? 'Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.'
+                                                : 'Vous avez sélectionné un vol hiver. Pour vous inscrire, choisissez dans nos formules été.'}
                                             </p>
                                           ) : (
                                             <>
