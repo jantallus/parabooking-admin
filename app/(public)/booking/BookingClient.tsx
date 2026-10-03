@@ -786,10 +786,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const _flightSeason = String(selectedFlight?.season || 'ALL').toUpperCase().trim();
   const isWinterFlight = _flightSeason === 'WINTER' || _flightSeason === 'HIVER';
   const isSummerFlight = _flightSeason === 'SUMMER' || _flightSeason === 'ETE' || _flightSeason === 'ÉTÉ';
-  // Cross-saison : il y a des créneaux actifs (toutes saisons) mais pas pour ce vol spécifique.
-  // Basé sur les données réelles, pas sur des mois fixes.
-  const isCrossSeasonPeriod = !!nextAvailableDate && pickedDate >= nextAvailableDate
-    && (!nextAvailableForFlight || pickedDate < nextAvailableForFlight);
   // La saison active est-elle hiver ? Déduit du mois de la prochaine dispo globale.
   const _nextGlobalMonth = nextAvailableDate ? new Date(nextAvailableDate + 'T12:00:00').getMonth() : -1;
   const crossSeasonIsWinterPeriod = _nextGlobalMonth >= 10 || (_nextGlobalMonth >= 0 && _nextGlobalMonth <= 4);
@@ -1757,9 +1753,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                     .filter(d => d > contextDate && Object.keys(gridData[d]).length > 0)
                                     .sort()[0] ?? nextAvailableDate;
                                   const isFull = fullDates.has(dateStr);
+                                  // Cross-saison calculé par colonne (dateStr) et non par pickedDate
+                                  const isColCrossSeason = !!nextAvailableDate && dateStr >= nextAvailableDate && (!nextAvailableForFlight || dateStr < nextAvailableForFlight);
 
                                   if (isFull) {
-                                    if (isCrossSeasonPeriod) {
+                                    if (isColCrossSeason) {
                                       return (
                                         <div className="rounded-[5px] py-5 px-3 border border-slate-200 flex flex-col items-center justify-center gap-1.5 text-center" style={{ backgroundColor: 'rgba(49,39,131,0.03)' }}>
                                           <p className="text-[9px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
@@ -1830,7 +1828,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                       )}
                                       {(!msg || msg.offSeason) && (
                                         <>
-                                          {isCrossSeasonPeriod ? (
+                                          {isColCrossSeason ? (
                                             <p className="text-[9px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
                                               {crossSeasonIsWinterPeriod
                                                 ? 'Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.'
