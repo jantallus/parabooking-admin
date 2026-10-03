@@ -1760,14 +1760,14 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                     if (isColCrossSeason) {
                                       return (
                                         <div className="rounded-[5px] py-5 px-3 border border-slate-200 flex flex-col items-center justify-center gap-1.5 text-center" style={{ backgroundColor: 'rgba(49,39,131,0.03)' }}>
-                                          <p className="text-[9px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
+                                          <p className="text-[11px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
                                             {crossSeasonIsWinterPeriod
                                               ? 'Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.'
                                               : 'Vous avez sélectionné un vol hiver. Pour vous inscrire, choisissez dans nos formules été.'}
                                           </p>
-                                          <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
+                                          <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
                                           <div className="flex items-center gap-1">
-                                            <span className="text-[9px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
+                                            <span className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
                                             <button onClick={() => window.dispatchEvent(new CustomEvent('openFlightForm', { detail: { flight_type: selectedFlight?.name || '' } }))} style={{ background: '#E6007E', border: 'none', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }} aria-label="Formulaire de demande de vol">
                                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
                                             </button>
@@ -1777,23 +1777,23 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                     }
                                     return (
                                       <div className="rounded-[5px] py-5 px-3 border border-slate-200 flex flex-col items-center justify-center gap-1.5 text-center" style={{ backgroundColor: 'rgba(230,0,126,0.03)' }}>
-                                        <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#E6007E', opacity: 0.7 }}>Complet</p>
+                                        <p className="text-[11px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#E6007E', opacity: 0.7 }}>Complet</p>
                                         {nextFromHere ? (
                                           <button
                                             onClick={() => pickDate(nextFromHere)}
                                             className="flex flex-col items-center gap-0.5 group cursor-pointer"
                                             style={{ background: 'none', border: 'none', padding: 0 }}
                                           >
-                                            <p className="text-[9px] leading-tight group-hover:underline" style={{ color: '#312783', opacity: 0.5 }}>Prochaines réservations disponibles le</p>
-                                            <p className="text-[10px] font-black leading-tight group-hover:underline" style={{ color: '#312783' }}>
+                                            <p className="text-[11px] leading-tight group-hover:underline" style={{ color: '#312783', opacity: 0.5 }}>Prochaines réservations disponibles le</p>
+                                            <p className="text-[13px] font-black leading-tight group-hover:underline" style={{ color: '#312783' }}>
                                               {new Date(nextFromHere + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                                             </p>
                                           </button>
                                         ) : (
-                                          <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.5 }}>Prochaines réservations disponibles bientôt</p>
+                                          <p className="text-[11px] leading-tight" style={{ color: '#312783', opacity: 0.5 }}>Prochaines réservations disponibles bientôt</p>
                                         )}
                                         <div className="w-8 border-t border-slate-300 my-0.5" />
-                                        <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
+                                        <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
                                       </div>
                                     );
                                   }
@@ -1809,27 +1809,27 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                               className="flex flex-col items-center gap-1 group cursor-pointer"
                                               style={{ background: 'none', border: 'none', padding: 0 }}
                                             >
-                                              <p className="text-[9px] font-bold uppercase tracking-wider leading-tight group-hover:underline" style={{ color: '#312783', opacity: 0.45 }}>{msg.headline}</p>
+                                              <p className="text-[11px] font-bold uppercase tracking-wider leading-tight group-hover:underline" style={{ color: '#312783', opacity: 0.45 }}>{msg.headline}</p>
                                               {msg.lines.map((line, i) => (
-                                                <p key={i} className="text-[10px] font-black leading-tight group-hover:underline" style={{ color: '#312783' }}>{line}</p>
+                                                <p key={i} className="text-[13px] font-black leading-tight group-hover:underline" style={{ color: '#312783' }}>{line}</p>
                                               ))}
                                             </button>
                                           ) : (
                                             <>
-                                              <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>{msg.headline}</p>
+                                              <p className="text-[11px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>{msg.headline}</p>
                                               {msg.lines.map((line, i) => (
-                                                <p key={i} className="text-[10px] font-black leading-tight" style={{ color: '#312783' }}>{line}</p>
+                                                <p key={i} className="text-[13px] font-black leading-tight" style={{ color: '#312783' }}>{line}</p>
                                               ))}
                                             </>
                                           )}
                                           <div className="w-8 border-t border-slate-300 my-0.5" />
-                                          <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>En dehors de ces dates, appelez le</p>
+                                          <p className="text-[11px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>En dehors de ces dates, appelez le</p>
                                         </>
                                       )}
                                       {(!msg || msg.offSeason) && (
                                         <>
                                           {isColCrossSeason ? (
-                                            <p className="text-[9px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
+                                            <p className="text-[11px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
                                               {crossSeasonIsWinterPeriod
                                                 ? 'Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.'
                                                 : 'Vous avez sélectionné un vol hiver. Pour vous inscrire, choisissez dans nos formules été.'}
@@ -1842,20 +1842,20 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                                   className="flex flex-col items-center gap-0.5 group cursor-pointer"
                                                   style={{ background: 'none', border: 'none', padding: 0 }}
                                                 >
-                                                  <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>Prochaine dispo en ligne le</p>
-                                                  <p className="text-[10px] font-black leading-tight group-hover:underline" style={{ color: '#E6007E' }}>
+                                                  <p className="text-[11px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>Prochaine dispo en ligne le</p>
+                                                  <p className="text-[13px] font-black leading-tight group-hover:underline" style={{ color: '#E6007E' }}>
                                                     {new Date(nextAvailableDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
                                                   </p>
                                                 </button>
                                               )}
-                                              <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>Si vous souhaitez voler avant cette date — appelez le :</p>
+                                              <p className="text-[11px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>Si vous souhaitez voler avant cette date — appelez le :</p>
                                             </>
                                           )}
                                         </>
                                       )}
-                                      <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
+                                      <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
                                       <div className="flex items-center gap-1">
-                                        <span className="text-[9px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
+                                        <span className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
                                         <button
                                           onClick={() => window.dispatchEvent(new CustomEvent('openFlightForm', { detail: { flight_type: selectedFlight?.name || '' } }))}
                                           style={{ background: '#E6007E', border: 'none', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
