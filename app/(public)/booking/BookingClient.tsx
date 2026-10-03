@@ -625,16 +625,17 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [nextAvailableForFlight, setNextAvailableForFlight] = useState<string | null>(null);
   useEffect(() => {
     if (!selectedFlight) return;
-    const today = getLocalYYYYMMDD(new Date());
-    fetch(`/api/proxy/public/next-available?start=${today}`)
+    // Fetcher depuis gridStartDate (position actuelle) pour détecter correctement
+    // la prochaine dispo et la période active quelle que soit la date naviguée.
+    fetch(`/api/proxy/public/next-available?start=${gridStartDate}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => setNextAvailableDate(data?.date ?? null))
       .catch(() => setNextAvailableDate(null));
-    fetch(`/api/proxy/public/next-available?start=${today}&flight_type_id=${selectedFlight.id}`)
+    fetch(`/api/proxy/public/next-available?start=${gridStartDate}&flight_type_id=${selectedFlight.id}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => setNextAvailableForFlight(data?.date ?? null))
       .catch(() => setNextAvailableForFlight(null));
-  }, [selectedFlight?.id]);
+  }, [selectedFlight?.id, gridStartDate]);
 
   useEffect(() => {
     if (!showCalendar) return;
