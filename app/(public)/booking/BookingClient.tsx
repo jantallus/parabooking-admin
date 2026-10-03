@@ -625,8 +625,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   useEffect(() => {
     if (!selectedFlight) return;
     const today = getLocalYYYYMMDD(new Date());
-    const params = `start=${today}&flight_type_id=${selectedFlight.id}`;
-    fetch(`/api/proxy/public/next-available?${params}`)
+    fetch(`/api/proxy/public/next-available?start=${today}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => setNextAvailableDate(data?.date ?? null))
       .catch(() => setNextAvailableDate(null));
@@ -783,9 +782,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const isWinterFlight = _flightSeason === 'WINTER' || _flightSeason === 'HIVER';
   const isSummerFlight = _flightSeason === 'SUMMER' || _flightSeason === 'ETE' || _flightSeason === 'ÉTÉ';
   // Période hiver active (nov–mars) : vol été sélectionné → suggérer formules hiver
-  const isSummerInWinterPeriod = isSummerFlight && showNextAvailBanner && (pickedMonth >= 10 || pickedMonth <= 3);
+  const isSummerInWinterPeriod = isSummerFlight && (pickedMonth >= 10 || pickedMonth <= 3);
   // Période été active (mai–sept) : vol hiver sélectionné → suggérer formules été
-  const isWinterInSummerPeriod = isWinterFlight && showNextAvailBanner && (pickedMonth >= 4 && pickedMonth <= 8);
+  const isWinterInSummerPeriod = isWinterFlight && (pickedMonth >= 4 && pickedMonth <= 8);
 
   // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
   // dans des passagers virtuels pour que le calcul de prix reflète les options pré-sélectionnées.
