@@ -355,13 +355,27 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
     if (!isSearchingTimes && bodyScrollRef.current) {
 
-      // Aucun créneau dans cette période (hors-saison) — révéler la grille directement sans animation
+      // Aucun créneau dans cette période (hors-saison) — révéler la grille et centrer sur la date
       if (rawSlots.length === 0) {
         const container = bodyScrollRef.current;
         container.classList.remove('opacity-0');
         if (headerScrollRef.current) headerScrollRef.current.classList.remove('opacity-0');
-        hasAnimatedIntro.current = true; // Navigation classique ensuite si l'utilisateur change de date
-        setIsGridExpanded(true);
+        hasAnimatedIntro.current = true;
+        container.style.scrollSnapType = 'none';
+        isProgrammaticScrollRef.current = true;
+        setTimeout(() => {
+          const targetEl = document.getElementById(`mobile-col-${pickedDate}`);
+          if (targetEl) {
+            const pos = targetEl.offsetLeft - (container.clientWidth / 2) + (targetEl.clientWidth / 2);
+            container.scrollTo({ left: Math.max(0, pos), behavior: 'auto' });
+            if (headerScrollRef.current) headerScrollRef.current.scrollLeft = Math.max(0, pos);
+          }
+          setTimeout(() => {
+            container.style.scrollSnapType = '';
+            isProgrammaticScrollRef.current = false;
+            setIsGridExpanded(true);
+          }, 80);
+        }, 20);
         return;
       }
 
