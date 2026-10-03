@@ -781,8 +781,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const _flightSeason = String(selectedFlight?.season || 'ALL').toUpperCase().trim();
   const isWinterFlight = _flightSeason === 'WINTER' || _flightSeason === 'HIVER';
   const isSummerFlight = _flightSeason === 'SUMMER' || _flightSeason === 'ETE' || _flightSeason === 'ÉTÉ';
-  // Période hiver active (nov–mars) : vol été sélectionné → suggérer formules hiver
-  const isSummerInWinterPeriod = isSummerFlight && (pickedMonth >= 10 || pickedMonth <= 3);
+  // Période hiver active (nov–mars) : tout vol non-hiver → suggérer formules hiver
+  const isSummerInWinterPeriod = !isWinterFlight && (pickedMonth >= 10 || pickedMonth <= 3);
   // Période été active (mai–sept) : vol hiver sélectionné → suggérer formules été
   const isWinterInSummerPeriod = isWinterFlight && (pickedMonth >= 4 && pickedMonth <= 8);
 
@@ -1751,6 +1751,24 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                   const isFull = fullDates.has(dateStr);
 
                                   if (isFull) {
+                                    if (isSummerInWinterPeriod || isWinterInSummerPeriod) {
+                                      return (
+                                        <div className="rounded-[5px] py-5 px-3 border border-slate-200 flex flex-col items-center justify-center gap-1.5 text-center" style={{ backgroundColor: 'rgba(49,39,131,0.03)' }}>
+                                          <p className="text-[9px] leading-tight text-center" style={{ color: '#312783', opacity: 0.5 }}>
+                                            {isSummerInWinterPeriod
+                                              ? 'Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.'
+                                              : 'Vous avez sélectionné un vol hiver. Pour vous inscrire, choisissez dans nos formules été.'}
+                                          </p>
+                                          <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
+                                          <div className="flex items-center gap-1">
+                                            <span className="text-[9px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
+                                            <button onClick={() => window.dispatchEvent(new CustomEvent('openFlightForm', { detail: { flight_type: selectedFlight?.name || '' } }))} style={{ background: '#E6007E', border: 'none', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }} aria-label="Formulaire de demande de vol">
+                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    }
                                     return (
                                       <div className="rounded-[5px] py-5 px-3 border border-slate-200 flex flex-col items-center justify-center gap-1.5 text-center" style={{ backgroundColor: 'rgba(230,0,126,0.03)' }}>
                                         <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#E6007E', opacity: 0.7 }}>Complet</p>
