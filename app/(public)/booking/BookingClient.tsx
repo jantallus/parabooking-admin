@@ -1806,7 +1806,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                               className="flex flex-col items-center gap-0.5 group cursor-pointer"
                                               style={{ background: 'none', border: 'none', padding: 0 }}
                                             >
-                                              <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>Prochaine dispo</p>
+                                              <p className="text-[9px] font-bold uppercase tracking-wider leading-tight" style={{ color: '#312783', opacity: 0.45 }}>Prochaine dispo en ligne</p>
                                               <p className="text-[10px] font-black leading-tight group-hover:underline" style={{ color: '#E6007E' }}>
                                                 {new Date(nextAvailableDate + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
                                               </p>
