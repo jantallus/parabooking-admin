@@ -782,7 +782,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const isWinterFlight = _flightSeason === 'WINTER' || _flightSeason === 'HIVER';
   const isSummerFlight = _flightSeason === 'SUMMER' || _flightSeason === 'ETE' || _flightSeason === 'ÉTÉ';
   // Période hiver active (nov–mars) : tout vol non-hiver → suggérer formules hiver
-  const isSummerInWinterPeriod = !isWinterFlight && (pickedMonth >= 10 || pickedMonth <= 3);
+  const isSummerInWinterPeriod = !isWinterFlight && (pickedMonth >= 10 || pickedMonth <= 2);
   // Période été active (mai–sept) : vol hiver sélectionné → suggérer formules été
   const isWinterInSummerPeriod = isWinterFlight && (pickedMonth >= 4 && pickedMonth <= 8);
 
