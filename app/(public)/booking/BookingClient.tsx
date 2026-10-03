@@ -1812,7 +1812,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                               </p>
                                             </button>
                                           )}
-                                          <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>Fermeture des remontées — appelez le :</p>
+                                          <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>Si vous souhaitez voler avant cette date — appelez le :</p>
                                         </>
                                       )}
                                       <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
