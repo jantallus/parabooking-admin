@@ -784,8 +784,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const isSummerFlight = _flightSeason === 'SUMMER' || _flightSeason === 'ETE' || _flightSeason === 'ÉTÉ';
   // Période hiver active (nov–mars) : vol été sélectionné → suggérer formules hiver
   const isSummerInWinterPeriod = isSummerFlight && showNextAvailBanner && (pickedMonth >= 10 || pickedMonth <= 3);
-  // Période été active (mai–oct) : vol hiver sélectionné → suggérer formules été
-  const isWinterInSummerPeriod = isWinterFlight && showNextAvailBanner && (pickedMonth >= 4 && pickedMonth <= 9);
+  // Période été active (mai–sept) : vol hiver sélectionné → suggérer formules été
+  const isWinterInSummerPeriod = isWinterFlight && showNextAvailBanner && (pickedMonth >= 4 && pickedMonth <= 8);
 
   // Quand les passagers n'existent pas encore (étapes 1/2), on injecte les pendingComplements
   // dans des passagers virtuels pour que le calcul de prix reflète les options pré-sélectionnées.
