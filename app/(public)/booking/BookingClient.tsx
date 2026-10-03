@@ -450,18 +450,19 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         // 🧭 NAVIGATION CLASSIQUE (Flèches ou calendrier)
         container.classList.remove('opacity-0');
         if (headerContainer) headerContainer.classList.remove('opacity-0');
+        // Désactiver snap immédiatement pour éviter le re-snap automatique quand les colonnes changent
+        container.style.scrollSnapType = 'none';
+        isProgrammaticScrollRef.current = true;
         setTimeout(() => {
           const targetEl = document.getElementById(`mobile-col-${pickedDate}`);
           if (targetEl) {
-            const behavior = container.scrollLeft === 0 ? 'auto' : 'smooth';
-            // Bloquer onScroll pendant le scroll programmé pour éviter qu'il écrase pickedDate
-            isProgrammaticScrollRef.current = true;
-            centerHorizontally(targetEl, behavior);
-            const releaseLock = () => { isProgrammaticScrollRef.current = false; };
-            container.addEventListener('scrollend', releaseLock, { once: true });
-            setTimeout(releaseLock, 500); // fallback si scrollend non déclenché
+            centerHorizontally(targetEl, 'auto'); // toujours instantané pour éviter onScroll intermédiaire
           }
-          setTimeout(() => { setIsGridExpanded(true); }, 100);
+          setTimeout(() => {
+            container.style.scrollSnapType = '';
+            isProgrammaticScrollRef.current = false;
+            setIsGridExpanded(true);
+          }, 80); // laisser le layout se stabiliser avant de ré-activer le snap
         }, 20);
       }
     }
