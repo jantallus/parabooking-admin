@@ -1849,7 +1849,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                                   </p>
                                                 </button>
                                               )}
-                                              <p className="text-[11px] leading-tight" style={{ color: '#312783', opacity: 0.4 }}>Si vous souhaitez voler avant cette date — appelez le :</p>
                                             </>
                                           )}
                                         </>
