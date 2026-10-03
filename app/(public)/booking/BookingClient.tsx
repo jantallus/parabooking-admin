@@ -1765,6 +1765,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                               ? 'Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.'
                                               : 'Vous avez sélectionné un vol hiver. Pour vous inscrire, choisissez dans nos formules été.'}
                                           </p>
+                                          <p className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>Vous pouvez aussi nous contacter :</p>
                                           <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
                                           <div className="flex items-center gap-1">
                                             <span className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
@@ -1853,6 +1854,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                           )}
                                         </>
                                       )}
+                                      <p className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>Vous pouvez aussi nous contacter :</p>
                                       <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
                                       <div className="flex items-center gap-1">
                                         <span className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
