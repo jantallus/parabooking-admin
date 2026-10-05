@@ -319,7 +319,7 @@ export default function CadeauPage() {
             </div>
           </div>
 
-          <div data-reveal data-delay="200">
+          <div>
           {isLoading ? (
             /* ☠️ SKELETON — même structure que les vraies cartes */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -352,8 +352,8 @@ export default function CadeauPage() {
             <div style={{ textAlign: 'center', padding: '50px 0', backgroundColor: '#F3F3F3', borderRadius: '20px' }}><p style={{ color: '#1D1D1B', fontWeight: 900 }}>Aucune offre n'est disponible.</p></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {templates.map((tpl) => (
-                <div key={tpl.id} className={`card-template bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${selectedTemplate?.id === tpl.id ? 'border-[#E6007E]' : 'border-transparent'}`}>
+              {templates.map((tpl, idx) => (
+                <div key={tpl.id} data-reveal data-delay={String((idx % 3) * 100)} className={`card-template bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${selectedTemplate?.id === tpl.id ? 'border-[#E6007E]' : 'border-transparent'}`}>
                   {tpl.image_url && <div className="w-full h-40 md:h-52 bg-cover bg-center rounded-[10px] mb-6 shadow-sm border border-slate-100" style={{ backgroundImage: `url(${tpl.image_url})` }} />}
                   <div>
                     <div className="flex justify-between items-start mb-3 gap-2">
