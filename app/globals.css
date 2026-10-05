@@ -163,7 +163,7 @@ body, *:not(.font-georgia) {
   transform: translateY(40px);
   transition: opacity 0.7s ease-out, transform 0.7s ease-out;
 }
-[data-reveal].revealed {
+[data-reveal][data-revealed] {
   opacity: 1;
   transform: translateY(0);
 }

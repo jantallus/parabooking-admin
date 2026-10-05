@@ -17,8 +17,8 @@ export default function RevealProvider() {
       nodes.forEach(node => {
         if (node.nodeType !== 1) return;
         const el = node as Element;
-        if (el.hasAttribute('data-reveal') && !el.classList.contains('revealed')) found.push(el);
-        el.querySelectorAll?.('[data-reveal]:not(.revealed)').forEach(c => found.push(c));
+        if (el.hasAttribute('data-reveal') && !el.hasAttribute('data-revealed')) found.push(el);
+        el.querySelectorAll?.('[data-reveal]:not([data-revealed])').forEach(c => found.push(c));
       });
       if (!found.length) return;
       // double-rAF so opacity:0 is painted before observer fires
@@ -31,7 +31,7 @@ export default function RevealProvider() {
           (entries) => {
             entries.forEach(entry => {
               if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
+                (entry.target as HTMLElement).setAttribute('data-revealed', '');
                 io?.unobserve(entry.target);
               }
             });
@@ -39,7 +39,7 @@ export default function RevealProvider() {
           { threshold: 0.08, rootMargin: '0px 0px -20px 0px' }
         );
 
-        document.querySelectorAll('[data-reveal]:not(.revealed)').forEach(observe);
+        document.querySelectorAll('[data-reveal]:not([data-revealed])').forEach(observe);
 
         mo = new MutationObserver(mutations =>
           mutations.forEach(m => observeNew(m.addedNodes))
