@@ -10,20 +10,23 @@ export default function RevealProvider() {
     let mo: MutationObserver | null = null;
     let raf1: number, raf2: number;
 
-    const observe = (el: Element) => io?.observe(el);
+    const scan = () => {
+      document.querySelectorAll('[data-reveal]:not([data-revealed])').forEach(el => io?.observe(el));
+    };
 
     const observeNew = (nodes: NodeList) => {
-      const found: Element[] = [];
+      let hasReveal = false;
       nodes.forEach(node => {
         if (node.nodeType !== 1) return;
         const el = node as Element;
-        if (el.hasAttribute('data-reveal') && !el.hasAttribute('data-revealed')) found.push(el);
-        el.querySelectorAll?.('[data-reveal]:not([data-revealed])').forEach(c => found.push(c));
+        if (el.hasAttribute('data-reveal') || el.querySelectorAll?.('[data-reveal]').length) hasReveal = true;
       });
-      if (!found.length) return;
+      if (!hasReveal) return;
       // double-rAF so opacity:0 is painted before observer fires
-      requestAnimationFrame(() => requestAnimationFrame(() => found.forEach(observe)));
+      requestAnimationFrame(() => requestAnimationFrame(() => scan()));
     };
+
+    const handleScanEvent = () => requestAnimationFrame(() => requestAnimationFrame(() => scan()));
 
     raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
@@ -39,7 +42,7 @@ export default function RevealProvider() {
           { threshold: 0.08, rootMargin: '0px 0px -20px 0px' }
         );
 
-        document.querySelectorAll('[data-reveal]:not([data-revealed])').forEach(observe);
+        scan();
 
         mo = new MutationObserver(mutations =>
           mutations.forEach(m => observeNew(m.addedNodes))
@@ -48,11 +51,14 @@ export default function RevealProvider() {
       });
     });
 
+    window.addEventListener('reveal:scan', handleScanEvent);
+
     return () => {
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
       io?.disconnect();
       mo?.disconnect();
+      window.removeEventListener('reveal:scan', handleScanEvent);
     };
   }, [pathname]);
 

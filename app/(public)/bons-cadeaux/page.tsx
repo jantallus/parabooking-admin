@@ -142,6 +142,15 @@ export default function CadeauPage() {
     }
   }, [selectedTemplate]);
 
+  // Déclenche un re-scan reveal après chargement des templates
+  useEffect(() => {
+    if (!isLoading && templates.length > 0) {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        window.dispatchEvent(new Event('reveal:scan'));
+      }));
+    }
+  }, [isLoading, templates.length]);
+
   useScrollLock(!!infoTemplate);
 
   // 🎯 SÉCURITÉ : Le formulaire vérifie aussi l'adresse si la case est cochée
