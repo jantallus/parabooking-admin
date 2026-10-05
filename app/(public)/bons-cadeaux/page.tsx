@@ -262,13 +262,13 @@ export default function CadeauPage() {
 
       <section id="boutique" style={{ backgroundColor: '#FFFFFF', padding: '100px 4vw' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <div data-reveal style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '3rem', fontWeight: 700, color: '#312783', marginBottom: '15px' }}>Choisissez votre bon cadeau</h2>
             <p style={{ color: '#1D1D1B', fontSize: '1.125rem', fontWeight: 400 }}>Sélectionnez l'offre de votre choix pour la personnaliser.</p>
           </div>
 
           {/* 💡 BANDEAU DE RÉASSURANCE BONS CADEAUX */}
-          <div className="max-w-7xl mx-auto mb-12 rounded-[10px] p-6 shadow-sm backdrop-blur-sm" style={{ backgroundColor: 'rgba(49,39,131,0.04)', border: '1px solid rgba(49,39,131,0.1)' }}>
+          <div data-reveal data-delay="100" className="max-w-7xl mx-auto mb-12 rounded-[10px] p-6 shadow-sm backdrop-blur-sm" style={{ backgroundColor: 'rgba(49,39,131,0.04)', border: '1px solid rgba(49,39,131,0.1)' }}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 
               <div className="flex items-start gap-4">
@@ -319,6 +319,7 @@ export default function CadeauPage() {
             </div>
           </div>
 
+          <div data-reveal data-delay="200">
           {isLoading ? (
             /* ☠️ SKELETON — même structure que les vraies cartes */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -394,6 +395,7 @@ export default function CadeauPage() {
               ))}
             </div>
           )}
+          </div>{/* fin data-reveal grille */}
 
           {(selectedTemplate || directFlightId) && (
             <div id="achat-form" style={{ marginTop: '60px', backgroundColor: 'white', borderRadius: '10px', padding: '40px', boxShadow: 'none', border: '1px solid #e2e8f0', scrollMarginTop: '100px' }}>
