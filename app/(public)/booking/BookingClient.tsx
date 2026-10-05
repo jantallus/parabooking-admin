@@ -1160,7 +1160,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
         {/* ÉTAPE 1 : CHOIX DU VOL */}
         {step === 1 && !isDirect && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" onClick={() => setActiveTooltip(null)}>
+          <div onClick={() => setActiveTooltip(null)}>
             {/* 🎯 SÉLECTEUR DE SAISON "COLLANT" (STICKY) */}
             <div className="flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40 transition-all duration-300">
               <div className="bg-white p-1.5 rounded-[10px] inline-flex border border-slate-200" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
@@ -1170,7 +1170,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             </div>
 
             {/* 💡 BANDEAU DE RÉASSURANCE (ASTUCES FLUIDES) */}
-          <div className="max-w-7xl mx-auto mb-12 rounded-[10px] p-6 shadow-sm" style={{ backgroundColor: 'rgba(49,39,131,0.04)' }}>
+          <div data-reveal className="max-w-7xl mx-auto mb-12 rounded-[10px] p-6 shadow-sm" style={{ backgroundColor: 'rgba(49,39,131,0.04)' }}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
 
               <div>
@@ -1306,7 +1306,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                <div className="text-center py-20 bg-white rounded-[10px] border border-slate-100"><Wind size={48} strokeWidth={1} style={{ color: '#312783', margin: '0 auto 16px', display: 'block' }} /><h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#312783' }}>Aucun vol configuré pour cette saison</h3></div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {displayedFlights.map((flight) => {
+                {displayedFlights.map((flight, idx) => {
                   const s = String(flight.season || 'ALL').toUpperCase().trim();
                   const isWinter = s === 'WINTER' || s === 'HIVER';
                   const isSummer = s === 'SUMMER' || s === 'ETE' || s === 'ÉTÉ';
@@ -1314,7 +1314,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   const SeasonPictoIcon: React.ElementType | null = isWinter ? Snowflake : isSummer ? Sun : null;
 
                   return (
-                  <div key={flight.id} className="flight-card bg-slate-50 rounded-[10px] p-8 border border-slate-100 flex flex-col justify-between">
+                  <div key={flight.id} data-reveal data-delay={String((idx % 3) * 100)} className="flight-card bg-slate-50 rounded-[10px] p-8 border border-slate-100 flex flex-col justify-between">
                     
                     {flight.image_url && (
                       <div className="flight-img-wrap w-full h-40 md:h-52 rounded-[10px] mb-6 border border-slate-100 overflow-hidden">
