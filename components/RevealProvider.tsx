@@ -8,24 +8,32 @@ export default function RevealProvider() {
   useEffect(() => {
     if (pathname.startsWith('/booking')) return;
 
-    const observe = () => {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('revealed');
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
-      );
-      document.querySelectorAll('[data-reveal]:not(.revealed)').forEach(el => observer.observe(el));
-      return observer;
-    };
+    let observer: IntersectionObserver | null = null;
+    let rafId: number;
 
-    const observer = observe();
-    return () => observer.disconnect();
+    // Double-rAF ensures opacity:0 is painted before we add .revealed
+    // so the CSS transition is guaranteed to play
+    rafId = requestAnimationFrame(() => {
+      rafId = requestAnimationFrame(() => {
+        observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer?.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.08, rootMargin: '0px 0px -20px 0px' }
+        );
+        document.querySelectorAll('[data-reveal]:not(.revealed)').forEach(el => observer!.observe(el));
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer?.disconnect();
+    };
   }, [pathname]);
 
   return null;
