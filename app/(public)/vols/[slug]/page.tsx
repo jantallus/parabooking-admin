@@ -128,7 +128,9 @@ export default async function VolPage({ params }: Props) {
       </div>{/* fin contenu blanc */}
 
       {/* ── Autres vols ── */}
-      <OtherFlightsSection currentVolParam={config.volParam} season={config.season} />
+      <div data-reveal>
+        <OtherFlightsSection currentVolParam={config.volParam} season={config.season} />
+      </div>
 
     </div>
   );

@@ -109,7 +109,7 @@ export default function EtePage() {
       <section style={{ backgroundColor: 'white' }}>
         <div className="content-section">
           
-          <div className="text-block" style={{ flex: 1.2 }}>
+          <div data-reveal className="text-block" style={{ flex: 1.2 }}>
             <h2>Évadez-vous en altitude</h2>
             <p>
               Laissez-vous transporter par la magie et les sensations uniques d'un baptême de parapente ou d'un vol biplace à La Clusaz, l'écrin estival des majestueuses Alpes françaises. C'est la destination idéale pour tous ceux qui cherchent le grand frisson du vol libre sous le soleil !
@@ -135,7 +135,7 @@ export default function EtePage() {
             </p>
           </div>
 
-          <div className="image-container-ete">
+          <div data-reveal data-delay="200" className="image-container-ete">
             <Image src="/coldesaravis.webp" alt="Vue du Col des Aravis" fill style={{ objectFit: 'cover' }} />
           </div>
 
@@ -144,11 +144,11 @@ export default function EtePage() {
 
       {/* --- SECTION 3 : GRILLE DES VOLS --- */}
       <section style={{ padding: '0 4vw 140px', backgroundColor: 'white' }}>
-        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+        <div data-reveal style={{ textAlign: 'center', marginBottom: '60px' }}>
           <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#1e40af' }}>Choisissez votre vol d'été</h2>
         </div>
-        
-        <div className="grid-vols">
+
+        <div data-reveal data-delay="200" className="grid-vols">
           {summerFlights.map((flight) => (
             <div key={flight.id} className="flight-card">
               <div style={{ position: 'relative', height: '200px' }}>

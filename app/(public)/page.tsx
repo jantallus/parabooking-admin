@@ -113,10 +113,10 @@ export default function HomePage() {
 
       {/* --- SECTION DES VOLS --- */}
       <section className="section-vols" style={{ padding: '100px 4vw 140px', backgroundColor: 'white' }}>
-        <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+        <div data-reveal style={{ textAlign: 'center', marginBottom: '80px' }}>
           <h2 className="title-underline" style={{ fontSize: '3rem', fontWeight: 900, color: '#1e40af', textTransform: 'uppercase' }}>Choisir mon vol</h2>
         </div>
-        <div className="grid-vols">
+        <div data-reveal data-delay="200" className="grid-vols">
           {summerFlights.map((flight) => (
             <div key={flight.id} className="flight-card">
               <div style={{ position: 'relative', height: '200px' }}><Image src={flight.img} alt={flight.title} fill style={{ objectFit: 'cover' }} /></div>

@@ -147,7 +147,7 @@ export default function HiverPage() {
       <section style={{ backgroundColor: 'white' }}>
         <div className="content-section">
           
-          <div className="text-block" style={{ flex: 1.2 }}>
+          <div data-reveal className="text-block" style={{ flex: 1.2 }}>
             <h2>L'hiver, une saison idéale pour le parapente à La Clusaz</h2>
             
             <h3>Décollage à ski : un supplément de fun</h3>
@@ -168,7 +168,7 @@ export default function HiverPage() {
           </div>
 
           {/* PHOTO RÉELLE INTÉGRÉE ICI */}
-          <div className="image-container-hiver">
+          <div data-reveal data-delay="200" className="image-container-hiver">
             <Image 
               src="/hhero2.webp" 
               alt="Décollage à ski à La Clusaz" 
@@ -182,11 +182,11 @@ export default function HiverPage() {
 
       {/* --- SECTION 3 : GRILLE DES VOLS --- */}
       <section style={{ padding: '0 4vw 140px', backgroundColor: 'white' }}>
-        <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+        <div data-reveal style={{ textAlign: 'center', marginBottom: '80px' }}>
           <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#1e40af' }}>Nos vols d'hiver</h2>
         </div>
-        
-        <div className="grid-vols-hiver">
+
+        <div data-reveal data-delay="200" className="grid-vols-hiver">
           {winterFlights.map((flight) => (
             <div key={flight.id} className="flight-card">
               <div style={{ position: 'relative', height: '230px' }}>

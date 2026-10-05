@@ -121,7 +121,7 @@ export default function InfosPage() {
 
       {/* --- GRILLE D'INFOS (Identique) --- */}
       <section className="info-grid">
-        <div className="info-card">
+        <div data-reveal className="info-card">
           <div className="icon-box-modern">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.62 1.96V10a10 10 0 0 0 20 0V5.42a2 2 0 0 0-1.62-1.96Z"/><path d="M12 10V21"/></svg>
           </div>
@@ -134,7 +134,7 @@ export default function InfosPage() {
           </ul>
         </div>
 
-        <div className="info-card">
+        <div data-reveal data-delay="100" className="info-card">
           <div className="icon-box-modern">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
           </div>
@@ -142,7 +142,7 @@ export default function InfosPage() {
           <p>Au départ du télécabine du <strong>Crêt du Loup</strong> à La Clusaz.</p>
         </div>
 
-        <div className="info-card">
+        <div data-reveal data-delay="200" className="info-card">
           <div className="icon-box-modern">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
@@ -154,7 +154,7 @@ export default function InfosPage() {
         </div>
       </section>
 
-      <section className="cta-box">
+      <section data-reveal className="cta-box">
         <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '15px' }}>Prêt pour le grand saut ?</h2>
         <NextLink href="/booking" className="btn-white">Réserver maintenant</NextLink>
       </section>
