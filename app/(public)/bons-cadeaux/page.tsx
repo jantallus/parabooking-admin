@@ -551,7 +551,21 @@ export default function CadeauPage() {
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    const boutiqueEl = document.getElementById('boutique');
+                    if (boutiqueEl) {
+                      const y = boutiqueEl.getBoundingClientRect().top + window.scrollY - 80;
+                      window.scrollTo({ top: y, behavior: 'smooth' });
+                    }
+                  }}
+                  style={{ padding: '12px 20px', borderRadius: '5px', border: '2px solid #312783', background: 'white', color: '#312783', fontWeight: 700, fontSize: '1.125rem', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#312783'; }}
+                >
+                  + Ajouter un bon
+                </button>
                 <button onClick={handleCheckout} disabled={!isFormValid || isCheckingOut} className="btn-page-action" style={{ flex: 1, textAlign: 'center', opacity: (!isFormValid || isCheckingOut) ? 0.5 : 1, cursor: (!isFormValid || isCheckingOut) ? 'not-allowed' : 'pointer' }}>
                   {isCheckingOut ? 'Redirection Stripe...' : `Payer ${totalPrice}€ de façon sécurisée`}
                 </button>
