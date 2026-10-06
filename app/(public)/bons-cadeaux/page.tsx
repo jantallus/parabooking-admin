@@ -9,26 +9,41 @@ export default function CadeauPage() {
   const { toast } = useToast();
   const [templates, setTemplates] = useState<GiftCardShopTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedTemplate, setSelectedTemplate] = useState<GiftCardShopTemplate | null>(null);
-  
+
   const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
-  // 🎯 NOUVEAU : Gestion de l'envoi postal
   const [shippingSettings, setShippingSettings] = useState({ enabled: false, price: 0 });
   const [wantsShipping, setWantsShipping] = useState(false);
   const [address, setAddress] = useState({ street: '', zip: '', city: '' });
-  // 🎯 NOUVEAU : Gestion des options additionnelles
   const [complements, setComplements] = useState<Complement[]>([]);
   const [complementQuantities, setComplementQuantities] = useState<Record<number, number>>({});
 
-  const [quantity, setQuantity] = useState(1);
+  // Panier : templateId → quantité
+  const [cartItems, setCartItems] = useState<Record<number, number>>({});
+
   const [infoTemplate, setInfoTemplate] = useState<GiftCardShopTemplate | null>(null);
   const [redemptionCode, setRedemptionCode] = useState('');
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [redemptionError, setRedemptionError] = useState('');
   const hasAutoScrolled = React.useRef(false);
   const [urlFlightName, setUrlFlightName] = useState<string | null>(null);
+
+  const totalCartItems = Object.values(cartItems).reduce((sum, q) => sum + q, 0);
+  const cartTotal = templates
+    .filter(t => (cartItems[t.id] ?? 0) > 0)
+    .reduce((sum, t) => sum + (t.price_cents / 100) * cartItems[t.id], 0);
+
+  const adjustCart = (tplId: number, delta: number) => {
+    setCartItems(prev => {
+      const next = Math.max(0, Math.min(10, (prev[tplId] ?? 0) + delta));
+      if (next === 0) {
+        const { [tplId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [tplId]: next };
+    });
+  };
   // Mode direct vol (depuis page réservation, sans template boutique)
   const [directFlightId, setDirectFlightId] = useState<number | null>(null);
   const [directFlightName, setDirectFlightName] = useState<string | null>(null);
@@ -51,7 +66,7 @@ export default function CadeauPage() {
           if (targetId) {
             const found = data.find(t => t.id.toString() === targetId);
             if (found) {
-              setSelectedTemplate(found);
+              setCartItems({ [found.id]: 1 });
               if (incomingFlightName) setUrlFlightName(incomingFlightName);
             }
           }
@@ -90,57 +105,46 @@ export default function CadeauPage() {
     fetchData();
   }, []);
 
-  // 🎯 MOTEUR DE DÉFILEMENT ROBUSTE (Uniquement à l'arrivée sur la page)
+  // Défilement automatique à l'arrivée (si panier ou vol direct pré-rempli)
   useEffect(() => {
-    // On ne le déclenche que si on n'a pas encore fait le saut automatique !
-    if ((selectedTemplate || directFlightId) && !isLoading && !hasAutoScrolled.current) {
-      hasAutoScrolled.current = true; // 🔒 On verrouille pour ne plus jamais le refaire
-      
+    if ((totalCartItems > 0 || directFlightId) && !isLoading && !hasAutoScrolled.current) {
+      hasAutoScrolled.current = true;
       const performScroll = () => {
         const formEl = document.getElementById('achat-form');
         if (formEl) {
-          const y = formEl.getBoundingClientRect().top + window.scrollY - 60; 
-          // ⚡ MAGIE : 'auto' au lieu de 'smooth'. La page se téléporte instantanément !
+          const y = formEl.getBoundingClientRect().top + window.scrollY - 60;
           window.scrollTo({ top: y, behavior: 'auto' });
         }
       };
-
-      // ⚡ TURBO MAX : 50ms suffisent car on ne fait plus glisser la page
       const timer = setTimeout(performScroll, 50);
       return () => clearTimeout(timer);
     }
-  }, [selectedTemplate, directFlightId, isLoading]);
+  }, [totalCartItems, directFlightId, isLoading]);
 
-  // 🎯 GESTION DU BOUTON RETOUR DU NAVIGATEUR (Bons Cadeaux)
-  // 1. On écoute la flèche "Retour"
+  // Bouton retour : vide le panier
   useEffect(() => {
     const handlePopState = () => {
       if (!window.location.hash.includes('#personnaliser')) {
-        setSelectedTemplate(null);
+        setCartItems({});
       }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // 2. On met à jour l'URL sans recharger la page quand on clique sur un bon
+  // Hash URL quand le panier est non-vide
   useEffect(() => {
-    const expectedHash = selectedTemplate ? '#personnaliser' : '';
+    const expectedHash = totalCartItems > 0 ? '#personnaliser' : '';
     const currentHash = window.location.hash;
-    
-    if (selectedTemplate && currentHash !== expectedHash) {
+    if (totalCartItems > 0 && currentHash !== expectedHash) {
       const newUrl = window.location.pathname + window.location.search + expectedHash;
-      
-      // 🎯 CORRECTION : Si on arrive via le bouton "Offrir" (présence de ?templateId= dans l'URL),
-      // on REMPLACE l'état actuel au lieu d'en rajouter un dans l'historique.
-      // Ainsi, le bouton "Retour" ramènera directement à la page de réservation !
       if (window.location.search.includes('templateId=')) {
         window.history.replaceState({ personnalisation: true }, '', newUrl);
       } else {
         window.history.pushState({ personnalisation: true }, '', newUrl);
       }
     }
-  }, [selectedTemplate]);
+  }, [totalCartItems]);
 
   // Déclenche un re-scan reveal après chargement des templates
   useEffect(() => {
@@ -153,29 +157,33 @@ export default function CadeauPage() {
 
   useScrollLock(!!infoTemplate);
 
-  // 🎯 SÉCURITÉ : Le formulaire vérifie aussi l'adresse si la case est cochée
   const isShippingValid = !wantsShipping || (address.street && address.zip && address.city);
-  const isFormValid = buyer.name && buyer.email && buyer.phone && isShippingValid && (!!selectedTemplate || !!directFlightId);
+  const isFormValid = buyer.name && buyer.email && buyer.phone && isShippingValid && (totalCartItems > 0 || !!directFlightId);
 
   const handleCheckout = async () => {
-    if (!isFormValid || (!selectedTemplate && !directFlightId)) return;
+    if (!isFormValid) return;
     setIsCheckingOut(true);
-
     try {
       const shippingPayload = wantsShipping ? { enabled: true, address: `${address.street}, ${address.zip} ${address.city}` } : null;
       const selectedComplements = complements
         .filter(c => (complementQuantities[c.id] ?? 0) > 0)
         .map(c => ({ id: c.id, quantity: complementQuantities[c.id] }));
-      const payload = selectedTemplate
-        ? { template: selectedTemplate, buyer, physicalShipping: shippingPayload, selectedComplements, quantity }
-        : { flight_type_id: directFlightId, buyer, physicalShipping: shippingPayload, selectedComplements, quantity };
+
+      let payload: Record<string, unknown>;
+      if (directFlightId) {
+        payload = { flight_type_id: directFlightId, buyer, physicalShipping: shippingPayload, selectedComplements, quantity: 1 };
+      } else {
+        const items = templates
+          .filter(t => (cartItems[t.id] ?? 0) > 0)
+          .map(t => ({ template_id: t.id, quantity: cartItems[t.id] }));
+        payload = { items, buyer, physicalShipping: shippingPayload, selectedComplements };
+      }
 
       const res = await fetch(`/api/proxy/public/checkout-gift-card`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
@@ -183,22 +191,20 @@ export default function CadeauPage() {
         toast.error("Erreur lors de la création du paiement.");
         setIsCheckingOut(false);
       }
-    } catch (err) {
+    } catch {
       toast.error("Erreur de connexion au serveur de paiement.");
       setIsCheckingOut(false);
     }
   };
 
-  // 🎯 NOUVEAU : Fonction de défilement intelligente et précise
   const scrollToForm = () => {
-    // Délai plus court pour le clic manuel car la page est déjà chargée
-    setTimeout(() => { 
+    setTimeout(() => {
       const formEl = document.getElementById('achat-form');
       if (formEl) {
-        const y = formEl.getBoundingClientRect().top + window.scrollY - 60; 
+        const y = formEl.getBoundingClientRect().top + window.scrollY - 60;
         window.scrollTo({ top: y, behavior: 'smooth' });
       }
-    }, 100); 
+    }, 100);
   };
 
   const handleRedeemCode = async () => {
@@ -227,10 +233,10 @@ export default function CadeauPage() {
 
   const inputStyle = { width: '100%', padding: '15px', borderRadius: '10px', border: '2px solid #e2e8f0', fontSize: '1rem', fontWeight: 700, outline: 'none' };
   
-  // Calcul du prix total affiché sur le bouton
+  // Prix total
   const optionsTotal = complements.reduce((sum, c) => sum + (c.price_cents / 100) * (complementQuantities[c.id] ?? 0), 0);
-  const basePriceCents = selectedTemplate ? selectedTemplate.price_cents : (directFlightPrice ?? 0);
-  const totalPrice = (basePriceCents / 100) * quantity + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
+  const basePrice = directFlightId ? (directFlightPrice ?? 0) / 100 : cartTotal;
+  const totalPrice = basePrice + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
 
   return (
     <main className="main-bons-cadeaux" style={{ width: '100%', overflowX: 'hidden', position: 'relative' }}>
@@ -362,7 +368,7 @@ export default function CadeauPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {templates.map((tpl, idx) => (
-                <div key={tpl.id} data-reveal data-delay={String((idx % 3) * 100)} className={`card-template bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${selectedTemplate?.id === tpl.id ? 'border-[#E6007E]' : 'border-transparent'}`}>
+                <div key={tpl.id} data-reveal data-delay={String((idx % 3) * 100)} className={`card-template bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${(cartItems[tpl.id] ?? 0) > 0 ? 'border-[#E6007E]' : 'border-transparent'}`}>
                   {tpl.image_url && <div className="w-full h-40 md:h-52 bg-cover bg-center rounded-[10px] mb-6 shadow-sm border border-slate-100" style={{ backgroundImage: `url(${tpl.image_url})` }} />}
                   <div>
                     <div className="flex justify-between items-start mb-3 gap-2">
@@ -390,15 +396,32 @@ export default function CadeauPage() {
                     </div>
                     <p style={{ color: '#1D1D1B', fontSize: '1.125rem', fontWeight: 400, lineHeight: 1.625, marginBottom: '0.25rem' }}>{tpl.description}</p>
                   </div>
-                  <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E' }}>{tpl.price_cents / 100}€</div>
-                    <button
-                      onClick={() => { setSelectedTemplate(tpl); setComplementQuantities({}); setUrlFlightName(null); setQuantity(1); scrollToForm(); }}
-                      className="btn-choisir cursor-pointer px-6 py-4 rounded-[5px] text-white"
-                      style={{ fontSize: '1.125rem', fontWeight: 700, ...(selectedTemplate?.id === tpl.id ? { backgroundColor: '#312783' } : {}) }}
-                    >
-                      {selectedTemplate?.id === tpl.id ? '✓ Choisi' : 'Choisir ce bon'}
-                    </button>
+                  <div className="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', flexShrink: 0 }}>{tpl.price_cents / 100}€</div>
+                    {(cartItems[tpl.id] ?? 0) > 0 ? (
+                      <div className="flex items-center" style={{ border: '2px solid #E6007E', borderRadius: '5px', overflow: 'hidden' }}>
+                        <button
+                          onClick={() => adjustCart(tpl.id, -1)}
+                          style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >−</button>
+                        <span style={{ padding: '0 10px', fontWeight: 700, color: '#E6007E', fontSize: '1rem', whiteSpace: 'nowrap' }}>
+                          {cartItems[tpl.id]} bon{cartItems[tpl.id] > 1 ? 's' : ''} · {(tpl.price_cents / 100) * cartItems[tpl.id]}€
+                        </span>
+                        <button
+                          onClick={() => adjustCart(tpl.id, 1)}
+                          disabled={(cartItems[tpl.id] ?? 0) >= 10}
+                          style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: (cartItems[tpl.id] ?? 0) >= 10 ? 'not-allowed' : 'pointer', color: (cartItems[tpl.id] ?? 0) >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >+</button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { adjustCart(tpl.id, 1); setComplementQuantities({}); setUrlFlightName(null); scrollToForm(); }}
+                        className="btn-choisir cursor-pointer px-6 py-4 rounded-[5px] text-white"
+                        style={{ fontSize: '1.125rem', fontWeight: 700 }}
+                      >
+                        Choisir ce bon
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -406,31 +429,36 @@ export default function CadeauPage() {
           )}
           </div>{/* fin data-reveal grille */}
 
-          {(selectedTemplate || directFlightId) && (
+          {(totalCartItems > 0 || directFlightId) && (
             <div id="achat-form" style={{ marginTop: '60px', backgroundColor: 'white', borderRadius: '10px', padding: '40px', boxShadow: 'none', border: '1px solid #e2e8f0', scrollMarginTop: '100px' }}>
-              <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#312783', marginBottom: '10px' }}>Personnalisez votre bon</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
-                <p style={{ color: '#E6007E', fontSize: '1.5rem', fontWeight: 900, margin: 0 }}>
-                  {directFlightId
-                    ? `Bon ${directFlightName || 'vol'} - ${directFlightPrice ? directFlightPrice / 100 : '?'}€`
-                    : `${urlFlightName ? `Bon ${urlFlightName}` : selectedTemplate!.title} - ${selectedTemplate!.price_cents / 100}€`}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0', border: '2px solid #e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    disabled={quantity <= 1}
-                    style={{ width: '44px', height: '44px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: quantity <= 1 ? 'not-allowed' : 'pointer', color: quantity <= 1 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >−</button>
-                  <span style={{ minWidth: '36px', textAlign: 'center', fontSize: '1.125rem', fontWeight: 700, color: '#312783', padding: '0 4px' }}>{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(q => Math.min(10, q + 1))}
-                    disabled={quantity >= 10}
-                    style={{ width: '44px', height: '44px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: quantity >= 10 ? 'not-allowed' : 'pointer', color: quantity >= 10 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >+</button>
-                </div>
-                {quantity > 1 && <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#64748b' }}>{quantity} bons cadeaux</span>}
+              <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#312783', marginBottom: '20px' }}>Votre panier</h3>
+              {/* Récap panier */}
+              <div style={{ backgroundColor: '#F3F3F3', borderRadius: '10px', padding: '16px 20px', marginBottom: '30px' }}>
+                {directFlightId ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 700, color: '#1D1D1B' }}>Bon {directFlightName || 'vol'}</span>
+                    <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.25rem' }}>{directFlightPrice ? directFlightPrice / 100 : '?'}€</span>
+                  </div>
+                ) : (
+                  <>
+                    {templates.filter(t => (cartItems[t.id] ?? 0) > 0).map(t => (
+                      <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                        <span style={{ fontWeight: 700, color: '#1D1D1B' }}>
+                          {cartItems[t.id] > 1 ? `${cartItems[t.id]} × ` : ''}{urlFlightName && Object.keys(cartItems).length === 1 ? `Bon ${urlFlightName}` : t.title}
+                        </span>
+                        <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>
+                          {(t.price_cents / 100) * cartItems[t.id]}€
+                        </span>
+                      </div>
+                    ))}
+                    {totalCartItems > 1 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', marginTop: '4px' }}>
+                        <span style={{ fontWeight: 700, color: '#312783' }}>Total bons</span>
+                        <span style={{ fontWeight: 700, color: '#312783', fontSize: '1.25rem' }}>{cartTotal}€</span>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
@@ -455,9 +483,9 @@ export default function CadeauPage() {
                     {complements.map(comp => {
                       const compQty = complementQuantities[comp.id] ?? 0;
                       const isSelected = compQty > 0;
-                      const setCompQty = (n: number) => setComplementQuantities(prev => ({ ...prev, [comp.id]: Math.max(0, Math.min(quantity, n)) }));
+                      const setCompQty = (n: number) => setComplementQuantities(prev => ({ ...prev, [comp.id]: Math.max(0, Math.min(totalCartItems || 1, n)) }));
 
-                      if (quantity === 1) {
+                      if ((totalCartItems || 1) === 1) {
                         return (
                           <label key={comp.id} className="flex items-center gap-4 p-4 cursor-pointer transition-all" style={{ borderRadius: '10px', border: `2px solid ${isSelected ? '#312783' : '#e2e8f0'}`, backgroundColor: 'white' }}>
                             <input type="checkbox" className="cb-white" checked={isSelected} onChange={e => setCompQty(e.target.checked ? 1 : 0)} />
@@ -481,7 +509,7 @@ export default function CadeauPage() {
                               <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
                                 <button type="button" onClick={() => setCompQty(compQty - 1)} disabled={compQty <= 0} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty <= 0 ? 'not-allowed' : 'pointer', color: compQty <= 0 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
                                 <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: '#312783' }}>{compQty}</span>
-                                <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= quantity} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= quantity ? 'not-allowed' : 'pointer', color: compQty >= quantity ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= (totalCartItems || 1)} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= (totalCartItems || 1) ? 'not-allowed' : 'pointer', color: compQty >= (totalCartItems || 1) ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                               </div>
                             </div>
                           </div>
@@ -501,9 +529,9 @@ export default function CadeauPage() {
                     <div>
                       <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                         <Package size={20} strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                        Recevoir {quantity > 1 ? `${quantity} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)
+                        Recevoir {(totalCartItems || 1) > 1 ? `${totalCartItems} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)
                       </span>
-                      {quantity > 1 && <span style={{ fontSize: '0.9rem', fontWeight: 400, color: '#64748b', display: 'block', marginTop: '2px' }}>Une par bon commandé</span>}
+                      {(totalCartItems || 1) > 1 && <span style={{ fontSize: '0.9rem', fontWeight: 400, color: '#64748b', display: 'block', marginTop: '2px' }}>Une par bon commandé</span>}
                     </div>
                   </label>
                   
