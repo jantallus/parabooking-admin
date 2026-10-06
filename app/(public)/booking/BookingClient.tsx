@@ -106,6 +106,16 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       if (next === 0) { const { [flightId]: _, ...rest } = prev; return rest; }
       return { ...prev, [flightId]: next };
     });
+  const addToGiftCart = (flightId: number) => {
+    adjustGiftQty(flightId, 1);
+    setTimeout(() => {
+      const panel = document.getElementById('gift-panel');
+      if (panel) {
+        const y = panel.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }, 50);
+  };
 
   const { setCartSummary, registerOpenCart } = useCart();
 
@@ -1438,7 +1448,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                     </span>
                                     <button
                                       type="button"
-                                      onClick={e => { e.stopPropagation(); adjustGiftQty(flight.id, 1); }}
+                                      onClick={e => { e.stopPropagation(); addToGiftCart(flight.id); }}
                                       disabled={flightQty >= 10}
                                       style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: flightQty >= 10 ? 'not-allowed' : 'pointer', color: flightQty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >+</button>
@@ -1446,7 +1456,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                 ) : (
                                   /* Vol pas encore dans le panier : bouton Offrir rose plein */
                                   <button
-                                    onClick={e => { e.stopPropagation(); adjustGiftQty(flight.id, 1); }}
+                                    onClick={e => { e.stopPropagation(); addToGiftCart(flight.id); }}
                                     className="cursor-pointer shrink-0"
                                     style={{ padding: '14px 24px', borderRadius: '5px', backgroundColor: '#E6007E', color: 'white', fontSize: '1.125rem', fontWeight: 700, border: 'none', transition: 'background-color 0.3s ease' }}
                                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; }}
@@ -1470,7 +1480,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               </button>
                               {!appliedVoucher && !appliedPartner && flight.is_giftable && (
                                 <button
-                                  onClick={e => { e.stopPropagation(); adjustGiftQty(flight.id, 1); }}
+                                  onClick={e => { e.stopPropagation(); addToGiftCart(flight.id); }}
                                   className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
                                   style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
                                   onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}

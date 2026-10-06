@@ -107,6 +107,7 @@ export default function GiftCardPanel({ selectedFlights, onClose }: Props) {
   return (
     <div
       ref={panelRef}
+      id="gift-panel"
       style={{
         marginTop: '32px',
         backgroundColor: 'white',
