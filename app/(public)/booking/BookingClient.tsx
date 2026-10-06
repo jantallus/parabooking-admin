@@ -99,6 +99,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [pendingComplements, setPendingComplements] = useState<Record<number, number>>({});
   const pendingComplementsRef = useRef<Record<number, number>>({});
   const [giftFlight, setGiftFlight] = useState<{ id: number; name: string; price_cents: number } | null>(null);
+  const [giftQty, setGiftQty] = useState(1);
 
   const { setCartSummary, registerOpenCart } = useCart();
 
@@ -1413,22 +1414,43 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                         );
                       })()}
                       <div className="flex gap-2">
-                        <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
-                          Réserver ce vol
-                        </button>
-                        {!appliedVoucher && !appliedPartner && flight.is_giftable && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setGiftFlight(giftFlight?.id === flight.id ? null : { id: flight.id, name: flight.name, price_cents: flight.price_cents });
-                            }}
-                            className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
-                            style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
-                          >
-                            <Gift size={16} strokeWidth={1.5} />Offrir
+                        {/* Mode normal : bouton Réserver visible seulement si pas en mode offrir */}
+                        {!giftFlight && (
+                          <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
+                            Réserver ce vol
                           </button>
+                        )}
+                        {!appliedVoucher && !appliedPartner && flight.is_giftable && (
+                          giftFlight?.id === flight.id ? (
+                            /* Carte sélectionnée en mode offrir : contrôles panier */
+                            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #E6007E', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff8fc', flex: 1, height: '50px' }}>
+                              <button
+                                type="button"
+                                onClick={e => { e.stopPropagation(); if (giftQty <= 1) { setGiftFlight(null); } else { setGiftQty(q => q - 1); } }}
+                                style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                              >−</button>
+                              <span style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: '0.9rem', color: '#1D1D1B', padding: '0 4px' }}>
+                                {giftQty} bon{giftQty > 1 ? 's' : ''} — {(flight.price_cents / 100) * giftQty}€
+                              </span>
+                              <button
+                                type="button"
+                                onClick={e => { e.stopPropagation(); setGiftQty(q => Math.min(10, q + 1)); }}
+                                disabled={giftQty >= 10}
+                                style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'transparent', border: 'none', cursor: giftQty >= 10 ? 'not-allowed' : 'pointer', color: giftQty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                              >+</button>
+                            </div>
+                          ) : (
+                            /* Autre carte en mode offrir, ou aucune sélectionnée : bouton Offrir */
+                            <button
+                              onClick={e => { e.stopPropagation(); setGiftFlight({ id: flight.id, name: flight.name, price_cents: flight.price_cents }); setGiftQty(1); }}
+                              className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2"
+                              style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700, flex: giftFlight ? 1 : undefined }}
+                              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
+                              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
+                            >
+                              <Gift size={16} strokeWidth={1.5} />Offrir
+                            </button>
+                          )
                         )}
                       </div>
                     </div>
@@ -1439,7 +1461,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             {giftFlight && step === 1 && (
               <GiftCardPanel
                 flight={giftFlight}
-                onClose={() => setGiftFlight(null)}
+                qty={giftQty}
+                onQtyChange={setGiftQty}
+                onClose={() => { setGiftFlight(null); setGiftQty(1); }}
               />
             )}
           </div>

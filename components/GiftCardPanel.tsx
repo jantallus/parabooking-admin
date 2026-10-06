@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react'; // useState kept for buyer/shipping/complements
 import type { Complement } from '@/lib/types';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Sparkles, Package, X } from 'lucide-react';
@@ -12,14 +12,14 @@ interface GiftFlight {
 
 interface Props {
   flight: GiftFlight;
+  qty: number;
+  onQtyChange: (qty: number) => void;
   onClose: () => void;
 }
 
-export default function GiftCardPanel({ flight, onClose }: Props) {
+export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Props) {
   const { toast } = useToast();
   const panelRef = useRef<HTMLDivElement>(null);
-
-  const [qty, setQty] = useState(1);
   const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
@@ -147,14 +147,14 @@ export default function GiftCardPanel({ flight, onClose }: Props) {
             <div style={{ display: 'flex', alignItems: 'center', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: 'white' }}>
               <button
                 type="button"
-                onClick={() => setQty(q => Math.max(1, q - 1))}
+                onClick={() => onQtyChange(Math.max(1, qty - 1))}
                 disabled={qty <= 1}
                 style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: qty <= 1 ? 'not-allowed' : 'pointer', color: qty <= 1 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >−</button>
               <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 700, fontSize: '1rem', color: '#1D1D1B' }}>{qty}</span>
               <button
                 type="button"
-                onClick={() => setQty(q => Math.min(10, q + 1))}
+                onClick={() => onQtyChange(Math.min(10, qty + 1))}
                 disabled={qty >= 10}
                 style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: qty >= 10 ? 'not-allowed' : 'pointer', color: qty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >+</button>
