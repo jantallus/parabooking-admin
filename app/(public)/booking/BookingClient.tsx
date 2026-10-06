@@ -1434,7 +1434,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                               {priceEl}
-                              {!appliedVoucher && !appliedPartner && flight.is_giftable && (
+                              {!appliedVoucher && !appliedPartner && (
                                 flightQty > 0 ? (
                                   /* Vol dans le panier : [− N bon · X€ +] */
                                   <div className="flex items-center" style={{ border: '2px solid #E6007E', borderRadius: '5px', overflow: 'hidden' }}>
@@ -1478,7 +1478,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
                                 Réserver ce vol
                               </button>
-                              {!appliedVoucher && !appliedPartner && flight.is_giftable && (
+                              {!appliedVoucher && !appliedPartner && (
                                 <button
                                   onClick={e => { e.stopPropagation(); addToGiftCart(flight.id); }}
                                   className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
