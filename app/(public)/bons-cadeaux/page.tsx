@@ -169,15 +169,12 @@ export default function CadeauPage() {
         .filter(c => (complementQuantities[c.id] ?? 0) > 0)
         .map(c => ({ id: c.id, quantity: complementQuantities[c.id] }));
 
-      let payload: Record<string, unknown>;
-      if (directFlightId) {
-        payload = { flight_type_id: directFlightId, buyer, physicalShipping: shippingPayload, selectedComplements, quantity: 1 };
-      } else {
-        const items = templates
-          .filter(t => (cartItems[t.id] ?? 0) > 0)
-          .map(t => ({ template_id: t.id, quantity: cartItems[t.id] }));
-        payload = { items, buyer, physicalShipping: shippingPayload, selectedComplements };
-      }
+      const items: Array<{ template_id?: number; flight_type_id?: number; quantity: number }> = [];
+      if (directFlightId) items.push({ flight_type_id: directFlightId, quantity: 1 });
+      templates.filter(t => (cartItems[t.id] ?? 0) > 0).forEach(t => {
+        items.push({ template_id: t.id, quantity: cartItems[t.id] });
+      });
+      const payload = { items, buyer, physicalShipping: shippingPayload, selectedComplements };
 
       const res = await fetch(`/api/proxy/public/checkout-gift-card`, {
         method: 'POST',
