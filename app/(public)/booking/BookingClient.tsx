@@ -1314,7 +1314,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             ) : displayedFlights.length === 0 ? (
                <div className="text-center py-20 bg-white rounded-[10px] border border-slate-100"><Wind size={48} strokeWidth={1} style={{ color: '#312783', margin: '0 auto 16px', display: 'block' }} /><h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#312783' }}>Aucun vol configuré pour cette saison</h3></div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div id="grille-vols" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {displayedFlights.map((flight, idx) => {
                   const s = String(flight.season || 'ALL').toUpperCase().trim();
                   const isWinter = s === 'WINTER' || s === 'HIVER';
