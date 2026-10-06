@@ -334,7 +334,7 @@ export default function CadeauPage() {
             </div>
           </div>
 
-          <div>
+          <div id="grille-bons">
           {isLoading ? (
             /* ☠️ SKELETON — même structure que les vraies cartes */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -554,10 +554,12 @@ export default function CadeauPage() {
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <button
                   onClick={() => {
-                    const boutiqueEl = document.getElementById('boutique');
-                    if (boutiqueEl) {
-                      const y = boutiqueEl.getBoundingClientRect().top + window.scrollY - 80;
-                      window.scrollTo({ top: y, behavior: 'smooth' });
+                    const grilleEl = document.getElementById('grille-bons');
+                    if (grilleEl) {
+                      const rect = grilleEl.getBoundingClientRect();
+                      const elCenter = rect.top + window.scrollY + rect.height / 2;
+                      const y = elCenter - window.innerHeight / 2;
+                      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
                     }
                   }}
                   style={{ padding: '12px 20px', borderRadius: '5px', border: '2px solid #312783', background: 'white', color: '#312783', fontWeight: 700, fontSize: '1.125rem', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
