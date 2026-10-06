@@ -1387,72 +1387,90 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                       )}
                     </div>
                     <div className="mt-2 pt-3 border-t border-slate-100">
+                      {/* Prix + bouton Offrir inline (mode offrir, carte non sélectionnée) */}
                       {(() => {
                         const voucherCents = appliedVoucher ? getVoucherCents(appliedVoucher) : null;
                         const delta = voucherCents != null ? flight.price_cents - voucherCents : null;
+                        const isOtherGiftCard = giftFlight && giftFlight.id !== flight.id;
+                        const showInlineOffrir = isOtherGiftCard && !appliedVoucher && !appliedPartner && flight.is_giftable;
                         return (
-                          <div className="mb-3">
-                            {voucherCents == null ? (
-                              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1 }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
-                            ) : delta! <= 0 ? (
-                              <>
-                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
-                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-                                  <span style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>0€</span>
-                                  {delta! < 0 && (
-                                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>{(-delta!) / 100}€ de solde pour les photos et vidéos</span>
-                                  )}
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
-                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>{delta! / 100}€</div>
-                              </>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: isOtherGiftCard ? 0 : '12px' }}>
+                            <div>
+                              {voucherCents == null ? (
+                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1 }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
+                              ) : delta! <= 0 ? (
+                                <>
+                                  <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
+                                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                                    <span style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>0€</span>
+                                    {delta! < 0 && (
+                                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>{(-delta!) / 100}€ de solde pour les photos et vidéos</span>
+                                    )}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
+                                  <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>{delta! / 100}€</div>
+                                </>
+                              )}
+                            </div>
+                            {showInlineOffrir && (
+                              <button
+                                onClick={e => { e.stopPropagation(); setGiftFlight({ id: flight.id, name: flight.name, price_cents: flight.price_cents }); setGiftQty(1); }}
+                                className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
+                                style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
+                              >
+                                <Gift size={16} strokeWidth={1.5} />Offrir
+                              </button>
                             )}
                           </div>
                         );
                       })()}
-                      <div className="flex gap-2">
-                        {/* Mode normal : bouton Réserver visible seulement si pas en mode offrir */}
-                        {!giftFlight && (
-                          <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
-                            Réserver ce vol
-                          </button>
-                        )}
-                        {!appliedVoucher && !appliedPartner && flight.is_giftable && (
-                          giftFlight?.id === flight.id ? (
-                            /* Carte sélectionnée en mode offrir : contrôles panier */
-                            <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #E6007E', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff8fc', flex: 1, height: '50px' }}>
-                              <button
-                                type="button"
-                                onClick={e => { e.stopPropagation(); if (giftQty <= 1) { setGiftFlight(null); } else { setGiftQty(q => q - 1); } }}
-                                style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                              >−</button>
-                              <span style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: '0.9rem', color: '#1D1D1B', padding: '0 4px' }}>
-                                {giftQty} bon{giftQty > 1 ? 's' : ''} — {(flight.price_cents / 100) * giftQty}€
-                              </span>
-                              <button
-                                type="button"
-                                onClick={e => { e.stopPropagation(); setGiftQty(q => Math.min(10, q + 1)); }}
-                                disabled={giftQty >= 10}
-                                style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'transparent', border: 'none', cursor: giftQty >= 10 ? 'not-allowed' : 'pointer', color: giftQty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                              >+</button>
-                            </div>
-                          ) : (
-                            /* Autre carte en mode offrir, ou aucune sélectionnée : bouton Offrir */
-                            <button
-                              onClick={e => { e.stopPropagation(); setGiftFlight({ id: flight.id, name: flight.name, price_cents: flight.price_cents }); setGiftQty(1); }}
-                              className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2"
-                              style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700, flex: giftFlight ? 1 : undefined }}
-                              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
-                              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
-                            >
-                              <Gift size={16} strokeWidth={1.5} />Offrir
+                      {/* Boutons (mode normal ou carte sélectionnée en mode offrir) */}
+                      {(!giftFlight || giftFlight.id === flight.id) && (
+                        <div className="flex gap-2">
+                          {!giftFlight && (
+                            <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
+                              Réserver ce vol
                             </button>
-                          )
-                        )}
-                      </div>
+                          )}
+                          {!appliedVoucher && !appliedPartner && flight.is_giftable && (
+                            giftFlight?.id === flight.id ? (
+                              /* Carte sélectionnée : contrôles panier */
+                              <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #E6007E', borderRadius: '10px', overflow: 'hidden', backgroundColor: '#fff8fc', flex: 1, height: '50px' }}>
+                                <button
+                                  type="button"
+                                  onClick={e => { e.stopPropagation(); if (giftQty <= 1) { setGiftFlight(null); setGiftQty(1); } else { setGiftQty(q => q - 1); } }}
+                                  style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'transparent', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                                >−</button>
+                                <span style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: '0.9rem', color: '#1D1D1B', padding: '0 4px' }}>
+                                  {giftQty} bon{giftQty > 1 ? 's' : ''} — {(flight.price_cents / 100) * giftQty}€
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={e => { e.stopPropagation(); setGiftQty(q => Math.min(10, q + 1)); }}
+                                  disabled={giftQty >= 10}
+                                  style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'transparent', border: 'none', cursor: giftQty >= 10 ? 'not-allowed' : 'pointer', color: giftQty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                                >+</button>
+                              </div>
+                            ) : (
+                              /* Mode normal : bouton Offrir compact */
+                              <button
+                                onClick={e => { e.stopPropagation(); setGiftFlight({ id: flight.id, name: flight.name, price_cents: flight.price_cents }); setGiftQty(1); }}
+                                className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
+                                style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(230,0,126,0.1)'; e.currentTarget.style.color = '#E6007E'; }}
+                              >
+                                <Gift size={16} strokeWidth={1.5} />Offrir
+                              </button>
+                            )
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )})}
