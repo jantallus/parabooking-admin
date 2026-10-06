@@ -1493,7 +1493,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 selectedFlights={flights
                   .filter(f => (giftCartQty[f.id] ?? 0) > 0)
                   .map(f => ({ id: f.id, name: f.name, price_cents: f.price_cents, qty: giftCartQty[f.id] }))}
-                onAdjust={adjustGiftQty}
                 onClose={() => setGiftCartQty({})}
               />
             )}

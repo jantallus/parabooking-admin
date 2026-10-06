@@ -13,11 +13,10 @@ interface SelectedFlight {
 
 interface Props {
   selectedFlights: SelectedFlight[];
-  onAdjust: (flightId: number, delta: number) => void;
   onClose: () => void;
 }
 
-export default function GiftCardPanel({ selectedFlights, onAdjust, onClose }: Props) {
+export default function GiftCardPanel({ selectedFlights, onClose }: Props) {
   const { toast } = useToast();
   const panelRef = useRef<HTMLDivElement>(null);
   const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
@@ -134,25 +133,9 @@ export default function GiftCardPanel({ selectedFlights, onAdjust, onClose }: Pr
       <div style={{ backgroundColor: '#F3F3F3', borderRadius: '10px', padding: '16px 20px', marginBottom: '30px' }}>
         {selectedFlights.map((f, i) => (
           <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < selectedFlights.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div className="flex items-center" style={{ border: '2px solid #E6007E', borderRadius: '5px', overflow: 'hidden', backgroundColor: 'white' }}>
-                <button
-                  type="button"
-                  onClick={() => onAdjust(f.id, -1)}
-                  style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >−</button>
-                <span style={{ padding: '0 6px', fontWeight: 700, color: '#E6007E', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
-                  {f.qty} bon{f.qty > 1 ? 's' : ''}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onAdjust(f.id, 1)}
-                  disabled={f.qty >= 10}
-                  style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: f.qty >= 10 ? 'not-allowed' : 'pointer', color: f.qty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >+</button>
-              </div>
-              <span style={{ fontWeight: 700, color: '#1D1D1B' }}>Bon {f.name}</span>
-            </div>
+            <span style={{ fontWeight: 700, color: '#1D1D1B' }}>
+              {f.qty > 1 ? `${f.qty} × ` : ''}Bon {f.name}
+            </span>
             <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>
               {(f.price_cents / 100) * f.qty}€
             </span>
