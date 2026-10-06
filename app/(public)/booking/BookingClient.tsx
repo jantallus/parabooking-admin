@@ -27,6 +27,7 @@ import { useScrollLock } from '@/hooks/useScrollLock';
 import { calculateBookingPrice } from '@/lib/price-utils';
 import { useCart } from '@/lib/CartContext';
 import { Gift, Camera, Zap, Clock, Weight, FileText, Mountain, Wind, Sun, Snowflake, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, X, Plus, Trash2, AlertCircle } from 'lucide-react';
+import GiftCardPanel from '@/components/GiftCardPanel';
 import { SkiIcon, SnowboardIcon, PedestrianIcon, ChildrenIcon, GoproIcon } from '@/components/icons/ActivityIcons';
 
 function cloudinaryOptimize(url: string, w = 600, h = 300): string {
@@ -97,6 +98,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const cartPopupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingComplements, setPendingComplements] = useState<Record<number, number>>({});
   const pendingComplementsRef = useRef<Record<number, number>>({});
+  const [giftFlight, setGiftFlight] = useState<{ id: number; name: string; price_cents: number } | null>(null);
 
   const { setCartSummary, registerOpenCart } = useCart();
 
@@ -1418,7 +1420,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.location.href = `/bons-cadeaux?flightId=${flight.id}&flightName=${encodeURIComponent(flight.name)}&flightPrice=${flight.price_cents}`;
+                              setGiftFlight(giftFlight?.id === flight.id ? null : { id: flight.id, name: flight.name, price_cents: flight.price_cents });
                             }}
                             className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
                             style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
@@ -1433,6 +1435,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   </div>
                 )})}
               </div>
+            )}
+            {giftFlight && step === 1 && (
+              <GiftCardPanel
+                flight={giftFlight}
+                onClose={() => setGiftFlight(null)}
+              />
             )}
           </div>
         )}
