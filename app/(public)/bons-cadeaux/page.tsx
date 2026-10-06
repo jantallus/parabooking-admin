@@ -30,6 +30,7 @@ export default function CadeauPage() {
   const [urlFlightName, setUrlFlightName] = useState<string | null>(null);
 
   const totalCartItems = Object.values(cartItems).reduce((sum, q) => sum + q, 0);
+  const totalAllItems = (directFlightId ? directFlightQty : 0) + totalCartItems;
   const cartTotal = templates
     .filter(t => (cartItems[t.id] ?? 0) > 0)
     .reduce((sum, t) => sum + (t.price_cents / 100) * cartItems[t.id], 0);
@@ -486,9 +487,9 @@ export default function CadeauPage() {
                     {complements.map(comp => {
                       const compQty = complementQuantities[comp.id] ?? 0;
                       const isSelected = compQty > 0;
-                      const setCompQty = (n: number) => setComplementQuantities(prev => ({ ...prev, [comp.id]: Math.max(0, Math.min(totalCartItems || 1, n)) }));
+                      const setCompQty = (n: number) => setComplementQuantities(prev => ({ ...prev, [comp.id]: Math.max(0, Math.min(totalAllItems || 1, n)) }));
 
-                      if ((totalCartItems || 1) === 1) {
+                      if ((totalAllItems || 1) === 1) {
                         return (
                           <label key={comp.id} className="flex items-center gap-4 p-4 cursor-pointer transition-all" style={{ borderRadius: '10px', border: `2px solid ${isSelected ? '#312783' : '#e2e8f0'}`, backgroundColor: 'white' }}>
                             <input type="checkbox" className="cb-white" checked={isSelected} onChange={e => setCompQty(e.target.checked ? 1 : 0)} />
@@ -512,7 +513,7 @@ export default function CadeauPage() {
                               <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
                                 <button type="button" onClick={() => setCompQty(compQty - 1)} disabled={compQty <= 0} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty <= 0 ? 'not-allowed' : 'pointer', color: compQty <= 0 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
                                 <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: '#312783' }}>{compQty}</span>
-                                <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= (totalCartItems || 1)} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= (totalCartItems || 1) ? 'not-allowed' : 'pointer', color: compQty >= (totalCartItems || 1) ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= (totalAllItems || 1)} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= (totalAllItems || 1) ? 'not-allowed' : 'pointer', color: compQty >= (totalAllItems || 1) ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                               </div>
                             </div>
                           </div>
@@ -532,9 +533,9 @@ export default function CadeauPage() {
                     <div>
                       <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                         <Package size={20} strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                        Recevoir {(totalCartItems || 1) > 1 ? `${totalCartItems} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)
+                        Recevoir {(totalAllItems || 1) > 1 ? `${totalAllItems} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)
                       </span>
-                      {(totalCartItems || 1) > 1 && <span style={{ fontSize: '0.9rem', fontWeight: 400, color: '#64748b', display: 'block', marginTop: '2px' }}>Une par bon commandé</span>}
+                      {(totalAllItems || 1) > 1 && <span style={{ fontSize: '0.9rem', fontWeight: 400, color: '#64748b', display: 'block', marginTop: '2px' }}>Une par bon commandé</span>}
                     </div>
                   </label>
                   
