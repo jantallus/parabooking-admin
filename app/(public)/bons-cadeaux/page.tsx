@@ -48,6 +48,8 @@ export default function CadeauPage() {
   const [directFlightId, setDirectFlightId] = useState<number | null>(null);
   const [directFlightName, setDirectFlightName] = useState<string | null>(null);
   const [directFlightPrice, setDirectFlightPrice] = useState<number | null>(null);
+  const [directFlightQty, setDirectFlightQty] = useState(1);
+  const adjustDirectQty = (delta: number) => setDirectFlightQty(q => Math.max(1, Math.min(10, q + delta)));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -170,7 +172,7 @@ export default function CadeauPage() {
         .map(c => ({ id: c.id, quantity: complementQuantities[c.id] }));
 
       const items: Array<{ template_id?: number; flight_type_id?: number; quantity: number }> = [];
-      if (directFlightId) items.push({ flight_type_id: directFlightId, quantity: 1 });
+      if (directFlightId) items.push({ flight_type_id: directFlightId, quantity: directFlightQty });
       templates.filter(t => (cartItems[t.id] ?? 0) > 0).forEach(t => {
         items.push({ template_id: t.id, quantity: cartItems[t.id] });
       });
@@ -232,7 +234,7 @@ export default function CadeauPage() {
   
   // Prix total
   const optionsTotal = complements.reduce((sum, c) => sum + (c.price_cents / 100) * (complementQuantities[c.id] ?? 0), 0);
-  const basePrice = (directFlightId ? (directFlightPrice ?? 0) / 100 : 0) + cartTotal;
+  const basePrice = (directFlightId ? (directFlightPrice ?? 0) / 100 * directFlightQty : 0) + cartTotal;
   const totalPrice = basePrice + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
 
   return (
@@ -433,8 +435,15 @@ export default function CadeauPage() {
               <div style={{ backgroundColor: '#F3F3F3', borderRadius: '10px', padding: '16px 20px', marginBottom: '30px' }}>
                 {directFlightId && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: totalCartItems > 0 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-                    <span style={{ fontWeight: 700, color: '#1D1D1B' }}>Bon {directFlightName || 'vol'}</span>
-                    <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>{directFlightPrice ? directFlightPrice / 100 : '?'}€</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: 'white' }}>
+                        <button type="button" onClick={() => adjustDirectQty(-1)} disabled={directFlightQty <= 1} style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: directFlightQty <= 1 ? 'not-allowed' : 'pointer', color: directFlightQty <= 1 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                        <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 700, fontSize: '1rem', color: '#1D1D1B' }}>{directFlightQty}</span>
+                        <button type="button" onClick={() => adjustDirectQty(1)} disabled={directFlightQty >= 10} style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: directFlightQty >= 10 ? 'not-allowed' : 'pointer', color: directFlightQty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                      </div>
+                      <span style={{ fontWeight: 700, color: '#1D1D1B' }}>Bon {directFlightName || 'vol'}</span>
+                    </div>
+                    <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>{directFlightPrice ? (directFlightPrice / 100) * directFlightQty : '?'}€</span>
                   </div>
                 )}
                 {templates.filter(t => (cartItems[t.id] ?? 0) > 0).map(t => (
@@ -447,7 +456,7 @@ export default function CadeauPage() {
                     </span>
                   </div>
                 ))}
-                {(!!directFlightId ? 1 : 0) + totalCartItems > 1 && (
+                {(directFlightId ? directFlightQty : 0) + totalCartItems > 1 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', marginTop: '4px' }}>
                     <span style={{ fontWeight: 700, color: '#312783' }}>Total bons</span>
                     <span style={{ fontWeight: 700, color: '#312783', fontSize: '1.25rem' }}>{basePrice}€</span>
