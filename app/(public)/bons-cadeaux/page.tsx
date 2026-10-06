@@ -30,7 +30,6 @@ export default function CadeauPage() {
   const [urlFlightName, setUrlFlightName] = useState<string | null>(null);
 
   const totalCartItems = Object.values(cartItems).reduce((sum, q) => sum + q, 0);
-  const totalAllItems = (directFlightId ? directFlightQty : 0) + totalCartItems;
   const cartTotal = templates
     .filter(t => (cartItems[t.id] ?? 0) > 0)
     .reduce((sum, t) => sum + (t.price_cents / 100) * cartItems[t.id], 0);
@@ -51,6 +50,7 @@ export default function CadeauPage() {
   const [directFlightPrice, setDirectFlightPrice] = useState<number | null>(null);
   const [directFlightQty, setDirectFlightQty] = useState(1);
   const adjustDirectQty = (delta: number) => setDirectFlightQty(q => Math.max(1, Math.min(10, q + delta)));
+  const totalAllItems = (directFlightId ? directFlightQty : 0) + totalCartItems;
 
   useEffect(() => {
     const fetchData = async () => {
