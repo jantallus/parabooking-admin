@@ -556,14 +556,22 @@ export default function CadeauPage() {
               )}
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <a
-                  href="/booking#grille-vols"
-                  style={{ padding: '12px 20px', borderRadius: '5px', border: '2px solid #312783', background: 'white', color: '#312783', fontWeight: 700, fontSize: '1.125rem', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, textDecoration: 'none', display: 'inline-block' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#312783'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'white'; (e.currentTarget as HTMLElement).style.color = '#312783'; }}
+                <button
+                  onClick={() => {
+                    const grilleEl = document.getElementById('grille-bons');
+                    if (grilleEl) {
+                      const rect = grilleEl.getBoundingClientRect();
+                      const elCenter = rect.top + window.scrollY + rect.height / 2;
+                      const y = elCenter - window.innerHeight / 2;
+                      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                    }
+                  }}
+                  style={{ padding: '12px 20px', borderRadius: '5px', border: '2px solid #312783', background: 'white', color: '#312783', fontWeight: 700, fontSize: '1.125rem', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#312783'; }}
                 >
-                  + Offrir un vol
-                </a>
+                  + Ajouter un bon
+                </button>
                 <button onClick={handleCheckout} disabled={!isFormValid || isCheckingOut} className="btn-page-action" style={{ flex: 1, textAlign: 'center', opacity: (!isFormValid || isCheckingOut) ? 0.5 : 1, cursor: (!isFormValid || isCheckingOut) ? 'not-allowed' : 'pointer' }}>
                   {isCheckingOut ? 'Redirection Stripe...' : `Payer ${totalPrice}€ de façon sécurisée`}
                 </button>

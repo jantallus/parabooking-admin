@@ -239,21 +239,38 @@ export default function GiftCardPanel({ selectedFlights, onClose }: Props) {
         </div>
       )}
 
-      <button
-        onClick={handleCheckout}
-        disabled={!isFormValid || isCheckingOut}
-        style={{
-          width: '100%', padding: '14px 20px', borderRadius: '5px',
-          backgroundColor: !isFormValid || isCheckingOut ? 'rgba(230,0,126,0.4)' : '#E6007E',
-          color: 'white', fontWeight: 700, fontSize: '1.125rem', border: 'none',
-          cursor: !isFormValid || isCheckingOut ? 'not-allowed' : 'pointer',
-          transition: 'background-color 0.3s ease',
-        }}
-        onMouseEnter={e => { if (isFormValid && !isCheckingOut) e.currentTarget.style.backgroundColor = '#312783'; }}
-        onMouseLeave={e => { if (isFormValid && !isCheckingOut) e.currentTarget.style.backgroundColor = '#E6007E'; }}
-      >
-        {isCheckingOut ? 'Redirection Stripe...' : `Payer ${totalPrice}€ de façon sécurisée`}
-      </button>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <button
+          onClick={() => {
+            const grilleEl = document.getElementById('grille-vols');
+            if (grilleEl) {
+              const rect = grilleEl.getBoundingClientRect();
+              const elCenter = rect.top + window.scrollY + rect.height / 2;
+              window.scrollTo({ top: Math.max(0, elCenter - window.innerHeight / 2), behavior: 'smooth' });
+            }
+          }}
+          style={{ padding: '14px 20px', borderRadius: '5px', border: '2px solid #312783', background: 'white', color: '#312783', fontWeight: 700, fontSize: '1.125rem', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#312783'; }}
+        >
+          + Offrir un vol
+        </button>
+        <button
+          onClick={handleCheckout}
+          disabled={!isFormValid || isCheckingOut}
+          style={{
+            flex: 1, padding: '14px 20px', borderRadius: '5px',
+            backgroundColor: !isFormValid || isCheckingOut ? 'rgba(230,0,126,0.4)' : '#E6007E',
+            color: 'white', fontWeight: 700, fontSize: '1.125rem', border: 'none',
+            cursor: !isFormValid || isCheckingOut ? 'not-allowed' : 'pointer',
+            transition: 'background-color 0.3s ease',
+          }}
+          onMouseEnter={e => { if (isFormValid && !isCheckingOut) e.currentTarget.style.backgroundColor = '#312783'; }}
+          onMouseLeave={e => { if (isFormValid && !isCheckingOut) e.currentTarget.style.backgroundColor = '#E6007E'; }}
+        >
+          {isCheckingOut ? 'Redirection Stripe...' : `Payer ${totalPrice}€ de façon sécurisée`}
+        </button>
+      </div>
       <p style={{ textAlign: 'center', color: '#64748b', fontSize: '0.875rem', marginTop: '16px' }}>
         Le bon cadeau au format PDF vous sera envoyé par email immédiatement après validation du paiement.
       </p>
