@@ -1,23 +1,23 @@
 'use client';
-import { useState, useEffect, useRef } from 'react'; // useState kept for buyer/shipping/complements
+import { useState, useEffect, useRef } from 'react';
 import type { Complement } from '@/lib/types';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Sparkles, Package, X } from 'lucide-react';
 
-interface GiftFlight {
+interface SelectedFlight {
   id: number;
   name: string;
   price_cents: number;
+  qty: number;
 }
 
 interface Props {
-  flight: GiftFlight;
-  qty: number;
-  onQtyChange: (qty: number) => void;
+  selectedFlights: SelectedFlight[];
+  onAdjust: (flightId: number, delta: number) => void;
   onClose: () => void;
 }
 
-export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Props) {
+export default function GiftCardPanel({ selectedFlights, onAdjust, onClose }: Props) {
   const { toast } = useToast();
   const panelRef = useRef<HTMLDivElement>(null);
   const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
@@ -51,8 +51,9 @@ export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Pro
     }
   }, []);
 
+  const totalAllItems = selectedFlights.reduce((sum, f) => sum + f.qty, 0);
+  const basePrice = selectedFlights.reduce((sum, f) => sum + (f.price_cents / 100) * f.qty, 0);
   const optionsTotal = complements.reduce((sum, c) => sum + (c.price_cents / 100) * (complementQuantities[c.id] ?? 0), 0);
-  const basePrice = (flight.price_cents / 100) * qty;
   const totalPrice = basePrice + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
 
   const isShippingValid = !wantsShipping || (address.street && address.zip && address.city);
@@ -70,7 +71,7 @@ export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Pro
         .map(c => ({ id: c.id, quantity: complementQuantities[c.id] }));
 
       const payload = {
-        items: [{ flight_type_id: flight.id, quantity: qty }],
+        items: selectedFlights.map(f => ({ flight_type_id: f.id, quantity: f.qty })),
         buyer,
         physicalShipping: shippingPayload,
         selectedComplements,
@@ -119,52 +120,50 @@ export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Pro
     >
       <button
         onClick={onClose}
-        style={{
-          position: 'absolute',
-          top: '16px',
-          right: '16px',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          color: '#94a3b8',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '4px',
-        }}
+        style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center', padding: '4px' }}
         aria-label="Fermer"
       >
         <X size={20} />
       </button>
 
       <h3 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#312783', marginBottom: '20px' }}>
-        Offrir ce vol en bon cadeau
+        Votre panier
       </h3>
 
-      {/* Récap panier */}
+      {/* Récap panier — une ligne par vol */}
       <div style={{ backgroundColor: '#F3F3F3', borderRadius: '10px', padding: '16px 20px', marginBottom: '30px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', backgroundColor: 'white' }}>
-              <button
-                type="button"
-                onClick={() => onQtyChange(Math.max(1, qty - 1))}
-                disabled={qty <= 1}
-                style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: qty <= 1 ? 'not-allowed' : 'pointer', color: qty <= 1 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >−</button>
-              <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: 700, fontSize: '1rem', color: '#1D1D1B' }}>{qty}</span>
-              <button
-                type="button"
-                onClick={() => onQtyChange(Math.min(10, qty + 1))}
-                disabled={qty >= 10}
-                style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: qty >= 10 ? 'not-allowed' : 'pointer', color: qty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >+</button>
+        {selectedFlights.map((f, i) => (
+          <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < selectedFlights.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="flex items-center" style={{ border: '2px solid #E6007E', borderRadius: '5px', overflow: 'hidden', backgroundColor: 'white' }}>
+                <button
+                  type="button"
+                  onClick={() => onAdjust(f.id, -1)}
+                  style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >−</button>
+                <span style={{ padding: '0 6px', fontWeight: 700, color: '#E6007E', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+                  {f.qty} bon{f.qty > 1 ? 's' : ''}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onAdjust(f.id, 1)}
+                  disabled={f.qty >= 10}
+                  style={{ width: '32px', height: '40px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: f.qty >= 10 ? 'not-allowed' : 'pointer', color: f.qty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >+</button>
+              </div>
+              <span style={{ fontWeight: 700, color: '#1D1D1B' }}>Bon {f.name}</span>
             </div>
-            <span style={{ fontWeight: 700, color: '#1D1D1B' }}>Bon {flight.name}</span>
+            <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>
+              {(f.price_cents / 100) * f.qty}€
+            </span>
           </div>
-          <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>
-            {(flight.price_cents / 100) * qty}€
-          </span>
-        </div>
+        ))}
+        {totalAllItems > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', marginTop: '4px' }}>
+            <span style={{ fontWeight: 700, color: '#312783' }}>Total bons</span>
+            <span style={{ fontWeight: 700, color: '#312783', fontSize: '1.25rem' }}>{basePrice}€</span>
+          </div>
+        )}
       </div>
 
       {/* Formulaire acheteur */}
@@ -194,9 +193,9 @@ export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Pro
               const compQty = complementQuantities[comp.id] ?? 0;
               const isSelected = compQty > 0;
               const setCompQty = (n: number) =>
-                setComplementQuantities(prev => ({ ...prev, [comp.id]: Math.max(0, Math.min(qty, n)) }));
+                setComplementQuantities(prev => ({ ...prev, [comp.id]: Math.max(0, Math.min(totalAllItems, n)) }));
 
-              if (qty === 1) {
+              if (totalAllItems === 1) {
                 return (
                   <label key={comp.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', cursor: 'pointer', borderRadius: '10px', border: `2px solid ${isSelected ? '#312783' : '#e2e8f0'}`, backgroundColor: 'white' }}>
                     <input type="checkbox" checked={isSelected} onChange={e => setCompQty(e.target.checked ? 1 : 0)} />
@@ -220,7 +219,7 @@ export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Pro
                       <div style={{ display: 'flex', alignItems: 'center', border: '2px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
                         <button type="button" onClick={() => setCompQty(compQty - 1)} disabled={compQty <= 0} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty <= 0 ? 'not-allowed' : 'pointer', color: compQty <= 0 ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
                         <span style={{ minWidth: '28px', textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: '#312783' }}>{compQty}</span>
-                        <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= qty} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= qty ? 'not-allowed' : 'pointer', color: compQty >= qty ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                        <button type="button" onClick={() => setCompQty(compQty + 1)} disabled={compQty >= totalAllItems} style={{ width: '36px', height: '36px', fontSize: '1.25rem', fontWeight: 700, background: 'white', border: 'none', cursor: compQty >= totalAllItems ? 'not-allowed' : 'pointer', color: compQty >= totalAllItems ? '#cbd5e1' : '#312783', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                       </div>
                     </div>
                   </div>
@@ -240,9 +239,9 @@ export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Pro
             <div>
               <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#009FE3', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                 <Package size={20} strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                Recevoir {qty > 1 ? `${qty} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)
+                Recevoir {totalAllItems > 1 ? `${totalAllItems} cartes imprimées` : 'une carte imprimée'} par courrier (+{shippingSettings.price}€)
               </span>
-              {qty > 1 && <span style={{ fontSize: '0.9rem', color: '#64748b', display: 'block', marginTop: '2px' }}>Une par bon commandé</span>}
+              {totalAllItems > 1 && <span style={{ fontSize: '0.9rem', color: '#64748b', display: 'block', marginTop: '2px' }}>Une par bon commandé</span>}
             </div>
           </label>
           {wantsShipping && (
@@ -257,19 +256,13 @@ export default function GiftCardPanel({ flight, qty, onQtyChange, onClose }: Pro
         </div>
       )}
 
-      {/* Bouton payer */}
       <button
         onClick={handleCheckout}
         disabled={!isFormValid || isCheckingOut}
         style={{
-          width: '100%',
-          padding: '14px 20px',
-          borderRadius: '5px',
+          width: '100%', padding: '14px 20px', borderRadius: '5px',
           backgroundColor: !isFormValid || isCheckingOut ? 'rgba(230,0,126,0.4)' : '#E6007E',
-          color: 'white',
-          fontWeight: 700,
-          fontSize: '1.125rem',
-          border: 'none',
+          color: 'white', fontWeight: 700, fontSize: '1.125rem', border: 'none',
           cursor: !isFormValid || isCheckingOut ? 'not-allowed' : 'pointer',
           transition: 'background-color 0.3s ease',
         }}

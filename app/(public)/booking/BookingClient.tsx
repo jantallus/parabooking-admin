@@ -98,8 +98,14 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const cartPopupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingComplements, setPendingComplements] = useState<Record<number, number>>({});
   const pendingComplementsRef = useRef<Record<number, number>>({});
-  const [giftFlight, setGiftFlight] = useState<{ id: number; name: string; price_cents: number } | null>(null);
-  const [giftQty, setGiftQty] = useState(1);
+  const [giftCartQty, setGiftCartQty] = useState<Record<number, number>>({});
+  const giftMode = Object.values(giftCartQty).some(q => q > 0);
+  const adjustGiftQty = (flightId: number, delta: number) =>
+    setGiftCartQty(prev => {
+      const next = Math.max(0, Math.min(10, (prev[flightId] ?? 0) + delta));
+      if (next === 0) { const { [flightId]: _, ...rest } = prev; return rest; }
+      return { ...prev, [flightId]: next };
+    });
 
   const { setCartSummary, registerOpenCart } = useCart();
 
@@ -1411,34 +1417,36 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                           </div>
                         );
 
-                        if (giftFlight) {
+                        const flightQty = giftCartQty[flight.id] ?? 0;
+
+                        if (giftMode) {
                           /* ── MODE OFFRIR : prix + contrôle sur la même ligne (modèle bons-cadeaux) ── */
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                               {priceEl}
                               {!appliedVoucher && !appliedPartner && flight.is_giftable && (
-                                giftFlight.id === flight.id ? (
-                                  /* Carte sélectionnée : [− N bon · X€ +] */
+                                flightQty > 0 ? (
+                                  /* Vol dans le panier : [− N bon · X€ +] */
                                   <div className="flex items-center" style={{ border: '2px solid #E6007E', borderRadius: '5px', overflow: 'hidden' }}>
                                     <button
                                       type="button"
-                                      onClick={e => { e.stopPropagation(); if (giftQty <= 1) { setGiftFlight(null); setGiftQty(1); } else { setGiftQty(q => q - 1); } }}
+                                      onClick={e => { e.stopPropagation(); adjustGiftQty(flight.id, -1); }}
                                       style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >−</button>
                                     <span style={{ padding: '0 10px', fontWeight: 700, color: '#E6007E', fontSize: '1rem', whiteSpace: 'nowrap' }}>
-                                      {giftQty} bon{giftQty > 1 ? 's' : ''} · {(flight.price_cents / 100) * giftQty}€
+                                      {flightQty} bon{flightQty > 1 ? 's' : ''} · {(flight.price_cents / 100) * flightQty}€
                                     </span>
                                     <button
                                       type="button"
-                                      onClick={e => { e.stopPropagation(); setGiftQty(q => Math.min(10, q + 1)); }}
-                                      disabled={giftQty >= 10}
-                                      style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: giftQty >= 10 ? 'not-allowed' : 'pointer', color: giftQty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                      onClick={e => { e.stopPropagation(); adjustGiftQty(flight.id, 1); }}
+                                      disabled={flightQty >= 10}
+                                      style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: flightQty >= 10 ? 'not-allowed' : 'pointer', color: flightQty >= 10 ? '#cbd5e1' : '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >+</button>
                                   </div>
                                 ) : (
-                                  /* Autre carte : bouton Offrir rose plein (comme "Choisir ce bon") */
+                                  /* Vol pas encore dans le panier : bouton Offrir rose plein */
                                   <button
-                                    onClick={e => { e.stopPropagation(); setGiftFlight({ id: flight.id, name: flight.name, price_cents: flight.price_cents }); setGiftQty(1); }}
+                                    onClick={e => { e.stopPropagation(); adjustGiftQty(flight.id, 1); }}
                                     className="cursor-pointer shrink-0"
                                     style={{ padding: '14px 24px', borderRadius: '5px', backgroundColor: '#E6007E', color: 'white', fontSize: '1.125rem', fontWeight: 700, border: 'none', transition: 'background-color 0.3s ease' }}
                                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; }}
@@ -1462,7 +1470,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               </button>
                               {!appliedVoucher && !appliedPartner && flight.is_giftable && (
                                 <button
-                                  onClick={e => { e.stopPropagation(); setGiftFlight({ id: flight.id, name: flight.name, price_cents: flight.price_cents }); setGiftQty(1); }}
+                                  onClick={e => { e.stopPropagation(); adjustGiftQty(flight.id, 1); }}
                                   className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
                                   style={{ backgroundColor: 'rgba(230,0,126,0.1)', color: '#E6007E', fontSize: '1rem', fontWeight: 700 }}
                                   onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
@@ -1480,12 +1488,13 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 )})}
               </div>
             )}
-            {giftFlight && step === 1 && (
+            {giftMode && step === 1 && (
               <GiftCardPanel
-                flight={giftFlight}
-                qty={giftQty}
-                onQtyChange={setGiftQty}
-                onClose={() => { setGiftFlight(null); setGiftQty(1); }}
+                selectedFlights={flights
+                  .filter(f => (giftCartQty[f.id] ?? 0) > 0)
+                  .map(f => ({ id: f.id, name: f.name, price_cents: f.price_cents, qty: giftCartQty[f.id] }))}
+                onAdjust={adjustGiftQty}
+                onClose={() => setGiftCartQty({})}
               />
             )}
           </div>
