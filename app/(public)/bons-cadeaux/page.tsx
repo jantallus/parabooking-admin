@@ -232,7 +232,7 @@ export default function CadeauPage() {
   
   // Prix total
   const optionsTotal = complements.reduce((sum, c) => sum + (c.price_cents / 100) * (complementQuantities[c.id] ?? 0), 0);
-  const basePrice = directFlightId ? (directFlightPrice ?? 0) / 100 : cartTotal;
+  const basePrice = (directFlightId ? (directFlightPrice ?? 0) / 100 : 0) + cartTotal;
   const totalPrice = basePrice + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
 
   return (
@@ -431,30 +431,27 @@ export default function CadeauPage() {
               <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#312783', marginBottom: '20px' }}>Votre panier</h3>
               {/* Récap panier */}
               <div style={{ backgroundColor: '#F3F3F3', borderRadius: '10px', padding: '16px 20px', marginBottom: '30px' }}>
-                {directFlightId ? (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {directFlightId && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: totalCartItems > 0 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
                     <span style={{ fontWeight: 700, color: '#1D1D1B' }}>Bon {directFlightName || 'vol'}</span>
-                    <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.25rem' }}>{directFlightPrice ? directFlightPrice / 100 : '?'}€</span>
+                    <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>{directFlightPrice ? directFlightPrice / 100 : '?'}€</span>
                   </div>
-                ) : (
-                  <>
-                    {templates.filter(t => (cartItems[t.id] ?? 0) > 0).map(t => (
-                      <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                        <span style={{ fontWeight: 700, color: '#1D1D1B' }}>
-                          {cartItems[t.id] > 1 ? `${cartItems[t.id]} × ` : ''}{urlFlightName && Object.keys(cartItems).length === 1 ? `Bon ${urlFlightName}` : t.title}
-                        </span>
-                        <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>
-                          {(t.price_cents / 100) * cartItems[t.id]}€
-                        </span>
-                      </div>
-                    ))}
-                    {totalCartItems > 1 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', marginTop: '4px' }}>
-                        <span style={{ fontWeight: 700, color: '#312783' }}>Total bons</span>
-                        <span style={{ fontWeight: 700, color: '#312783', fontSize: '1.25rem' }}>{cartTotal}€</span>
-                      </div>
-                    )}
-                  </>
+                )}
+                {templates.filter(t => (cartItems[t.id] ?? 0) > 0).map(t => (
+                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <span style={{ fontWeight: 700, color: '#1D1D1B' }}>
+                      {cartItems[t.id] > 1 ? `${cartItems[t.id]} × ` : ''}{t.title}
+                    </span>
+                    <span style={{ fontWeight: 700, color: '#E6007E', fontSize: '1.125rem', flexShrink: 0, marginLeft: '12px' }}>
+                      {(t.price_cents / 100) * cartItems[t.id]}€
+                    </span>
+                  </div>
+                ))}
+                {(!!directFlightId ? 1 : 0) + totalCartItems > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', marginTop: '4px' }}>
+                    <span style={{ fontWeight: 700, color: '#312783' }}>Total bons</span>
+                    <span style={{ fontWeight: 700, color: '#312783', fontSize: '1.25rem' }}>{basePrice}€</span>
+                  </div>
                 )}
               </div>
 
