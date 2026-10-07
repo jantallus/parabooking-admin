@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import type { GiftCardShopTemplate, Complement } from '@/lib/types';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useCart } from '@/lib/CartContext';
 import { Clock, Wallet, MapPin, Mail, CalendarDays, Package, Sparkles, Gift } from 'lucide-react';
 
 export default function CadeauPage() {
   const { toast } = useToast();
+  const { setGiftCartSummary, registerOpenGiftCart } = useCart();
   const [templates, setTemplates] = useState<GiftCardShopTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -237,6 +239,21 @@ export default function CadeauPage() {
   const optionsTotal = complements.reduce((sum, c) => sum + (c.price_cents / 100) * (complementQuantities[c.id] ?? 0), 0);
   const basePrice = (directFlightId ? (directFlightPrice ?? 0) / 100 * directFlightQty : 0) + cartTotal;
   const totalPrice = basePrice + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
+
+  useEffect(() => {
+    registerOpenGiftCart(() => {
+      const formEl = document.getElementById('achat-form');
+      if (formEl) {
+        const y = formEl.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    });
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (totalAllItems === 0) { setGiftCartSummary(null); return; }
+    setGiftCartSummary({ totalItems: totalAllItems, totalPrice, isFormValid: !!isFormValid });
+  }, [totalAllItems, totalPrice, isFormValid]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <main className="main-bons-cadeaux" style={{ width: '100%', overflowX: 'hidden', position: 'relative' }}>
