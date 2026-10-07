@@ -930,29 +930,35 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       return;
     }
     el.style.transition = 'none';
+    el.style.willChange = 'transform';
+    let rafId = 0;
     const onScroll = () => {
-      const panel = document.getElementById('gift-panel');
-      if (!panel || !el) return;
-      const pt = panel.getBoundingClientRect().top;
-      const navH = 90;
-      const elH = el.offsetHeight;
-      const startAt = 305;
-      const endAt = navH;
-      if (pt >= startAt) {
-        el.style.transform = 'translateY(0)';
-      } else if (pt <= endAt) {
-        el.style.transform = `translateY(-${navH + elH}px)`;
-      } else {
-        const progress = (startAt - pt) / (startAt - endAt);
-        el.style.transform = `translateY(-${Math.round(progress * (navH + elH))}px)`;
-      }
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const panel = document.getElementById('gift-panel');
+        if (!panel || !el) return;
+        const pt = panel.getBoundingClientRect().top;
+        const navH = 90;
+        const elH = el.offsetHeight;
+        const startAt = 305;
+        const endAt = navH;
+        if (pt >= startAt) {
+          el.style.transform = 'translateY(0)';
+        } else if (pt <= endAt) {
+          el.style.transform = `translateY(-${navH + elH}px)`;
+        } else {
+          const progress = (startAt - pt) / (startAt - endAt);
+          el.style.transform = `translateY(-${Math.round(progress * (navH + elH))}px)`;
+        }
+      });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => {
       window.removeEventListener('scroll', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
       const el2 = document.getElementById('season-selector-sticky');
-      if (el2) { el2.style.transform = ''; el2.style.transition = 'none'; }
+      if (el2) { el2.style.transform = ''; el2.style.transition = 'none'; el2.style.willChange = 'auto'; }
     };
   }, [giftMode]);
 
