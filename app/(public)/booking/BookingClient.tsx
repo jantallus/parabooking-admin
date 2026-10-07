@@ -949,7 +949,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const slideMax = navH + elH + 10;
     const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
     // Animation starts when panel is 310px from top, ends when panel is behind the selector
-    const startScroll = Math.max(0, panelOffsetTop - 310);
+    const startScroll = Math.max(0, panelOffsetTop - 315);
     const endScroll = Math.max(0, panelOffsetTop - navH - elH - 5);
 
     // Inject keyframe once — uses CSS custom property so slideMax is dynamic
@@ -977,12 +977,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     el.style.transform = 'translateY(0)';
     const onScroll = () => {
       const pt = panel.getBoundingClientRect().top;
-      if (pt >= 310) {
+      if (pt >= 315) {
         el.style.transform = 'translateY(0)';
       } else if (pt <= navH) {
         el.style.transform = `translateY(-${slideMax}px)`;
       } else {
-        const p = (310 - pt) / (310 - navH);
+        const p = (315 - pt) / (315 - navH);
         el.style.transform = `translateY(-${Math.round(p * slideMax)}px)`;
       }
     };
