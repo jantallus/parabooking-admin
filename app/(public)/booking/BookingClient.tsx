@@ -117,11 +117,28 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     }, 50);
   };
 
-  const { setCartSummary, registerOpenCart } = useCart();
+  const { setCartSummary, registerOpenCart, setGiftCartSummary, registerOpenGiftCart } = useCart();
 
   useEffect(() => {
     registerOpenCart(() => setCartOpen(true));
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    registerOpenGiftCart(() => {
+      const panel = document.getElementById('gift-panel');
+      if (panel) {
+        const y = panel.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    });
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const totalItems = Object.values(giftCartQty).reduce((s, q) => s + q, 0);
+    if (totalItems === 0) { setGiftCartSummary(null); return; }
+    const totalPrice = flights.reduce((s, f) => s + (giftCartQty[f.id] ?? 0) * (f.price_cents / 100), 0);
+    setGiftCartSummary({ totalItems, totalPrice });
+  }, [giftCartQty, flights]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Réinitialise isCheckingOut si l'utilisateur revient en arrière depuis Stripe (bfcache)
   useEffect(() => {
@@ -1433,27 +1450,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
                         if (giftMode) {
                           /* ── MODE OFFRIR : prix + contrôle sur la même ligne (modèle bons-cadeaux) ── */
-                          const scrollToPanel = (e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            const panel = document.getElementById('gift-panel');
-                            if (panel) {
-                              const y = panel.getBoundingClientRect().top + window.scrollY - 100;
-                              window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-                            }
-                          };
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                               {priceEl}
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                              <button
-                                onClick={scrollToPanel}
-                                title="Voir mon panier"
-                                style={{ width: '44px', height: '50px', borderRadius: '5px', border: '2px solid #E6007E', background: 'white', color: '#E6007E', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.2s, color 0.2s' }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#E6007E'; e.currentTarget.style.color = 'white'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#E6007E'; }}
-                              >
-                                <ShoppingCart size={18} strokeWidth={1.5} />
-                              </button>
                               {!appliedVoucher && !appliedPartner && (
                                 flightQty > 0 ? (
                                   /* Vol dans le panier : [− N bon · X€ +] */
@@ -1486,7 +1485,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                   </button>
                                 )
                               )}
-                              </div>
                             </div>
                           );
                         }

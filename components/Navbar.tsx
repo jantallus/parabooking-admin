@@ -17,7 +17,7 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [ctaHovered, setCtaHovered] = useState(false);
-  const { cartSummary, openCart } = useCart();
+  const { cartSummary, openCart, giftCartSummary, openGiftCart } = useCart();
   const [hoveredMobileLink, setHoveredMobileLink] = useState<string | null>(null);
   const [mobileCTAHovered, setMobileCTAHovered] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -89,7 +89,37 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
         </nav>
 
         {/* CTA */}
-        {cartSummary && cartSummary.totalItems > 0 && openCart ? (
+        {giftCartSummary && giftCartSummary.totalItems > 0 && openGiftCart ? (
+          <button
+            className="hidden lg:inline-flex nav-cta"
+            onClick={openGiftCart}
+            style={{
+              position: 'absolute',
+              right: '29px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              backgroundColor: ctaHovered ? '#c2006a' : '#E6007E',
+              color: '#fff',
+              fontFamily: 'inherit',
+              fontSize: '15px',
+              fontWeight: 700,
+              lineHeight: '24px',
+              padding: '10px 17px',
+              borderRadius: '5px',
+              border: 'none',
+              whiteSpace: 'nowrap',
+              transition: 'background-color 0.2s ease',
+              cursor: 'pointer',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+            onPointerEnter={() => setCtaHovered(true)}
+            onPointerLeave={() => setCtaHovered(false)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span>{giftCartSummary.totalItems} bon{giftCartSummary.totalItems > 1 ? 's' : ''} · {giftCartSummary.totalPrice}€</span>
+          </button>
+        ) : cartSummary && cartSummary.totalItems > 0 && openCart ? (
           <button
             className="hidden lg:inline-flex nav-cta"
             onClick={openCart}
@@ -154,7 +184,23 @@ export default function Navbar({ transparentOnTop = false }: { transparentOnTop?
           className="lg:hidden flex items-center"
           style={{ position: 'absolute', right: 16, top: 0, height: '80px' }}
         >
-          {cartSummary && cartSummary.totalItems > 0 && openCart ? (
+          {giftCartSummary && giftCartSummary.totalItems > 0 && openGiftCart ? (
+            <button
+              onClick={openGiftCart}
+              aria-label="Voir le panier cadeaux"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 84, height: '100%', position: 'relative', top: '-2.5px', left: '4.5px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              <div style={{ position: 'relative', display: 'inline-flex' }}>
+                <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <span style={{ position: 'absolute', top: '-6px', right: '-8px', minWidth: '18px', height: '18px', borderRadius: '9px', backgroundColor: '#E6007E', color: 'white', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>
+                  {giftCartSummary.totalItems}
+                </span>
+              </div>
+            </button>
+          ) : cartSummary && cartSummary.totalItems > 0 && openCart ? (
             <button
               onClick={openCart}
               aria-label="Voir le panier"
