@@ -925,47 +925,40 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const el = document.getElementById('season-selector-sticky');
     if (!el) return;
 
-    const cleanup = () => {
-      const e = document.getElementById('season-selector-sticky');
-      if (!e) return;
-      e.style.removeProperty('animation-name');
-      e.style.removeProperty('animation-duration');
-      e.style.removeProperty('animation-timing-function');
-      e.style.removeProperty('animation-fill-mode');
-      e.style.removeProperty('animation-timeline');
-      e.style.removeProperty('animation-range');
-      e.style.removeProperty('--sss-max');
-      e.style.transform = '';
-      e.style.transition = '';
-    };
-
-    if (!giftMode) { cleanup(); return; }
+    if (!giftMode) {
+      el.style.transform = '';
+      el.style.transition = '';
+      return;
+    }
 
     const panel = document.getElementById('gift-panel');
     if (!panel) return;
 
     const navH = window.innerWidth >= 1024 ? 90 : 80;
     const elH = el.offsetHeight;
-    const slideMax = navH + elH + 10;
-    // Scroll listener live : getBoundingClientRect() relu à chaque event
-    // → toujours exact quelle que soit la longueur de la page (été / hiver)
-    const threshold = 280;
+    const startAt = 305;
+    const maxSlide = navH + elH;
+    // panelOffsetTop caché une fois : évite getBoundingClientRect() à chaque event
+    const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
     el.style.transition = 'none';
-    el.style.transform = 'translateY(0)';
     const onScroll = () => {
-      const pt = panel.getBoundingClientRect().top;
-      if (pt >= threshold) {
+      const pt = Math.max(0, panelOffsetTop - window.scrollY);
+      if (pt >= startAt) {
         el.style.transform = 'translateY(0)';
-      } else if (pt <= navH + elH + 5) {
-        el.style.transform = `translateY(-${slideMax}px)`;
+      } else if (pt <= navH) {
+        el.style.transform = `translateY(-${maxSlide}px)`;
       } else {
-        const p = (threshold - pt) / (threshold - navH - elH - 5);
-        el.style.transform = `translateY(-${Math.round(p * slideMax)}px)`;
+        const progress = (startAt - pt) / (startAt - navH);
+        el.style.transform = `translateY(-${Math.round(progress * maxSlide)}px)`;
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-    return () => { window.removeEventListener('scroll', onScroll); cleanup(); };
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      const e = document.getElementById('season-selector-sticky');
+      if (e) { e.style.transform = ''; e.style.transition = ''; }
+    };
   }, [giftMode]);
 
   const missingFields: string[] = step === 3 ? [
