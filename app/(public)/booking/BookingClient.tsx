@@ -930,20 +930,22 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       return;
     }
     el.style.transition = 'none';
+    const panel = document.getElementById('gift-panel');
+    if (!panel) return;
+    const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
+    const elH = el.offsetHeight;
+    const navH = 90;
+    const startAt = 305;
+    const maxSlide = navH + elH;
     const onScroll = () => {
-      const panel = document.getElementById('gift-panel');
-      if (!panel) return;
-      const pt = Math.max(0, panel.getBoundingClientRect().top);
-      const navH = 90;
-      const elH = el.offsetHeight;
-      const startAt = 305;
+      const pt = Math.max(0, panelOffsetTop - window.scrollY);
       if (pt >= startAt) {
         el.style.transform = 'translateY(0)';
       } else if (pt <= navH) {
-        el.style.transform = `translateY(-${navH + elH}px)`;
+        el.style.transform = `translateY(-${maxSlide}px)`;
       } else {
         const progress = (startAt - pt) / (startAt - navH);
-        el.style.transform = `translateY(-${Math.round(progress * (navH + elH))}px)`;
+        el.style.transform = `translateY(-${Math.round(progress * maxSlide)}px)`;
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
