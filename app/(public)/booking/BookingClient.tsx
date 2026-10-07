@@ -921,6 +921,42 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     setCartSummary({ totalItems, finalPrice, originalPrice, discountAmount, flightName, step, isFormValid: !!isFormValid });
   }, [totalItems, finalPrice, originalPrice, discountAmount, step, isFormValid, contact, passengers]);  // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const el = document.getElementById('season-selector-sticky');
+    if (!el) return;
+    if (!giftMode) {
+      el.style.transform = '';
+      el.style.transition = '';
+      return;
+    }
+    const panel = document.getElementById('gift-panel');
+    if (!panel) return;
+    const navH = window.innerWidth >= 1024 ? 90 : 80;
+    const elH = el.offsetHeight;
+    const startAt = 450;
+    const maxSlide = navH + elH;
+    const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
+    // transition:none empêche transition-all Tailwind d'animer les mises à jour transform
+    el.style.transition = 'none';
+    const onScroll = () => {
+      const pt = Math.max(0, panelOffsetTop - window.scrollY);
+      if (pt >= startAt) {
+        el.style.transform = 'translateY(0)';
+      } else if (pt <= navH) {
+        el.style.transform = `translateY(-${maxSlide}px)`;
+      } else {
+        const progress = (startAt - pt) / (startAt - navH);
+        el.style.transform = `translateY(-${Math.round(progress * maxSlide)}px)`;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      const e = document.getElementById('season-selector-sticky');
+      if (e) { e.style.transform = ''; e.style.transition = ''; }
+    };
+  }, [giftMode]);
 
   const missingFields: string[] = step === 3 ? [
     needsName  && !contact.firstName ? 'Prénom du contact' : null,
