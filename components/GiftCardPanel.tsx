@@ -45,7 +45,7 @@ export default function GiftCardPanel({ selectedFlights, onClose }: Props) {
 
   useEffect(() => {
     if (panelRef.current) {
-      const y = panelRef.current.getBoundingClientRect().top + window.scrollY - 80;
+      const y = panelRef.current.getBoundingClientRect().top + window.scrollY - 350;
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
     }
   }, []);

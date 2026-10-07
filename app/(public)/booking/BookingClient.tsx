@@ -946,7 +946,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
           el.style.transform = 'translateY(0)';
         }
       },
-      { rootMargin: '-280px 0px 0px 0px', threshold: 0 }
+      { rootMargin: '-300px 0px 0px 0px', threshold: 0 }
     );
     observer.observe(panel);
     return () => {
