@@ -23,6 +23,7 @@ export default function CadeauPage() {
 
   // Panier : templateId → quantité
   const [cartItems, setCartItems] = useState<Record<number, number>>({});
+  const [cartSelectionOrder, setCartSelectionOrder] = useState<number[]>([]);
 
   const [infoTemplate, setInfoTemplate] = useState<GiftCardShopTemplate | null>(null);
   const [redemptionCode, setRedemptionCode] = useState('');
@@ -37,13 +38,16 @@ export default function CadeauPage() {
     .reduce((sum, t) => sum + (t.price_cents / 100) * cartItems[t.id], 0);
 
   const adjustCart = (tplId: number, delta: number) => {
+    const prevQty = cartItems[tplId] ?? 0;
+    const next = Math.max(0, Math.min(10, prevQty + delta));
     setCartItems(prev => {
-      const next = Math.max(0, Math.min(10, (prev[tplId] ?? 0) + delta));
-      if (next === 0) {
-        const { [tplId]: _, ...rest } = prev;
-        return rest;
-      }
+      if (next === 0) { const { [tplId]: _, ...rest } = prev; return rest; }
       return { ...prev, [tplId]: next };
+    });
+    setCartSelectionOrder(prev => {
+      if (prevQty === 0 && next > 0) return [...prev.filter(id => id !== tplId), tplId];
+      if (next === 0) return prev.filter(id => id !== tplId);
+      return prev;
     });
   };
   // Mode direct vol (depuis page réservation, sans template boutique)
@@ -130,7 +134,7 @@ export default function CadeauPage() {
   useEffect(() => {
     const handlePopState = () => {
       if (!window.location.hash.includes('#personnaliser')) {
-        setCartItems({});
+        setCartItems({}); setCartSelectionOrder([]);
       }
     };
     window.addEventListener('popstate', handlePopState);
@@ -239,6 +243,14 @@ export default function CadeauPage() {
   const optionsTotal = complements.reduce((sum, c) => sum + (c.price_cents / 100) * (complementQuantities[c.id] ?? 0), 0);
   const basePrice = (directFlightId ? (directFlightPrice ?? 0) / 100 * directFlightQty : 0) + cartTotal;
   const totalPrice = basePrice + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
+
+  const displayedTemplates = (() => {
+    if (cartSelectionOrder.length === 0) return templates;
+    const selectedSet = new Set(cartSelectionOrder);
+    const unselected = templates.filter(t => !selectedSet.has(t.id));
+    const selected = cartSelectionOrder.map(id => templates.find(t => t.id === id)).filter(Boolean) as typeof templates;
+    return [...unselected, ...selected];
+  })();
 
   useEffect(() => {
     registerOpenGiftCart(() => {
@@ -384,7 +396,7 @@ export default function CadeauPage() {
             <div style={{ textAlign: 'center', padding: '50px 0', backgroundColor: '#F3F3F3', borderRadius: '20px' }}><p style={{ color: '#1D1D1B', fontWeight: 900 }}>Aucune offre n'est disponible.</p></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {templates.map((tpl, idx) => (
+              {displayedTemplates.map((tpl, idx) => (
                 <div key={tpl.id} data-template-id={tpl.id} data-reveal data-delay={String((idx % 3) * 100)} className={`card-template bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${(cartItems[tpl.id] ?? 0) > 0 ? 'border-[#E6007E]' : 'border-transparent'}`}>
                   {tpl.image_url && <div className="w-full h-40 md:h-52 bg-cover bg-center rounded-[10px] mb-6 shadow-sm border border-slate-100" style={{ backgroundImage: `url(${tpl.image_url})` }} />}
                   <div>
