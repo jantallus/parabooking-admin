@@ -99,15 +99,23 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [pendingComplements, setPendingComplements] = useState<Record<number, number>>({});
   const pendingComplementsRef = useRef<Record<number, number>>({});
   const [giftCartQty, setGiftCartQty] = useState<Record<number, number>>({});
+  const [giftSelectionOrder, setGiftSelectionOrder] = useState<number[]>([]);
   const [giftFormValid, setGiftFormValid] = useState(false);
   const [giftTotalPrice, setGiftTotalPrice] = useState(0);
   const giftMode = Object.values(giftCartQty).some(q => q > 0);
-  const adjustGiftQty = (flightId: number, delta: number) =>
+  const adjustGiftQty = (flightId: number, delta: number) => {
+    const prevQty = giftCartQty[flightId] ?? 0;
+    const next = Math.max(0, Math.min(10, prevQty + delta));
     setGiftCartQty(prev => {
-      const next = Math.max(0, Math.min(10, (prev[flightId] ?? 0) + delta));
       if (next === 0) { const { [flightId]: _, ...rest } = prev; return rest; }
       return { ...prev, [flightId]: next };
     });
+    setGiftSelectionOrder(prev => {
+      if (prevQty === 0 && next > 0) return [...prev.filter(id => id !== flightId), flightId];
+      if (next === 0) return prev.filter(id => id !== flightId);
+      return prev;
+    });
+  };
   const addToGiftCart = (flightId: number) => {
     adjustGiftQty(flightId, 1);
     setTimeout(() => {
@@ -925,16 +933,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         }
       }
     }
-    // En mode offrir, la carte sélectionnée remonte juste avant le panneau panier
-    const selectedGiftId = Object.keys(giftCartQty).find(id => (giftCartQty[Number(id)] ?? 0) > 0);
-    if (selectedGiftId) {
-      const idx = base.findIndex(f => f.id.toString() === selectedGiftId);
-      if (idx > -1 && idx < base.length - 1) {
-        const reordered = [...base];
-        const [card] = reordered.splice(idx, 1);
-        reordered.push(card);
-        return reordered;
-      }
+    // En mode offrir, cartes sélectionnées à la fin dans l'ordre de sélection
+    if (giftSelectionOrder.length > 0) {
+      const selectedSet = new Set(giftSelectionOrder);
+      const unselected = base.filter(f => !selectedSet.has(f.id));
+      const selected = giftSelectionOrder.map(id => base.find(f => f.id === id)).filter(Boolean) as typeof base;
+      return [...unselected, ...selected];
     }
     return base;
   })();
@@ -1544,7 +1548,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                 selectedFlights={flights
                   .filter(f => (giftCartQty[f.id] ?? 0) > 0)
                   .map(f => ({ id: f.id, name: f.name, price_cents: f.price_cents, qty: giftCartQty[f.id] }))}
-                onClose={() => setGiftCartQty({})}
+                onClose={() => { setGiftCartQty({}); setGiftSelectionOrder([]); }}
                 onValidityChange={setGiftFormValid}
                 onTotalPriceChange={setGiftTotalPrice}
               />
