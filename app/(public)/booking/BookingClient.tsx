@@ -921,6 +921,41 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     setCartSummary({ totalItems, finalPrice, originalPrice, discountAmount, flightName, step, isFormValid: !!isFormValid });
   }, [totalItems, finalPrice, originalPrice, discountAmount, step, isFormValid, contact, passengers]);  // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    const el = document.getElementById('season-selector-sticky');
+    if (!el) return;
+    if (!giftMode) {
+      el.style.transform = '';
+      el.style.transition = '';
+      return;
+    }
+    el.style.transition = 'transform 0.15s linear';
+    const onScroll = () => {
+      const panel = document.getElementById('gift-panel');
+      if (!panel || !el) return;
+      const pt = panel.getBoundingClientRect().top;
+      const navH = 90;
+      const elH = el.offsetHeight;
+      const startAt = 320;
+      const endAt = navH;
+      if (pt >= startAt) {
+        el.style.transform = 'translateY(0)';
+      } else if (pt <= endAt) {
+        el.style.transform = `translateY(-${navH + elH}px)`;
+      } else {
+        const progress = (startAt - pt) / (startAt - endAt);
+        el.style.transform = `translateY(-${Math.round(progress * (navH + elH))}px)`;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      const el2 = document.getElementById('season-selector-sticky');
+      if (el2) { el2.style.transform = ''; el2.style.transition = ''; }
+    };
+  }, [giftMode]);
+
   const missingFields: string[] = step === 3 ? [
     needsName  && !contact.firstName ? 'Prénom du contact' : null,
     needsName  && !contact.lastName  ? 'Nom du contact'    : null,
@@ -1180,9 +1215,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         {/* ÉTAPE 1 : CHOIX DU VOL */}
         {step === 1 && !isDirect && (
           <div onClick={() => setActiveTooltip(null)}>
-            <div style={{ marginBottom: '120px', position: 'relative' }}>
+            <div>
             {/* 🎯 SÉLECTEUR DE SAISON "COLLANT" (STICKY) */}
-            <div className="flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40 transition-all duration-300">
+            <div id="season-selector-sticky" className="flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40 transition-all duration-300">
               <div className="bg-white p-1.5 rounded-[10px] inline-flex border border-slate-200" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
                 <button aria-pressed={activeSeason === 'Standard'} onClick={() => setActiveSeason('Standard')} className={`px-6 py-3 rounded-[5px] transition-all duration-300 flex items-center gap-2 ${activeSeason === 'Standard' ? 'text-white shadow-md scale-105' : 'text-slate-500 hover:text-slate-800'}`} style={activeSeason === 'Standard' ? { backgroundColor: '#E6007E', fontSize: '1.125rem', fontWeight: 700 } : { fontSize: '1.125rem', fontWeight: 700 }}><Sun size={18} strokeWidth={1.5} />été</button>
                 <button aria-pressed={activeSeason === 'Hiver'} onClick={() => setActiveSeason('Hiver')} className={`px-6 py-3 rounded-[5px] transition-all duration-300 flex items-center gap-2 ${activeSeason === 'Hiver' ? 'text-white shadow-md scale-105' : 'text-slate-500 hover:text-slate-800'}`} style={activeSeason === 'Hiver' ? { backgroundColor: '#312783', fontSize: '1.125rem', fontWeight: 700 } : { fontSize: '1.125rem', fontWeight: 700 }}><Snowflake size={18} strokeWidth={1.5} />hiver</button>
