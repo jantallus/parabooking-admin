@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BackToTop from '@/components/BackToTop';
+import { CartProvider } from '@/lib/CartContext';
 
 export const metadata: Metadata = {
   title: 'Cartes cadeaux parapente biplace',
@@ -32,7 +33,7 @@ const giftCardSchema = {
 
 export default function BonsCadeauxLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <CartProvider>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(giftCardSchema) }}
@@ -41,6 +42,6 @@ export default function BonsCadeauxLayout({ children }: { children: React.ReactN
       {children}
       <Footer />
       <BackToTop />
-    </>
+    </CartProvider>
   );
 }
