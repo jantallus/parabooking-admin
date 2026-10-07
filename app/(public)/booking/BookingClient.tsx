@@ -1320,7 +1320,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
               /* ☠️ EFFET "SKELETON" POUR LES CARTES DE VOLS */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-[10px] p-8 border border-slate-100 flex flex-col justify-between animate-pulse">
+                  <div key={i} className="bg-[#F3F3F3] rounded-[10px] p-8 border border-slate-100 flex flex-col justify-between animate-pulse">
                     {/* Fausse image */}
                     <div className="w-full h-40 md:h-52 bg-slate-200/60 rounded-2xl md:rounded-[20px] mb-6"></div>
                     
@@ -1356,7 +1356,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   const SeasonPictoIcon: React.ElementType | null = isWinter ? Snowflake : isSummer ? Sun : null;
 
                   return (
-                  <div key={flight.id} data-reveal data-delay={String((idx % 3) * 100)} className="flight-card bg-slate-50 rounded-[10px] p-8 border border-slate-100 flex flex-col justify-between">
+                  <div key={flight.id} data-reveal data-delay={String((idx % 3) * 100)} className="flight-card bg-[#F3F3F3] rounded-[10px] p-8 border border-transparent flex flex-col justify-between">
                     
                     {flight.image_url && (
                       <div className="flight-img-wrap w-full h-40 md:h-52 rounded-[10px] mb-6 border border-slate-100 overflow-hidden">
