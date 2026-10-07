@@ -133,13 +133,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     });
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    const totalItems = Object.values(giftCartQty).reduce((s, q) => s + q, 0);
-    if (totalItems === 0) { setGiftCartSummary(null); return; }
-    const totalPrice = flights.reduce((s, f) => s + (giftCartQty[f.id] ?? 0) * (f.price_cents / 100), 0);
-    setGiftCartSummary({ totalItems, totalPrice });
-  }, [giftCartQty, flights]);  // eslint-disable-line react-hooks/exhaustive-deps
-
   // Réinitialise isCheckingOut si l'utilisateur revient en arrière depuis Stripe (bfcache)
   useEffect(() => {
     const handlePageShow = (e: PageTransitionEvent) => {
@@ -192,6 +185,13 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       setGridStartDate(calculateGridStart(dateStr, count));
     }
   );
+
+  useEffect(() => {
+    const totalItems = Object.values(giftCartQty).reduce((s, q) => s + q, 0);
+    if (totalItems === 0) { setGiftCartSummary(null); return; }
+    const totalPrice = flights.reduce((s, f) => s + (giftCartQty[f.id] ?? 0) * (f.price_cents / 100), 0);
+    setGiftCartSummary({ totalItems, totalPrice });
+  }, [giftCartQty, flights]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Disponibilités : se recharge automatiquement quand gridStartDate ou selectedFlight change
   const { rawSlots, isSearchingTimes } = useAvailabilities(gridStartDate, selectedFlight, displayDaysCount);
