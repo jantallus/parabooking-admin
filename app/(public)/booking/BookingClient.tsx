@@ -1180,7 +1180,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         {/* ÉTAPE 1 : CHOIX DU VOL */}
         {step === 1 && !isDirect && (
           <div onClick={() => setActiveTooltip(null)}>
-            <div style={{ marginBottom: '120px' }}>
+            <div style={{ marginBottom: '120px', position: 'relative' }}>
             {/* 🎯 SÉLECTEUR DE SAISON "COLLANT" (STICKY) */}
             <div className="flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40 transition-all duration-300">
               <div className="bg-white p-1.5 rounded-[10px] inline-flex border border-slate-200" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
