@@ -925,16 +925,26 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const el = document.getElementById('season-selector-sticky');
     if (!el) return;
     if (!giftMode) {
+      el.style.position = '';
+      el.style.top = '';
+      el.style.left = '';
+      el.style.right = '';
       el.style.transform = '';
       el.style.transition = '';
+      el.style.zIndex = '';
       return;
     }
+    const navH = window.innerWidth >= 1024 ? 90 : 80;
+    el.style.position = 'fixed';
+    el.style.top = `${navH}px`;
+    el.style.left = '0';
+    el.style.right = '0';
+    el.style.zIndex = '40';
     el.style.transition = 'none';
     const panel = document.getElementById('gift-panel');
     if (!panel) return;
     const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
     const elH = el.offsetHeight;
-    const navH = 90;
     const startAt = 305;
     const maxSlide = navH + elH;
     const onScroll = () => {
@@ -953,7 +963,15 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     return () => {
       window.removeEventListener('scroll', onScroll);
       const el2 = document.getElementById('season-selector-sticky');
-      if (el2) { el2.style.transform = ''; el2.style.transition = ''; }
+      if (el2) {
+        el2.style.position = '';
+        el2.style.top = '';
+        el2.style.left = '';
+        el2.style.right = '';
+        el2.style.transform = '';
+        el2.style.transition = '';
+        el2.style.zIndex = '';
+      }
     };
   }, [giftMode]);
 
