@@ -925,53 +925,34 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const el = document.getElementById('season-selector-sticky');
     if (!el) return;
     if (!giftMode) {
-      el.style.position = '';
-      el.style.top = '';
-      el.style.left = '';
-      el.style.right = '';
       el.style.transform = '';
       el.style.transition = '';
-      el.style.zIndex = '';
       return;
     }
-    const navH = window.innerWidth >= 1024 ? 90 : 80;
-    el.style.position = 'fixed';
-    el.style.top = `${navH}px`;
-    el.style.left = '0';
-    el.style.right = '0';
-    el.style.zIndex = '40';
-    el.style.transition = 'none';
     const panel = document.getElementById('gift-panel');
     if (!panel) return;
-    const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
     const elH = el.offsetHeight;
-    const startAt = 305;
-    const maxSlide = navH + elH;
-    const onScroll = () => {
-      const pt = Math.max(0, panelOffsetTop - window.scrollY);
-      if (pt >= startAt) {
-        el.style.transform = 'translateY(0)';
-      } else if (pt <= navH) {
-        el.style.transform = `translateY(-${maxSlide}px)`;
-      } else {
-        const progress = (startAt - pt) / (startAt - navH);
-        el.style.transform = `translateY(-${Math.round(progress * maxSlide)}px)`;
-      }
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+    const navH = window.innerWidth >= 1024 ? 90 : 80;
+    const slideOut = `translateY(-${navH + elH + 10}px)`;
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(0)';
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.style.transition = 'transform 0.25s ease-out';
+          el.style.transform = slideOut;
+        } else {
+          el.style.transition = 'transform 0.2s ease-in';
+          el.style.transform = 'translateY(0)';
+        }
+      },
+      { rootMargin: '-280px 0px 0px 0px', threshold: 0 }
+    );
+    observer.observe(panel);
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      observer.disconnect();
       const el2 = document.getElementById('season-selector-sticky');
-      if (el2) {
-        el2.style.position = '';
-        el2.style.top = '';
-        el2.style.left = '';
-        el2.style.right = '';
-        el2.style.transform = '';
-        el2.style.transition = '';
-        el2.style.zIndex = '';
-      }
+      if (el2) { el2.style.transform = ''; el2.style.transition = ''; }
     };
   }, [giftMode]);
 
@@ -1236,7 +1217,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
           <div onClick={() => setActiveTooltip(null)}>
             <div>
             {/* 🎯 SÉLECTEUR DE SAISON "COLLANT" (STICKY) */}
-            <div id="season-selector-sticky" className="flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40 transition-all duration-300">
+            <div id="season-selector-sticky" className="flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40">
               <div className="bg-white p-1.5 rounded-[10px] inline-flex border border-slate-200" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
                 <button aria-pressed={activeSeason === 'Standard'} onClick={() => setActiveSeason('Standard')} className={`px-6 py-3 rounded-[5px] transition-all duration-300 flex items-center gap-2 ${activeSeason === 'Standard' ? 'text-white shadow-md scale-105' : 'text-slate-500 hover:text-slate-800'}`} style={activeSeason === 'Standard' ? { backgroundColor: '#E6007E', fontSize: '1.125rem', fontWeight: 700 } : { fontSize: '1.125rem', fontWeight: 700 }}><Sun size={18} strokeWidth={1.5} />été</button>
                 <button aria-pressed={activeSeason === 'Hiver'} onClick={() => setActiveSeason('Hiver')} className={`px-6 py-3 rounded-[5px] transition-all duration-300 flex items-center gap-2 ${activeSeason === 'Hiver' ? 'text-white shadow-md scale-105' : 'text-slate-500 hover:text-slate-800'}`} style={activeSeason === 'Hiver' ? { backgroundColor: '#312783', fontSize: '1.125rem', fontWeight: 700 } : { fontSize: '1.125rem', fontWeight: 700 }}><Snowflake size={18} strokeWidth={1.5} />hiver</button>
