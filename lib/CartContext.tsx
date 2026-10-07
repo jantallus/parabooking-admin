@@ -14,6 +14,7 @@ interface CartSummary {
 interface GiftCartSummary {
   totalItems: number;
   totalPrice: number;
+  isFormValid: boolean;
 }
 
 interface CartContextType {

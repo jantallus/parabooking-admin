@@ -99,6 +99,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [pendingComplements, setPendingComplements] = useState<Record<number, number>>({});
   const pendingComplementsRef = useRef<Record<number, number>>({});
   const [giftCartQty, setGiftCartQty] = useState<Record<number, number>>({});
+  const [giftFormValid, setGiftFormValid] = useState(false);
   const giftMode = Object.values(giftCartQty).some(q => q > 0);
   const adjustGiftQty = (flightId: number, delta: number) =>
     setGiftCartQty(prev => {
@@ -190,8 +191,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const totalItems = Object.values(giftCartQty).reduce((s, q) => s + q, 0);
     if (totalItems === 0) { setGiftCartSummary(null); return; }
     const totalPrice = flights.reduce((s, f) => s + (giftCartQty[f.id] ?? 0) * (f.price_cents / 100), 0);
-    setGiftCartSummary({ totalItems, totalPrice });
-  }, [giftCartQty, flights]);  // eslint-disable-line react-hooks/exhaustive-deps
+    setGiftCartSummary({ totalItems, totalPrice, isFormValid: giftFormValid });
+  }, [giftCartQty, flights, giftFormValid]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Disponibilités : se recharge automatiquement quand gridStartDate ou selectedFlight change
   const { rawSlots, isSearchingTimes } = useAvailabilities(gridStartDate, selectedFlight, displayDaysCount);
@@ -1524,6 +1525,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   .filter(f => (giftCartQty[f.id] ?? 0) > 0)
                   .map(f => ({ id: f.id, name: f.name, price_cents: f.price_cents, qty: giftCartQty[f.id] }))}
                 onClose={() => setGiftCartQty({})}
+                onValidityChange={setGiftFormValid}
               />
             )}
           </div>
