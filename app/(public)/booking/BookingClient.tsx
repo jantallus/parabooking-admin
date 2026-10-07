@@ -947,46 +947,24 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const navH = window.innerWidth >= 1024 ? 90 : 80;
     const elH = el.offsetHeight;
     const slideMax = navH + elH + 10;
-    const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
-    // Animation starts when panel is 310px from top, ends when panel is behind the selector
-    const startScroll = Math.max(0, panelOffsetTop - 280);
-    const endScroll = Math.max(0, panelOffsetTop - navH - elH - 5);
-
-    // Inject keyframe once — uses CSS custom property so slideMax is dynamic
-    if (!document.getElementById('sss-kf')) {
-      const s = document.createElement('style');
-      s.id = 'sss-kf';
-      s.textContent = '@keyframes sss{from{transform:translateY(0)}to{transform:translateY(var(--sss-max))}}';
-      document.head.appendChild(s);
-    }
-
-    // CSS Scroll-Driven Animations: compositor-driven, zero JS per frame, perfectly smooth
-    if (CSS.supports('animation-timeline', 'scroll()')) {
-      el.style.setProperty('--sss-max', `-${slideMax}px`);
-      el.style.setProperty('animation-name', 'sss');
-      el.style.setProperty('animation-duration', 'auto');
-      el.style.setProperty('animation-timing-function', 'linear');
-      el.style.setProperty('animation-fill-mode', 'both');
-      el.style.setProperty('animation-timeline', 'scroll(root)');
-      el.style.setProperty('animation-range', `${startScroll}px ${endScroll}px`);
-      return cleanup;
-    }
-
-    // Fallback (Firefox) : scroll listener simple
+    // Scroll listener live : getBoundingClientRect() relu à chaque event
+    // → toujours exact quelle que soit la longueur de la page (été / hiver)
+    const threshold = 280;
     el.style.transition = 'none';
     el.style.transform = 'translateY(0)';
     const onScroll = () => {
       const pt = panel.getBoundingClientRect().top;
-      if (pt >= 280) {
+      if (pt >= threshold) {
         el.style.transform = 'translateY(0)';
-      } else if (pt <= navH) {
+      } else if (pt <= navH + elH + 5) {
         el.style.transform = `translateY(-${slideMax}px)`;
       } else {
-        const p = (280 - pt) / (280 - navH);
+        const p = (threshold - pt) / (threshold - navH - elH - 5);
         el.style.transform = `translateY(-${Math.round(p * slideMax)}px)`;
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return () => { window.removeEventListener('scroll', onScroll); cleanup(); };
   }, [giftMode]);
 
