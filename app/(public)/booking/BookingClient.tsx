@@ -1356,7 +1356,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   const SeasonPictoIcon: React.ElementType | null = isWinter ? Snowflake : isSummer ? Sun : null;
 
                   return (
-                  <div key={flight.id} data-reveal data-delay={String((idx % 3) * 100)} className="flight-card bg-[#F3F3F3] rounded-[10px] p-8 border border-transparent flex flex-col justify-between">
+                  <div key={flight.id} data-reveal data-delay={String((idx % 3) * 100)} className={`flight-card bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${(giftCartQty[flight.id] ?? 0) > 0 ? 'border-[#E6007E]' : 'border-transparent'}`}>
                     
                     {flight.image_url && (
                       <div className="flight-img-wrap w-full h-40 md:h-52 rounded-[10px] mb-6 border border-slate-100 overflow-hidden">
