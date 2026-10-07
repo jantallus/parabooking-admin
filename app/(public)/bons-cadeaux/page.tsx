@@ -385,7 +385,7 @@ export default function CadeauPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {templates.map((tpl, idx) => (
-                <div key={tpl.id} data-reveal data-delay={String((idx % 3) * 100)} className={`card-template bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${(cartItems[tpl.id] ?? 0) > 0 ? 'border-[#E6007E]' : 'border-transparent'}`}>
+                <div key={tpl.id} data-template-id={tpl.id} data-reveal data-delay={String((idx % 3) * 100)} className={`card-template bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${(cartItems[tpl.id] ?? 0) > 0 ? 'border-[#E6007E]' : 'border-transparent'}`}>
                   {tpl.image_url && <div className="w-full h-40 md:h-52 bg-cover bg-center rounded-[10px] mb-6 shadow-sm border border-slate-100" style={{ backgroundImage: `url(${tpl.image_url})` }} />}
                   <div>
                     <div className="flex justify-between items-start mb-3 gap-2">
@@ -432,7 +432,20 @@ export default function CadeauPage() {
                       </div>
                     ) : (
                       <button
-                        onClick={() => { adjustCart(tpl.id, 1); setComplementQuantities({}); setUrlFlightName(null); scrollToForm(); }}
+                        onClick={() => {
+                          adjustCart(tpl.id, 1); setComplementQuantities({}); setUrlFlightName(null);
+                          setTimeout(() => {
+                            if (window.innerWidth < 1024) {
+                              const card = document.querySelector(`[data-template-id="${tpl.id}"]`);
+                              if (card) {
+                                const y = card.getBoundingClientRect().top + window.scrollY - 90;
+                                window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                              }
+                            } else {
+                              scrollToForm();
+                            }
+                          }, 50);
+                        }}
                         className="btn-choisir cursor-pointer px-6 py-4 rounded-[5px] text-white"
                         style={{ fontSize: '1.125rem', fontWeight: 700 }}
                       >

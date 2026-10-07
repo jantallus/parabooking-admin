@@ -46,7 +46,7 @@ export default function GiftCardPanel({ selectedFlights, onClose, onValidityChan
   }, []);
 
   useEffect(() => {
-    if (panelRef.current) {
+    if (panelRef.current && window.innerWidth >= 1024) {
       const y = panelRef.current.getBoundingClientRect().top + window.scrollY - 350;
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
     }

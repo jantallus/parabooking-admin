@@ -101,6 +101,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [giftCartQty, setGiftCartQty] = useState<Record<number, number>>({});
   const [giftFormValid, setGiftFormValid] = useState(false);
   const [giftTotalPrice, setGiftTotalPrice] = useState(0);
+  const prevGiftCartQtyRef = useRef<Record<number, number>>({});
   const giftMode = Object.values(giftCartQty).some(q => q > 0);
   const adjustGiftQty = (flightId: number, delta: number) =>
     setGiftCartQty(prev => {
@@ -196,6 +197,22 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const totalPrice = giftTotalPrice > 0 ? giftTotalPrice : basePrice;
     setGiftCartSummary({ totalItems, totalPrice, isFormValid: giftFormValid });
   }, [giftCartQty, flights, giftFormValid, giftTotalPrice]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (window.innerWidth >= 1024) { prevGiftCartQtyRef.current = giftCartQty; return; }
+    const newFlightId = Object.keys(giftCartQty).find(
+      id => (giftCartQty[Number(id)] ?? 0) > 0 && (prevGiftCartQtyRef.current[Number(id)] ?? 0) === 0
+    );
+    prevGiftCartQtyRef.current = giftCartQty;
+    if (!newFlightId) return;
+    setTimeout(() => {
+      const card = document.querySelector(`[data-flight-id="${newFlightId}"]`);
+      if (card) {
+        const y = card.getBoundingClientRect().top + window.scrollY - 90;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }, 50);
+  }, [giftCartQty]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Disponibilités : se recharge automatiquement quand gridStartDate ou selectedFlight change
   const { rawSlots, isSearchingTimes } = useAvailabilities(gridStartDate, selectedFlight, displayDaysCount);
@@ -1356,7 +1373,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   const SeasonPictoIcon: React.ElementType | null = isWinter ? Snowflake : isSummer ? Sun : null;
 
                   return (
-                  <div key={flight.id} data-reveal data-delay={String((idx % 3) * 100)} className={`flight-card bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${(giftCartQty[flight.id] ?? 0) > 0 ? 'border-[#E6007E]' : 'border-transparent'}`}>
+                  <div key={flight.id} data-flight-id={flight.id} data-reveal data-delay={String((idx % 3) * 100)} className={`flight-card bg-[#F3F3F3] rounded-[10px] p-8 border flex flex-col justify-between ${(giftCartQty[flight.id] ?? 0) > 0 ? 'border-[#E6007E]' : 'border-transparent'}`}>
                     
                     {flight.image_url && (
                       <div className="flight-img-wrap w-full h-40 md:h-52 rounded-[10px] mb-6 border border-slate-100 overflow-hidden">
