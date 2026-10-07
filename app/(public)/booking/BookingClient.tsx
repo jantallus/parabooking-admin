@@ -26,7 +26,7 @@ import { getSeasonMessage } from '@/lib/season-schedule';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import { calculateBookingPrice } from '@/lib/price-utils';
 import { useCart } from '@/lib/CartContext';
-import { Gift, Camera, Zap, Clock, Weight, FileText, Mountain, Wind, Sun, Snowflake, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, X, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Gift, Camera, Zap, Clock, Weight, FileText, Mountain, Wind, Sun, Snowflake, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, X, Plus, Trash2, AlertCircle, ShoppingCart } from 'lucide-react';
 import GiftCardPanel from '@/components/GiftCardPanel';
 import { SkiIcon, SnowboardIcon, PedestrianIcon, ChildrenIcon, GoproIcon } from '@/components/icons/ActivityIcons';
 
@@ -1433,9 +1433,27 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
                         if (giftMode) {
                           /* ── MODE OFFRIR : prix + contrôle sur la même ligne (modèle bons-cadeaux) ── */
+                          const scrollToPanel = (e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            const panel = document.getElementById('gift-panel');
+                            if (panel) {
+                              const y = panel.getBoundingClientRect().top + window.scrollY - 100;
+                              window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                            }
+                          };
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                               {priceEl}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                              <button
+                                onClick={scrollToPanel}
+                                title="Voir mon panier"
+                                style={{ width: '44px', height: '50px', borderRadius: '5px', border: '2px solid #E6007E', background: 'white', color: '#E6007E', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.2s, color 0.2s' }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#E6007E'; e.currentTarget.style.color = 'white'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#E6007E'; }}
+                              >
+                                <ShoppingCart size={18} strokeWidth={1.5} />
+                              </button>
                               {!appliedVoucher && !appliedPartner && (
                                 flightQty > 0 ? (
                                   /* Vol dans le panier : [− N bon · X€ +] */
@@ -1468,6 +1486,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                                   </button>
                                 )
                               )}
+                              </div>
                             </div>
                           );
                         }
