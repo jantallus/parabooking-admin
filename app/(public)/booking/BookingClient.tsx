@@ -936,7 +936,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       const pt = panel.getBoundingClientRect().top;
       const navH = 90;
       const elH = el.offsetHeight;
-      const startAt = 320;
+      const startAt = 310;
       const endAt = navH;
       if (pt >= startAt) {
         el.style.transform = 'translateY(0)';
