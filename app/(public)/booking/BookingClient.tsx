@@ -926,8 +926,10 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     if (!el) return;
     if (!giftMode) {
       el.style.transform = '';
+      el.style.transition = '';
       return;
     }
+    el.style.transition = 'none';
     const onScroll = () => {
       const panel = document.getElementById('gift-panel');
       if (!panel) return;
@@ -949,7 +951,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     return () => {
       window.removeEventListener('scroll', onScroll);
       const el2 = document.getElementById('season-selector-sticky');
-      if (el2) el2.style.transform = '';
+      if (el2) { el2.style.transform = ''; el2.style.transition = ''; }
     };
   }, [giftMode]);
 
