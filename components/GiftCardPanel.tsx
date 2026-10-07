@@ -15,9 +15,10 @@ interface Props {
   selectedFlights: SelectedFlight[];
   onClose: () => void;
   onValidityChange?: (valid: boolean) => void;
+  onTotalPriceChange?: (price: number) => void;
 }
 
-export default function GiftCardPanel({ selectedFlights, onClose, onValidityChange }: Props) {
+export default function GiftCardPanel({ selectedFlights, onClose, onValidityChange, onTotalPriceChange }: Props) {
   const { toast } = useToast();
   const panelRef = useRef<HTMLDivElement>(null);
   const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
@@ -62,6 +63,10 @@ export default function GiftCardPanel({ selectedFlights, onClose, onValidityChan
   useEffect(() => {
     onValidityChange?.(!!isFormValid);
   }, [isFormValid]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    onTotalPriceChange?.(totalPrice);
+  }, [totalPrice]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCheckout = async () => {
     if (!isFormValid) return;

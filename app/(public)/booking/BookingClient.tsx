@@ -100,6 +100,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const pendingComplementsRef = useRef<Record<number, number>>({});
   const [giftCartQty, setGiftCartQty] = useState<Record<number, number>>({});
   const [giftFormValid, setGiftFormValid] = useState(false);
+  const [giftTotalPrice, setGiftTotalPrice] = useState(0);
   const giftMode = Object.values(giftCartQty).some(q => q > 0);
   const adjustGiftQty = (flightId: number, delta: number) =>
     setGiftCartQty(prev => {
@@ -190,9 +191,11 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   useEffect(() => {
     const totalItems = Object.values(giftCartQty).reduce((s, q) => s + q, 0);
     if (totalItems === 0) { setGiftCartSummary(null); return; }
-    const totalPrice = flights.reduce((s, f) => s + (giftCartQty[f.id] ?? 0) * (f.price_cents / 100), 0);
+    // Fallback sur le prix de base si GiftCardPanel n'a pas encore reporté (avant son premier render)
+    const basePrice = flights.reduce((s, f) => s + (giftCartQty[f.id] ?? 0) * (f.price_cents / 100), 0);
+    const totalPrice = giftTotalPrice > 0 ? giftTotalPrice : basePrice;
     setGiftCartSummary({ totalItems, totalPrice, isFormValid: giftFormValid });
-  }, [giftCartQty, flights, giftFormValid]);  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [giftCartQty, flights, giftFormValid, giftTotalPrice]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Disponibilités : se recharge automatiquement quand gridStartDate ou selectedFlight change
   const { rawSlots, isSearchingTimes } = useAvailabilities(gridStartDate, selectedFlight, displayDaysCount);
@@ -1526,6 +1529,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                   .map(f => ({ id: f.id, name: f.name, price_cents: f.price_cents, qty: giftCartQty[f.id] }))}
                 onClose={() => setGiftCartQty({})}
                 onValidityChange={setGiftFormValid}
+                onTotalPriceChange={setGiftTotalPrice}
               />
             )}
           </div>
