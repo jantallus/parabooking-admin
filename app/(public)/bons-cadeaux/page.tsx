@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useScrollLock } from '@/hooks/useScrollLock';
 import type { GiftCardShopTemplate, Complement } from '@/lib/types';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -9,6 +9,14 @@ import { Clock, Wallet, MapPin, Mail, CalendarDays, Package, Sparkles, Gift } fr
 export default function CadeauPage() {
   const { toast } = useToast();
   const { setGiftCartSummary, registerOpenGiftCart } = useCart();
+  const [isSingleColumn, setIsSingleColumn] = useState(false);
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    setIsSingleColumn(mq.matches);
+    const h = (e: MediaQueryListEvent) => setIsSingleColumn(e.matches);
+    mq.addEventListener('change', h);
+    return () => mq.removeEventListener('change', h);
+  }, []);
   const [templates, setTemplates] = useState<GiftCardShopTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -245,7 +253,7 @@ export default function CadeauPage() {
   const totalPrice = basePrice + optionsTotal + (wantsShipping ? shippingSettings.price : 0);
 
   const displayedTemplates = (() => {
-    if (cartSelectionOrder.length === 0) return templates;
+    if (!isSingleColumn || cartSelectionOrder.length === 0) return templates;
     const selectedSet = new Set(cartSelectionOrder);
     const unselected = templates.filter(t => !selectedSet.has(t.id));
     const selected = cartSelectionOrder.map(id => templates.find(t => t.id === id)).filter(Boolean) as typeof templates;
