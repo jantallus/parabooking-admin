@@ -432,20 +432,7 @@ export default function CadeauPage() {
                       </div>
                     ) : (
                       <button
-                        onClick={() => {
-                          adjustCart(tpl.id, 1); setComplementQuantities({}); setUrlFlightName(null);
-                          setTimeout(() => {
-                            if (window.innerWidth < 1024) {
-                              const card = document.querySelector(`[data-template-id="${tpl.id}"]`);
-                              if (card) {
-                                const y = card.getBoundingClientRect().top + window.scrollY - 90;
-                                window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-                              }
-                            } else {
-                              scrollToForm();
-                            }
-                          }, 50);
-                        }}
+                        onClick={() => { adjustCart(tpl.id, 1); setComplementQuantities({}); setUrlFlightName(null); scrollToForm(); }}
                         className="btn-choisir cursor-pointer px-6 py-4 rounded-[5px] text-white"
                         style={{ fontSize: '1.125rem', fontWeight: 700 }}
                       >

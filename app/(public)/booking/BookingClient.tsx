@@ -101,7 +101,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   const [giftCartQty, setGiftCartQty] = useState<Record<number, number>>({});
   const [giftFormValid, setGiftFormValid] = useState(false);
   const [giftTotalPrice, setGiftTotalPrice] = useState(0);
-  const prevGiftCartQtyRef = useRef<Record<number, number>>({});
   const giftMode = Object.values(giftCartQty).some(q => q > 0);
   const adjustGiftQty = (flightId: number, delta: number) =>
     setGiftCartQty(prev => {
@@ -198,21 +197,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     setGiftCartSummary({ totalItems, totalPrice, isFormValid: giftFormValid });
   }, [giftCartQty, flights, giftFormValid, giftTotalPrice]);  // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (window.innerWidth >= 1024) { prevGiftCartQtyRef.current = giftCartQty; return; }
-    const newFlightId = Object.keys(giftCartQty).find(
-      id => (giftCartQty[Number(id)] ?? 0) > 0 && (prevGiftCartQtyRef.current[Number(id)] ?? 0) === 0
-    );
-    prevGiftCartQtyRef.current = giftCartQty;
-    if (!newFlightId) return;
-    setTimeout(() => {
-      const card = document.querySelector(`[data-flight-id="${newFlightId}"]`);
-      if (card) {
-        const y = card.getBoundingClientRect().top + window.scrollY - 90;
-        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-      }
-    }, 50);
-  }, [giftCartQty]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Disponibilités : se recharge automatiquement quand gridStartDate ou selectedFlight change
   const { rawSlots, isSearchingTimes } = useAvailabilities(gridStartDate, selectedFlight, displayDaysCount);
@@ -924,19 +908,35 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   });
 
   const displayedFlights = (() => {
-    if (!appliedVoucher) return filteredFlights;
-    if (appliedVoucher.flight_type_id) {
-      return filteredFlights.filter(f => f.id.toString() === appliedVoucher.flight_type_id!.toString());
+    let base = filteredFlights;
+    if (appliedVoucher) {
+      if (appliedVoucher.flight_type_id) {
+        base = filteredFlights.filter(f => f.id.toString() === appliedVoucher.flight_type_id!.toString());
+      } else {
+        const voucherCents = getVoucherCents(appliedVoucher);
+        if (voucherCents) {
+          base = [...filteredFlights].sort((a, b) => {
+            const aExact = a.price_cents === voucherCents;
+            const bExact = b.price_cents === voucherCents;
+            if (aExact && !bExact) return -1;
+            if (bExact && !aExact) return 1;
+            return 0;
+          });
+        }
+      }
     }
-    const voucherCents = getVoucherCents(appliedVoucher);
-    if (!voucherCents) return filteredFlights;
-    return [...filteredFlights].sort((a, b) => {
-      const aExact = a.price_cents === voucherCents;
-      const bExact = b.price_cents === voucherCents;
-      if (aExact && !bExact) return -1;
-      if (bExact && !aExact) return 1;
-      return 0;
-    });
+    // En mode offrir, la carte sélectionnée remonte juste avant le panneau panier
+    const selectedGiftId = Object.keys(giftCartQty).find(id => (giftCartQty[Number(id)] ?? 0) > 0);
+    if (selectedGiftId) {
+      const idx = base.findIndex(f => f.id.toString() === selectedGiftId);
+      if (idx > -1 && idx < base.length - 1) {
+        const reordered = [...base];
+        const [card] = reordered.splice(idx, 1);
+        reordered.push(card);
+        return reordered;
+      }
+    }
+    return base;
   })();
 
   const pf = appliedPartner?.booking_fields;
