@@ -925,12 +925,9 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const el = document.getElementById('season-selector-sticky');
     if (!el) return;
     if (!giftMode) {
-      el.style.transform = '';
-      el.style.transition = '';
+      el.style.top = '';
       return;
     }
-    el.style.transition = 'none';
-    el.style.willChange = 'transform';
     let rafId = 0;
     const onScroll = () => {
       if (rafId) cancelAnimationFrame(rafId);
@@ -943,12 +940,12 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         const startAt = 305;
         const endAt = navH;
         if (pt >= startAt) {
-          el.style.transform = 'translateY(0)';
+          el.style.top = `${navH}px`;
         } else if (pt <= endAt) {
-          el.style.transform = `translateY(-${navH + elH}px)`;
+          el.style.top = `-${elH + 10}px`;
         } else {
           const progress = (startAt - pt) / (startAt - endAt);
-          el.style.transform = `translateY(-${Math.round(progress * (navH + elH))}px)`;
+          el.style.top = `${Math.round(navH - progress * (navH + elH + 10))}px`;
         }
       });
     };
@@ -958,7 +955,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       window.removeEventListener('scroll', onScroll);
       if (rafId) cancelAnimationFrame(rafId);
       const el2 = document.getElementById('season-selector-sticky');
-      if (el2) { el2.style.transform = ''; el2.style.transition = 'none'; el2.style.willChange = 'auto'; }
+      if (el2) { el2.style.top = ''; }
     };
   }, [giftMode]);
 
