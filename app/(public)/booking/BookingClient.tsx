@@ -925,37 +925,31 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
     const el = document.getElementById('season-selector-sticky');
     if (!el) return;
     if (!giftMode) {
-      el.style.top = '';
+      el.style.transform = '';
       return;
     }
-    let rafId = 0;
     const onScroll = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const panel = document.getElementById('gift-panel');
-        if (!panel || !el) return;
-        const pt = panel.getBoundingClientRect().top;
-        const navH = 90;
-        const elH = el.offsetHeight;
-        const startAt = 305;
-        const endAt = navH;
-        if (pt >= startAt) {
-          el.style.top = `${navH}px`;
-        } else if (pt <= endAt) {
-          el.style.top = `-${elH + 10}px`;
-        } else {
-          const progress = (startAt - pt) / (startAt - endAt);
-          el.style.top = `${Math.round(navH - progress * (navH + elH + 10))}px`;
-        }
-      });
+      const panel = document.getElementById('gift-panel');
+      if (!panel) return;
+      const pt = Math.max(0, panel.getBoundingClientRect().top);
+      const navH = 90;
+      const elH = el.offsetHeight;
+      const startAt = 305;
+      if (pt >= startAt) {
+        el.style.transform = 'translateY(0)';
+      } else if (pt <= navH) {
+        el.style.transform = `translateY(-${navH + elH}px)`;
+      } else {
+        const progress = (startAt - pt) / (startAt - navH);
+        el.style.transform = `translateY(-${Math.round(progress * (navH + elH))}px)`;
+      }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => {
       window.removeEventListener('scroll', onScroll);
-      if (rafId) cancelAnimationFrame(rafId);
       const el2 = document.getElementById('season-selector-sticky');
-      if (el2) { el2.style.top = ''; }
+      if (el2) el2.style.transform = '';
     };
   }, [giftMode]);
 
