@@ -924,36 +924,70 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   useEffect(() => {
     const el = document.getElementById('season-selector-sticky');
     if (!el) return;
-    if (!giftMode) {
-      el.style.transform = '';
-      el.style.transition = '';
-      return;
-    }
+
+    const cleanup = () => {
+      const e = document.getElementById('season-selector-sticky');
+      if (!e) return;
+      e.style.removeProperty('animation-name');
+      e.style.removeProperty('animation-duration');
+      e.style.removeProperty('animation-timing-function');
+      e.style.removeProperty('animation-fill-mode');
+      e.style.removeProperty('animation-timeline');
+      e.style.removeProperty('animation-range');
+      e.style.removeProperty('--sss-max');
+      e.style.transform = '';
+      e.style.transition = '';
+    };
+
+    if (!giftMode) { cleanup(); return; }
+
     const panel = document.getElementById('gift-panel');
     if (!panel) return;
-    const elH = el.offsetHeight;
+
     const navH = window.innerWidth >= 1024 ? 90 : 80;
-    const slideOut = `translateY(-${navH + elH + 10}px)`;
+    const elH = el.offsetHeight;
+    const slideMax = navH + elH + 10;
+    const panelOffsetTop = panel.getBoundingClientRect().top + window.scrollY;
+    // Animation starts when panel is 310px from top, ends when panel is behind the selector
+    const startScroll = Math.max(0, panelOffsetTop - 310);
+    const endScroll = Math.max(0, panelOffsetTop - navH - elH - 5);
+
+    // Inject keyframe once — uses CSS custom property so slideMax is dynamic
+    if (!document.getElementById('sss-kf')) {
+      const s = document.createElement('style');
+      s.id = 'sss-kf';
+      s.textContent = '@keyframes sss{from{transform:translateY(0)}to{transform:translateY(var(--sss-max))}}';
+      document.head.appendChild(s);
+    }
+
+    // CSS Scroll-Driven Animations: compositor-driven, zero JS per frame, perfectly smooth
+    if (CSS.supports('animation-timeline', 'scroll()')) {
+      el.style.setProperty('--sss-max', `-${slideMax}px`);
+      el.style.setProperty('animation-name', 'sss');
+      el.style.setProperty('animation-duration', 'auto');
+      el.style.setProperty('animation-timing-function', 'linear');
+      el.style.setProperty('animation-fill-mode', 'both');
+      el.style.setProperty('animation-timeline', 'scroll(root)');
+      el.style.setProperty('animation-range', `${startScroll}px ${endScroll}px`);
+      return cleanup;
+    }
+
+    // Fallback (Firefox) : scroll listener simple
     el.style.transition = 'none';
     el.style.transform = 'translateY(0)';
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.style.transition = 'transform 0.25s ease-out';
-          el.style.transform = slideOut;
-        } else {
-          el.style.transition = 'transform 0.2s ease-in';
-          el.style.transform = 'translateY(0)';
-        }
-      },
-      { rootMargin: '-300px 0px 0px 0px', threshold: 0 }
-    );
-    observer.observe(panel);
-    return () => {
-      observer.disconnect();
-      const el2 = document.getElementById('season-selector-sticky');
-      if (el2) { el2.style.transform = ''; el2.style.transition = ''; }
+    const onScroll = () => {
+      const pt = panel.getBoundingClientRect().top;
+      if (pt >= 310) {
+        el.style.transform = 'translateY(0)';
+      } else if (pt <= navH) {
+        el.style.transform = `translateY(-${slideMax}px)`;
+      } else {
+        const p = (310 - pt) / (310 - navH);
+        el.style.transform = `translateY(-${Math.round(p * slideMax)}px)`;
+      }
     };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { window.removeEventListener('scroll', onScroll); cleanup(); };
   }, [giftMode]);
 
   const missingFields: string[] = step === 3 ? [
