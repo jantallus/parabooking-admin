@@ -1181,7 +1181,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         {step === 1 && !isDirect && (
           <div onClick={() => setActiveTooltip(null)}>
             {/* 🎯 SÉLECTEUR DE SAISON "COLLANT" (STICKY) */}
-            <div className={`flex justify-center mb-12 sticky top-[80px] lg:top-[90px] z-40 transition-all duration-300${giftMode ? ' hidden' : ''}`}>
+            <div className={`flex justify-center mb-12 transition-all duration-300${giftMode ? '' : ' sticky top-[80px] lg:top-[90px] z-40'}`}>
               <div className="bg-white p-1.5 rounded-[10px] inline-flex border border-slate-200" style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
                 <button aria-pressed={activeSeason === 'Standard'} onClick={() => setActiveSeason('Standard')} className={`px-6 py-3 rounded-[5px] transition-all duration-300 flex items-center gap-2 ${activeSeason === 'Standard' ? 'text-white shadow-md scale-105' : 'text-slate-500 hover:text-slate-800'}`} style={activeSeason === 'Standard' ? { backgroundColor: '#E6007E', fontSize: '1.125rem', fontWeight: 700 } : { fontSize: '1.125rem', fontWeight: 700 }}><Sun size={18} strokeWidth={1.5} />été</button>
                 <button aria-pressed={activeSeason === 'Hiver'} onClick={() => setActiveSeason('Hiver')} className={`px-6 py-3 rounded-[5px] transition-all duration-300 flex items-center gap-2 ${activeSeason === 'Hiver' ? 'text-white shadow-md scale-105' : 'text-slate-500 hover:text-slate-800'}`} style={activeSeason === 'Hiver' ? { backgroundColor: '#312783', fontSize: '1.125rem', fontWeight: 700 } : { fontSize: '1.125rem', fontWeight: 700 }}><Snowflake size={18} strokeWidth={1.5} />hiver</button>
