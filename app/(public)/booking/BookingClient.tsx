@@ -93,14 +93,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [isSingleColumn, setIsSingleColumn] = useState(false);
-  useLayoutEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    setIsSingleColumn(mq.matches);
-    const h = (e: MediaQueryListEvent) => setIsSingleColumn(e.matches);
-    mq.addEventListener('change', h);
-    return () => mq.removeEventListener('change', h);
-  }, []);
   const [cartPopup, setCartPopup] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const cartPopupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -943,7 +935,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
       }
     }
     // Sur mobile (1 colonne) : cartes sélectionnées à la fin dans l'ordre de sélection
-    if (isSingleColumn && giftSelectionOrder.length > 0) {
+    if (giftSelectionOrder.length > 0 && typeof window !== 'undefined' && window.innerWidth < 768) {
       const selectedSet = new Set(giftSelectionOrder);
       const unselected = base.filter(f => !selectedSet.has(f.id));
       const selected = giftSelectionOrder.map(id => base.find(f => f.id === id)).filter(Boolean) as typeof base;
