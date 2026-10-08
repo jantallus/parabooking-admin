@@ -410,7 +410,6 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         const container = bodyScrollRef.current;
         container.classList.remove('opacity-0');
         if (headerScrollRef.current) headerScrollRef.current.classList.remove('opacity-0');
-        hasAnimatedIntro.current = true;
         container.style.scrollSnapType = 'none';
         isProgrammaticScrollRef.current = true;
         setTimeout(() => {
