@@ -264,7 +264,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   }, [flights]);
 
   const [cart, setCart] = useState<Record<string, number>>({});
-  
+  const cartEmpty = Object.keys(cart).length === 0;
+
   const [voucherInput, setVoucherInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState<GiftCard | null>(null);
   const [appliedPartner, setAppliedPartner] = useState<Partner | null>(null);
@@ -1481,7 +1482,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
 
                         const flightQty = giftCartQty[flight.id] ?? 0;
 
-                        if (giftMode) {
+                        if (giftMode && cartEmpty) {
                           /* ── MODE OFFRIR : prix + contrôle sur la même ligne (modèle bons-cadeaux) ── */
                           return (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
@@ -1530,7 +1531,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                               <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
                                 Réserver ce vol
                               </button>
-                              {!appliedVoucher && !appliedPartner && (
+                              {!appliedVoucher && !appliedPartner && cartEmpty && (
                                 <button
                                   onClick={e => { e.stopPropagation(); addToGiftCart(flight.id); }}
                                   className="cursor-pointer px-4 py-3 rounded-[5px] transition-all flex items-center justify-center gap-2 shrink-0"
