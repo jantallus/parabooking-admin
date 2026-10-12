@@ -467,7 +467,15 @@ export default function CadeauPage() {
           </div>{/* fin data-reveal grille */}
 
           {(totalCartItems > 0 || directFlightId) && (
-            <div id="achat-form" style={{ marginTop: '60px', backgroundColor: 'white', borderRadius: '10px', padding: '40px', boxShadow: 'none', border: '1px solid #e2e8f0', scrollMarginTop: '100px' }}>
+            <div id="achat-form" style={{ marginTop: '60px', backgroundColor: 'white', borderRadius: '10px', padding: '40px', boxShadow: 'none', border: '1px solid #e2e8f0', scrollMarginTop: '100px', position: 'relative' }}>
+              <button
+                type="button"
+                aria-label="Annuler le panier"
+                onClick={() => { setCartItems({}); setCartSelectionOrder([]); setDirectFlightId(null); setDirectFlightName(null); setDirectFlightPrice(null); setDirectFlightQty(1); }}
+                style={{ position: 'absolute', top: '16px', right: '16px', width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: '#f1f5f9', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '18px', lineHeight: 1, padding: 0 }}
+                onPointerEnter={e => (e.currentTarget.style.background = '#e2e8f0')}
+                onPointerLeave={e => (e.currentTarget.style.background = '#f1f5f9')}
+              >×</button>
               <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#312783', marginBottom: '20px' }}>Votre panier</h3>
               {/* Récap panier */}
               <div style={{ backgroundColor: '#F3F3F3', borderRadius: '10px', padding: '16px 20px', marginBottom: '30px' }}>
