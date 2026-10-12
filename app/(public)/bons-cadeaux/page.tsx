@@ -312,7 +312,7 @@ export default function CadeauPage() {
       </section>
 
 
-      <section id="boutique" style={{ backgroundColor: '#FFFFFF', padding: '100px 4vw' }}>
+      <section id="boutique" style={{ backgroundColor: '#FFFFFF', padding: '100px max(4vw, 80px)' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div data-reveal style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '3rem', fontWeight: 700, color: '#312783', marginBottom: '15px' }}>Choisissez votre bon cadeau</h2>
