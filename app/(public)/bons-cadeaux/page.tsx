@@ -4,7 +4,7 @@ import { useScrollLock } from '@/hooks/useScrollLock';
 import type { GiftCardShopTemplate, Complement } from '@/lib/types';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useCart } from '@/lib/CartContext';
-import { Clock, Wallet, MapPin, Mail, CalendarDays, Package, Sparkles, Gift } from 'lucide-react';
+import { Clock, Wallet, MapPin, Mail, CalendarDays, Package, Sparkles, Gift, X } from 'lucide-react';
 
 export default function CadeauPage() {
   const { toast } = useToast();
@@ -472,10 +472,8 @@ export default function CadeauPage() {
                 type="button"
                 aria-label="Annuler le panier"
                 onClick={() => { setCartItems({}); setCartSelectionOrder([]); setDirectFlightId(null); setDirectFlightName(null); setDirectFlightPrice(null); setDirectFlightQty(1); }}
-                style={{ position: 'absolute', top: '16px', right: '16px', width: '32px', height: '32px', borderRadius: '50%', border: 'none', background: '#f1f5f9', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '18px', lineHeight: 1, padding: 0 }}
-                onPointerEnter={e => (e.currentTarget.style.background = '#e2e8f0')}
-                onPointerLeave={e => (e.currentTarget.style.background = '#f1f5f9')}
-              >×</button>
+                style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center', padding: '4px' }}
+              ><X size={20} /></button>
               <h3 style={{ fontSize: '2rem', fontWeight: 700, color: '#312783', marginBottom: '20px' }}>Votre panier</h3>
               {/* Récap panier */}
               <div style={{ backgroundColor: '#F3F3F3', borderRadius: '10px', padding: '16px 20px', marginBottom: '30px' }}>
