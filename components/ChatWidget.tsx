@@ -6,6 +6,43 @@ import { X, Send } from 'lucide-react';
 const FLUIDE_PRIMARY   = '#312783';
 const FLUIDE_SECONDARY = '#E6007E';
 
+// Flèche Fluide (arrow-right.svg)
+function FluideArrow({ color = 'white', size = 22 }: { color?: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 25 29" fill="none" aria-hidden="true">
+      <path
+        d="M24.1375 15.0092C24.4736 14.673 24.4736 14.12 24.1375 13.7839L14.5955 4.24185C14.2593 3.90571 13.7063 3.90571 13.3702 4.24185C13.034 4.57799 13.034 5.13099 13.3702 5.46713L21.4321 13.5291L0.970973 13.5291C0.493871 13.5291 0.103516 13.9194 0.103516 14.3965C0.103516 14.8736 0.493871 15.264 0.970973 15.264L21.4321 15.264L13.3702 23.3259C13.034 23.662 13.034 24.215 13.3702 24.5512C13.7063 24.8873 14.2593 24.8873 14.5955 24.5512L24.1375 15.0092Z"
+        fill={color}
+      />
+    </svg>
+  );
+}
+
+// Bulle de chat style WhatsApp — forme entière en SVG avec la flèche Fluide fushia
+function ChatBubbleIcon() {
+  return (
+    <svg width="54" height="60" viewBox="0 0 60 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Forme bulle (cercle + queue bas-gauche) */}
+      <path
+        d="M30 4C44 4 53 13 53 27C53 41 44 51 30 51C24 51 18.5 49 14 45.5L5 63L18 52C12 48 7 38 7 27C7 13 16 4 30 4Z"
+        fill={FLUIDE_PRIMARY}
+      />
+      {/* Flèche Fluide fushia, centrée dans la bulle */}
+      <g transform="translate(20, 14) scale(0.85)">
+        <path
+          d="M24.1375 15.0092C24.4736 14.673 24.4736 14.12 24.1375 13.7839L14.5955 4.24185C14.2593 3.90571 13.7063 3.90571 13.3702 4.24185C13.034 4.57799 13.034 5.13099 13.3702 5.46713L21.4321 13.5291L0.970973 13.5291C0.493871 13.5291 0.103516 13.9194 0.103516 14.3965C0.103516 14.8736 0.493871 15.264 0.970973 15.264L21.4321 15.264L13.3702 23.3259C13.034 23.662 13.034 24.215 13.3702 24.5512C13.7063 24.8873 14.2593 24.8873 14.5955 24.5512L24.1375 15.0092Z"
+          fill={FLUIDE_SECONDARY}
+        />
+      </g>
+    </svg>
+  );
+}
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 function renderMessage(text: string, isUser: boolean): React.ReactNode {
   const linkColor = isUser ? '#a5b4fc' : FLUIDE_PRIMARY;
   const parts = text.split(/(\[.*?\]\(https?:\/\/[^)]+\)|\*\*.*?\*\*|https?:\/\/[^\s]+)/g);
@@ -17,26 +54,6 @@ function renderMessage(text: string, isUser: boolean): React.ReactNode {
     if (/^https?:\/\//.test(token)) return <a key={i} href={token} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline' }}>{token}</a>;
     return <span key={i}>{token}</span>;
   });
-}
-
-function ParagliderIcon() {
-  return (
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Voile */}
-      <path d="M2 13 C2 5 24 5 24 13" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Suspentes */}
-      <line x1="6.5"  y1="12.5" x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
-      <line x1="13"   y1="11"   x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
-      <line x1="19.5" y1="12.5" x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
-      {/* Pilote */}
-      <circle cx="13" cy="21.5" r="2" fill="white" />
-    </svg>
-  );
-}
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
 }
 
 export default function ChatWidget() {
@@ -94,41 +111,17 @@ export default function ChatWidget() {
           aria-label="Ouvrir le chat"
           style={{
             position: 'fixed',
-            bottom: '24px',
-            left: '24px',
+            bottom: '16px',
+            left: '16px',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             padding: 0,
             zIndex: 9999,
+            filter: 'drop-shadow(0 4px 12px rgba(49,39,131,0.4))',
           }}
         >
-          {/* Forme bulle de chat */}
-          <div style={{ position: 'relative', display: 'inline-flex' }}>
-            <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: FLUIDE_PRIMARY,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(49,39,131,0.35)',
-            }}>
-              <ParagliderIcon />
-            </div>
-            {/* Queue de la bulle */}
-            <div style={{
-              position: 'absolute',
-              bottom: '-6px',
-              left: '10px',
-              width: 0,
-              height: 0,
-              borderLeft: '6px solid transparent',
-              borderRight: '3px solid transparent',
-              borderTop: `7px solid ${FLUIDE_PRIMARY}`,
-            }} />
-          </div>
+          <ChatBubbleIcon />
         </button>
       )}
 
@@ -155,7 +148,7 @@ export default function ChatWidget() {
           {/* En-tête */}
           <div style={{ background: FLUIDE_PRIMARY, color: '#fff', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <ParagliderIcon />
+              <FluideArrow color={FLUIDE_SECONDARY} size={22} />
               <div>
                 <div style={{ fontWeight: 600, fontSize: '14px' }}>Fluide Parapente</div>
                 <div style={{ fontSize: '11px', opacity: 0.7 }}>Répond en quelques secondes</div>
