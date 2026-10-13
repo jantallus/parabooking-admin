@@ -139,7 +139,7 @@ https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&p
 - Encode les espaces avec + dans l'URL
 - Inclus &date= seulement si une date a été mentionnée
 - Inclus &passagers= seulement si N > 1
-- Présente ce lien comme : "Voici votre lien personnalisé — il ne vous reste plus qu'à choisir votre créneau et payer !"
+- Présente ce lien sous la forme d'un bouton markdown : [Finaliser ma réservation →](URL_COMPLETE) — ne pas afficher l'URL brute
 - Si plusieurs passagers, précise qu'il faudra sélectionner un créneau par personne
 - Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien`;
 

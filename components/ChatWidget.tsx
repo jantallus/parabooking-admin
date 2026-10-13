@@ -16,7 +16,15 @@ function renderMessage(text: string, isUser: boolean): React.ReactNode {
   const parts = text.split(/(\[.*?\]\(https?:\/\/[^)]+\)|\*\*.*?\*\*|https?:\/\/[^\s]+)/g);
   return parts.map((token, i) => {
     const mdLink = token.match(/^\[(.*?)\]\((https?:\/\/[^)]+)\)$/);
-    if (mdLink) return <a key={i} href={mdLink[2]} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline' }}>{mdLink[1]}</a>;
+    if (mdLink) {
+      const isBookingCTA = mdLink[2].includes('/booking?');
+      if (isBookingCTA) return (
+        <a key={i} href={mdLink[2]} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '8px', padding: '10px 18px', background: FLUIDE_SECONDARY, color: '#fff', borderRadius: '20px', textDecoration: 'none', fontWeight: 700, fontSize: '13.5px' }}>
+          {mdLink[1]}
+        </a>
+      );
+      return <a key={i} href={mdLink[2]} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline' }}>{mdLink[1]}</a>;
+    }
     const bold = token.match(/^\*\*(.*?)\*\*$/);
     if (bold) {
       if (/^https?:\/\//.test(bold[1])) return <a key={i} href={bold[1]} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline', fontWeight: 600 }}>{bold[1]}</a>;
