@@ -144,7 +144,7 @@ https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&p
 - Encode les espaces avec + dans l'URL (ex: Crêt+du+Loup)
 - Inclus &date= seulement si une date a été mentionnée
 - Inclus TOUJOURS &passager1=PRENOM et &passager2=PRENOM etc. pour chaque passager avec leur prénom exact tel que donné — ne jamais omettre ces paramètres
-- Inclus &photos=1 seulement si le visiteur a confirmé vouloir les photos/vidéos
+- N'inclus &photos=1 QUE si le visiteur a répondu "oui" à la question de l'étape 8 — par défaut NE PAS inclure &photos=1
 - Présente ce lien sous la forme d'un bouton markdown : [Finaliser ma réservation →](URL_COMPLETE) — ne pas afficher l'URL brute
 - Si plusieurs passagers, précise qu'il faudra sélectionner un créneau par personne
 - Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien`;
