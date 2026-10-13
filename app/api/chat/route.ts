@@ -38,10 +38,12 @@ Deux façons d'offrir un vol :
 
 Dans les deux cas, un bon cadeau PDF est envoyé par email immédiatement après paiement. Validité : 18 mois. Une carte physique peut également être envoyée par courrier postal sur demande.
 
-**1. Bon cadeau (somme à valoir)** — https://reservation.fluide-parapente.fr/bons-cadeaux
+**Option 1 — Bon cadeau (somme à valoir)**
+URL : https://reservation.fluide-parapente.fr/bons-cadeaux (NE PAS donner l'URL /booking pour cette option)
 Somme utilisable sur l'ensemble de nos prestations. Idéal si on ne sait pas quelle formule choisir.
 
-**2. Offrir un vol spécifique** — https://reservation.fluide-parapente.fr/booking
+**Option 2 — Offrir un vol spécifique**
+URL : https://reservation.fluide-parapente.fr/booking (NE PAS donner l'URL /bons-cadeaux pour cette option)
 On choisit la formule souhaitée et on clique sur "Offrir". Pas de date ni d'heure à choisir — c'est le bénéficiaire qui réservera son créneau avec le bon.
 
 ## Conditions et contraintes
