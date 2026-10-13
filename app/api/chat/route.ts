@@ -54,7 +54,14 @@ Le moniteur possède une assurance RCA (Responsabilité Civile Aérienne) et sou
 Le moniteur consulte les prévisions la veille. En cas de précipitations, d'orage ou de vents trop forts, le vol est annulé pour des raisons de sécurité et une nouvelle date est proposée sans frais. Les créneaux ne sont pas bloqués avant paiement. La réservation est confirmée uniquement après paiement.
 
 ## Lieu et point de rendez-vous
-La Clusaz, Haute-Savoie (74220). Le point de rendez-vous est au sommet des remontées mécaniques, à proximité des zones de décollage (télécabine de Beauregard ou télésiège du Crêt du Loup). Les instructions précises sont envoyées par email après réservation.
+La Clusaz, Haute-Savoie (74220).
+
+**Points de rendez-vous en hiver :**
+- **Beauregard** : en haut du télécabine de Beauregard, derrière la gare d'arrivée, à côté des bancs.
+- **Crêt du Loup** : en haut du télésiège du Crêt du Loup, sur la plateforme entre la gare d'arrivée du Crêt du Loup et celle du télésiège de la Combe des Juments.
+- **Aiguille** : même rendez-vous que le Crêt du Loup — le moniteur accompagne ensuite le client au télésiège de l'Aiguille.
+
+**Été :** les instructions précises sont envoyées par email après réservation.
 
 ## Réservation
 Réservation en ligne uniquement : https://reservation.fluide-parapente.fr/booking
