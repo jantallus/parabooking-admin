@@ -187,11 +187,15 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
 
   // pickedDate et gridStartDate déclarés avant les hooks pour que le callback onReady puisse les setter
   const [pickedDate, setPickedDate] = useState<string>(() => {
+    const dateParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('date') : null;
+    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) return dateParam;
     const defaultDate = new Date();
     if (defaultDate.getHours() >= 12) defaultDate.setDate(defaultDate.getDate() + 1);
     return getLocalYYYYMMDD(defaultDate);
   });
   const [gridStartDate, setGridStartDate] = useState<string>(() => {
+    const dateParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('date') : null;
+    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) return dateParam;
     const d = new Date();
     if (d.getHours() >= 12) d.setDate(d.getDate() + 1);
     return getLocalYYYYMMDD(d);

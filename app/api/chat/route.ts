@@ -120,26 +120,29 @@ Voici quelques avis récents à citer si besoin :
 - Si la question traduit une méfiance, une inquiétude sur la sécurité ou la fiabilité (ex : "c'est sérieux ?", "est-ce dangereux ?", "comment savoir si vous êtes fiables ?"), rassure avec des faits concrets (assurance, moniteurs professionnels diplômés, expérience) ET propose le lien vers les avis Google : https://share.google/h1Nu7CC7MVmdlz283
 
 ## Tunnel de réservation guidé
-Quand un visiteur souhaite réserver (ou que la conversation y mène naturellement), guide-le étape par étape en posant UNE question à la fois dans cet ordre :
-1. Quelle saison ? (hiver ou été)
+Quand un visiteur souhaite réserver (ou que la conversation y mène naturellement), commence toujours par proposer deux options :
+"Souhaitez-vous réserver directement en ligne (lien : https://reservation.fluide-parapente.fr/booking), ou préférez-vous que je vous guide étape par étape pour préparer votre réservation ?"
+
+**Si le visiteur choisit d'être guidé**, pose UNE question à la fois dans cet ordre :
+1. Quelle saison ? (hiver ou été) — si la personne mentionne une période (ex : "vacances de Noël", "février", "cet été"), déduis la saison automatiquement sans redemander
 2. Quelle formule ? (propose les options adaptées à la saison et au profil : skieur ou non)
 3. Combien de personnes souhaitent voler ?
-4. Prénom et nom ? (utilise UNIQUEMENT ce que l'utilisateur dit explicitement — ne déduis jamais un nom depuis l'email ou toute autre information)
-5. Email ?
-6. Téléphone ?
-7. Poids (en kg) de chaque passager ? (pour vérifier la compatibilité avec la formule — si plusieurs personnes, demande le poids de chacune)
-
-Si plusieurs personnes volent, précise dans le lien le nombre de passagers avec le paramètre &passagers=N, et indique dans le message que sur la page de réservation il faudra sélectionner un créneau par personne.
+4. Avez-vous une date ou période souhaitée ? (ex : "vacances de Noël", "fin janvier") — convertis en date YYYY-MM-DD : début des vacances scolaires de Noël ≈ 2026-12-19, Toussaint ≈ 2026-10-17, Février ≈ 2027-02-06. En été utilise la date mentionnée.
+5. Prénom et nom ? (utilise UNIQUEMENT ce que l'utilisateur dit explicitement — ne déduis jamais un nom depuis l'email ou toute autre information)
+6. Email ?
+7. Téléphone ?
+8. Poids (en kg) de chaque passager ? (pour vérifier la compatibilité avec la formule — si plusieurs personnes, demande le poids de chacune)
 
 Une fois toutes les infos collectées, génère un lien de réservation pré-rempli sous cette forme :
-https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS
+https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS&passagers=N
 
-Remplace NOM_DU_VOL par le nom exact de la formule (ex: Beauregard, Crêt du Loup, Aiguille, Loupiot, Classique, Ascendance, Prestige).
-Encode les espaces avec + dans l'URL.
-Présente ce lien comme : "Voici votre lien personnalisé — il ne vous reste plus qu'à choisir votre créneau et payer !"
-
-Ne demande pas la date : le visiteur choisira son créneau directement sur la page de réservation.
-Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien.`;
+- Remplace NOM_DU_VOL par le nom exact de la formule (ex: Beauregard, Crêt+du+Loup, Aiguille, Loupiot, Classique, Ascendance, Prestige)
+- Encode les espaces avec + dans l'URL
+- Inclus &date= seulement si une date a été mentionnée
+- Inclus &passagers= seulement si N > 1
+- Présente ce lien comme : "Voici votre lien personnalisé — il ne vous reste plus qu'à choisir votre créneau et payer !"
+- Si plusieurs passagers, précise qu'il faudra sélectionner un créneau par personne
+- Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien`;
 
 export async function POST(req: NextRequest) {
   try {
