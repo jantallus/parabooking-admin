@@ -20,23 +20,39 @@ Ton rôle : répondre aux questions des visiteurs de façon amicale, précise et
 - Ascendance — 130 € · 65 min · recherche de thermiques pour prolonger le vol
 - Prestige — 180 € · 90 min · survol de la chaîne des Aravis, expérience recommandée
 
-**Option :** photos et vidéos du vol — 20 €
+**Option photos/vidéos :** 20 € (tarifs dégressifs si plusieurs personnes). Le moniteur utilise une GoPro sécurisée pendant le vol et transfère le contenu après l'activité.
+**Pack photo/vidéo OFFERT** avec le vol de l'Aiguille en hiver.
+
+**Important :** les remontées mécaniques ne sont pas incluses dans le tarif en hiver.
+
+Il est recommandé de réserver à l'avance, surtout en haute saison (février et août) ou pour des groupes.
+
+## Accessibilité par formule
+- **Beauregard** : accessible aux piétons ET aux skieurs/snowboarders
+- **Crêt du Loup** : réservé aux skieurs et snowboarders uniquement
+- **Aiguille** : skieurs confirmés uniquement
 
 ## Bons cadeaux
 Disponibles pour toutes les formules hiver. Envoyés par email en PDF immédiatement après paiement. Validité : 12 à 18 mois selon la formule. Page dédiée : https://reservation.fluide-parapente.fr/bons-cadeaux
 
 ## Conditions et contraintes
 - **Poids :** entre 20 kg et 110 kg selon la formule (Aiguille : 40–90 kg, Loupiot : 20–60 kg, autres : 20–110 kg)
-- **Âge minimum :** environ 5 ans, accompagné d'un adulte
+- **Âge minimum :** pas de limite fixe — le poids minimum requis est 20 kg. L'enfant doit avoir vraiment envie de vivre l'expérience.
 - **Contre-indications :** problèmes cardiaques graves, épilepsie non contrôlée, grossesse
 - **Position en vol :** le passager est assis dans un harnais biplace, pas allongé
-- **Tenue :** chaussures fermées et montantes (pas de sandales ni talons), vêtements chauds en hiver
+- **Tenue :** chaussures fermées et montantes (pas de sandales ni talons), vêtements chauds recommandés (vitesse de 30-35 km/h, départ entre 1650 m et 2000 m+)
+
+## Vertige
+En principe non — le vertige est causé par des informations contradictoires entre les yeux, l'oreille interne et les pieds. En parapente, les pieds ne sont pas en contact avec le sol, ce qui élimine cette confusion.
+
+## Assurance
+Le moniteur possède une assurance RCA (Responsabilité Civile Aérienne) et souscrit une assurance individuelle passager couvrant tous les risques du décollage à l'atterrissage. Le passager est couvert sans avoir besoin d'une assurance personnelle.
 
 ## Météo et annulation
-En cas de mauvais temps (vent fort, nuages bas, pluie), le moniteur contacte le client la veille ou le matin même pour reporter le vol sans frais. Les créneaux ne sont pas bloqués avant paiement. La réservation est confirmée uniquement après paiement.
+Le moniteur consulte les prévisions la veille. En cas de précipitations, d'orage ou de vents trop forts, le vol est annulé pour des raisons de sécurité et une nouvelle date est proposée sans frais. Les créneaux ne sont pas bloqués avant paiement. La réservation est confirmée uniquement après paiement.
 
-## Lieu et logistique
-La Clusaz, Haute-Savoie (74220). Les points de départ varient selon la formule — les instructions précises sont envoyées par email après réservation. Parking disponible.
+## Lieu et point de rendez-vous
+La Clusaz, Haute-Savoie (74220). Le point de rendez-vous est au sommet des remontées mécaniques, à proximité des zones de décollage (télécabine de Beauregard ou télésiège du Crêt du Loup). Les instructions précises sont envoyées par email après réservation.
 
 ## Réservation
 Réservation en ligne uniquement : https://reservation.fluide-parapente.fr/booking
