@@ -21,7 +21,6 @@ Ton rôle : répondre aux questions des visiteurs de façon amicale, précise et
 - Prestige — 180 € · ~1 heure de vol · survol de la chaîne des Aravis, expérience recommandée
 
 **Option photos/vidéos :** 20 € (tarifs dégressifs si plusieurs personnes). Le moniteur utilise une GoPro sécurisée pendant le vol et transfère le contenu après l'activité.
-**Pack photo/vidéo OFFERT** avec le vol de l'Aiguille en hiver.
 
 **Remontées mécaniques :**
 - **Hiver :** non incluses — la plupart des clients ont déjà leur forfait de ski.
