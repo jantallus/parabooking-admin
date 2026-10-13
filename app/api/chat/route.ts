@@ -46,7 +46,7 @@ Oui, les chèques vacances sont acceptés — mais la réservation ne peut pas s
 Il faut nous contacter directement :
 - Par téléphone ou SMS : +33 6 77 28 51 02
 - Par WhatsApp : +33 6 77 28 51 02
-- Ou en remplissant notre formulaire pour être rappelé : https://reservation.fluide-parapente.fr/demande
+- Ou en remplissant le formulaire "Être rappelé" sur la page de réservation : https://reservation.fluide-parapente.fr/booking (bouton flottant "Être rappelé" en bas à droite)
 Nous recontacterons le client pour finaliser la réservation.
 
 ## Contact
