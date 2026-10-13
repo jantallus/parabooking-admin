@@ -294,7 +294,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const [passengers, setPassengers] = useState<BookingPassenger[]>([]);
   const prefillWeightRef = useRef<number[]>([]);
   const prefillPassengerNamesRef = useRef<string[]>([]);
-  const prefillPhotosRef = useRef(false);
+  const prefillPhotosRef = useRef(0);
 
   // Pré-remplit le formulaire depuis les query params du chatbot (?prenom=&nom=&email=&tel=&poids=&passager1=&passager2=...)
   useEffect(() => {
@@ -307,7 +307,6 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     // Poids des passagers : ?poids=80 (1 passager) ou ?poids=80,55 (plusieurs)
     const poids = p.get('poids');
     if (poids) prefillWeightRef.current = poids.split(',').map(Number).filter(n => n > 0);
-    if (p.get('photos') === '1') prefillPhotosRef.current = true;
     // Prénoms des passagers (?passager1=Julien&passager2=Ursula...)
     const names: string[] = [];
     for (let i = 1; i <= 10; i++) {
@@ -315,6 +314,11 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
       if (n) names.push(n); else break;
     }
     if (names.length > 0) prefillPassengerNamesRef.current = names;
+    // Photos : pré-sélectionner pour tous les passagers
+    if (p.get('photos') === '1') {
+      const count = names.length || prefillWeightRef.current.length || 1;
+      prefillPhotosRef.current = count;
+    }
   }, []);
   
   // 🎯 RÉFÉRENCES SÉCURISÉES POUR ÉVITER L'EFFET DOMINO (Double-clic)
@@ -832,9 +836,10 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
 
   // Pré-sélectionne les photos si ?photos=1 et que l'option est chargée
   useEffect(() => {
-    if (!prefillPhotosRef.current || !photoOption) return;
-    prefillPhotosRef.current = false;
-    const updated = { ...pendingComplementsRef.current, [photoOption.id]: 1 };
+    if (prefillPhotosRef.current <= 0 || !photoOption) return;
+    const count = prefillPhotosRef.current;
+    prefillPhotosRef.current = 0;
+    const updated = { ...pendingComplementsRef.current, [photoOption.id]: count };
     pendingComplementsRef.current = updated;
     setPendingComplements(updated);
   }, [photoOption?.id]);
