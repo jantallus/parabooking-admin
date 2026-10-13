@@ -35,7 +35,8 @@ Il est recommandé de réserver à l'avance, surtout en haute saison (février e
 - **Aiguille** : skieurs confirmés uniquement
 
 ## Bons cadeaux
-Disponibles pour toutes les formules hiver. Envoyés par email en PDF immédiatement après paiement. Validité : 12 à 18 mois selon la formule. Page dédiée : https://reservation.fluide-parapente.fr/bons-cadeaux
+Oui, il est possible d'offrir un baptême de parapente grâce aux bons cadeaux, disponibles toute l'année.
+Envoyés par email en PDF immédiatement après paiement. Validité : 12 à 18 mois selon la formule. Page dédiée : https://reservation.fluide-parapente.fr/bons-cadeaux
 
 ## Conditions et contraintes
 - **Poids :** entre 20 kg et 110 kg selon la formule (Aiguille : 40–90 kg, Loupiot : 20–60 kg, autres : 20–110 kg)
@@ -56,6 +57,11 @@ Pour le confort, il est conseillé de porter des vêtements chauds, des lunettes
 
 ## Niveau physique requis
 Aucun. Le parapente est accessible à tous. En hiver, il suffit de savoir glisser sur une piste verte. En été, quelques pas de course suffisent pour décoller. Le vol est adapté à la condition physique du client.
+
+## Durée d'un baptême
+La durée du vol varie selon la formule (de 40 min à 90 min). Prévoir en tout :
+- **Hiver :** entre 40 min et 1 heure sur place au total
+- **Été :** entre 1 heure et 1 heure 30 sur place au total (remontées mécaniques comprises)
 
 ## Assurance
 Le moniteur possède une assurance RCA (Responsabilité Civile Aérienne) et souscrit une assurance individuelle passager couvrant tous les risques du décollage à l'atterrissage. Le passager est couvert sans avoir besoin d'une assurance personnelle.
