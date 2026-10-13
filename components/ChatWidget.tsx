@@ -1,7 +1,25 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { X, Send } from 'lucide-react';
+
+const FLUIDE_PRIMARY   = '#312783';
+const FLUIDE_SECONDARY = '#E6007E';
+
+function ParagliderIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Voile */}
+      <path d="M2 13 C2 5 24 5 24 13" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Suspentes */}
+      <line x1="6.5"  y1="12.5" x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="13"   y1="11"   x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+      <line x1="19.5" y1="12.5" x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+      {/* Pilote */}
+      <circle cx="13" cy="21.5" r="2" fill="white" />
+    </svg>
+  );
+}
 
 interface Message {
   role: 'user' | 'assistant';
@@ -20,7 +38,7 @@ export default function ChatWidget() {
     if (open && messages.length === 0) {
       setMessages([{
         role: 'assistant',
-        content: 'Bonjour ! Une question sur nos vols parapente à La Clusaz ? Je suis là pour vous aider 🪂',
+        content: 'Bonjour ! Une question sur nos vols parapente à La Clusaz ? Je suis là pour vous aider.',
       }]);
     }
     if (open) setTimeout(() => inputRef.current?.focus(), 100);
@@ -64,22 +82,22 @@ export default function ChatWidget() {
           style={{
             position: 'fixed',
             bottom: '24px',
-            right: '24px',
+            left: '24px',
             width: '56px',
             height: '56px',
             borderRadius: '50%',
-            background: '#1a1a2e',
+            background: FLUIDE_PRIMARY,
             color: '#fff',
             border: 'none',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+            boxShadow: '0 4px 16px rgba(49,39,131,0.35)',
             zIndex: 9999,
           }}
         >
-          <MessageCircle size={24} />
+          <ParagliderIcon />
         </button>
       )}
 
@@ -89,14 +107,14 @@ export default function ChatWidget() {
           style={{
             position: 'fixed',
             bottom: '24px',
-            right: '24px',
+            left: '24px',
             width: '360px',
             maxWidth: 'calc(100vw - 32px)',
             height: '480px',
             maxHeight: 'calc(100vh - 48px)',
             background: '#fff',
             borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            boxShadow: '0 8px 32px rgba(49,39,131,0.18)',
             display: 'flex',
             flexDirection: 'column',
             zIndex: 9999,
@@ -104,9 +122,9 @@ export default function ChatWidget() {
           }}
         >
           {/* En-tête */}
-          <div style={{ background: '#1a1a2e', color: '#fff', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ background: FLUIDE_PRIMARY, color: '#fff', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '20px' }}>🪂</span>
+              <ParagliderIcon />
               <div>
                 <div style={{ fontWeight: 600, fontSize: '14px' }}>Fluide Parapente</div>
                 <div style={{ fontSize: '11px', opacity: 0.7 }}>Répond en quelques secondes</div>
@@ -125,7 +143,7 @@ export default function ChatWidget() {
                   maxWidth: '80%',
                   padding: '10px 13px',
                   borderRadius: msg.role === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
-                  background: msg.role === 'user' ? '#1a1a2e' : '#f1f5f9',
+                  background: msg.role === 'user' ? FLUIDE_PRIMARY : '#f1f5f9',
                   color: msg.role === 'user' ? '#fff' : '#1e293b',
                   fontSize: '13.5px',
                   lineHeight: '1.5',
@@ -174,7 +192,7 @@ export default function ChatWidget() {
                 width: '38px',
                 height: '38px',
                 borderRadius: '50%',
-                background: input.trim() && !loading ? '#1a1a2e' : '#e2e8f0',
+                background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0',
                 color: input.trim() && !loading ? '#fff' : '#94a3b8',
                 border: 'none',
                 cursor: input.trim() && !loading ? 'pointer' : 'default',
