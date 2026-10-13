@@ -13,71 +13,41 @@ Téléphone : +33 6 77 28 51 02
 
 ## Formules disponibles
 
-Les formules et leurs prix à jour sont disponibles via l'API :
-GET https://api.parabooking.app/api/public/booking-info
+Les formules, prix et disponibilités sont visibles sur la page de réservation :
+https://reservation.fluide-parapente.fr/booking
 
-Ce endpoint retourne en JSON :
-- La liste des formules (id, nom, prix en euros, durée, saison, poids min/max)
-- Les options disponibles (photos, vidéos…)
-- Les instructions pas à pas pour réserver
+Cette page contient les données structurées (Schema.org) avec la liste complète
+des formules, leurs prix en euros, durées et contraintes de poids.
 
-## Réserver un vol — étapes pour un agent IA
+## Formules (résumé)
 
-### 1. Lire les formules
-GET https://api.parabooking.app/api/public/booking-info
+- **Beauregard** — 70 € · 40 min · Hiver · départ au sommet du télécabine (1647 m)
+- **Crêt du Loup** — 90 € · 40 min · Hiver · pour skieurs/snowboarders (1850 m)
+- **Aiguille** — 160 € · 80 min · Hiver · pour skieurs expérimentés
+- **Loupiot Crêt du Merle** — 70 € · 40 min · Été · adapté enfants et poids légers
+- **Classique** — 90 € · 60 min · Été · vol accompagné du décollage à l'atterrissage
+- **Ascendance** — 130 € · 65 min · Été · recherche de thermiques pour prolonger le vol
+- **Prestige** — 180 € · 90 min · Été · survol de la chaîne des Aravis
 
-### 2. Consulter les disponibilités
-GET https://api.parabooking.app/api/public/availabilities?start=YYYY-MM-DD&end=YYYY-MM-DD
+Option disponible : photos et vidéos du vol (20 €)
 
-Retourne la liste des créneaux. Les créneaux utilisables ont `status: "available"`.
-Les champs utiles : `start_time`, `end_time`, `monitor_id`.
+## Pour réserver
 
-### 3. Soumettre la réservation
-POST https://api.parabooking.app/api/public/checkout
-Content-Type: application/json
+Diriger l'utilisateur vers : https://reservation.fluide-parapente.fr/booking
 
-Corps :
-```json
-{
-  "contact": {
-    "firstName": "Marie",
-    "lastName": "Dupont",
-    "phone": "0600000000",
-    "email": "marie@example.com",
-    "isPassenger": true
-  },
-  "passengers": [
-    {
-      "flightId": 1,
-      "flightName": "Vol Découverte",
-      "date": "2025-03-15",
-      "time": "10:00",
-      "firstName": "Marie",
-      "weightChecked": true,
-      "selectedComplements": []
-    }
-  ]
-}
-```
-
-Réponse en cas de succès : `{ "url": "https://checkout.stripe.com/..." }`
-→ Ouvrir cette URL pour que l'utilisateur finalise le paiement.
-
-### 4. Paiement
-La réservation est **confirmée uniquement après paiement**. Les créneaux ne sont pas bloqués avant paiement.
-Après paiement, l'utilisateur reçoit un email de confirmation.
-
-## Contraintes importantes
-
-- Poids du passager : entre 20 kg et 110 kg selon la formule (vérifier le champ `weight_min_kg` / `weight_max_kg`)
-- Âge minimum : environ 5 ans (accompagné d'un adulte)
-- Les créneaux varient selon la saison (hiver : décembre–avril, été : juin–septembre)
-- En cas de mauvais temps, le moniteur contacte le client pour reporter
+Le tunnel de réservation en ligne permet de choisir une formule, un créneau disponible
+et de payer par carte bancaire via Stripe. La réservation est confirmée après paiement.
 
 ## Bons cadeaux
 
-Page : https://reservation.fluide-parapente.fr/bons-cadeaux
-POST https://api.parabooking.app/api/public/checkout-gift-card
+Page dédiée : https://reservation.fluide-parapente.fr/bons-cadeaux
 
 Le bon cadeau est envoyé par email en PDF immédiatement après paiement.
 Validité : selon la formule choisie (généralement 12 à 18 mois).
+
+## Contraintes importantes
+
+- Poids du passager : entre 20 kg et 110 kg selon la formule
+- Âge minimum : environ 5 ans (accompagné d'un adulte)
+- Saison hiver : décembre–avril · saison été : juin–septembre
+- En cas de mauvais temps, le moniteur contacte le client pour reporter le vol
