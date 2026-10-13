@@ -135,9 +135,10 @@ export default function ChatWidget() {
           {/* En-tête */}
           <div style={{ background: FLUIDE_PRIMARY, color: '#fff', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                  <line x1="4" y1="18" x2="17" y2="5" stroke={FLUIDE_SECONDARY} strokeWidth="2.4" strokeLinecap="round"/>
-                  <polyline points="10,5 17,5 17,12" stroke={FLUIDE_SECONDARY} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <svg width="24" height="24" viewBox="-4 -2 32 34" fill="none" aria-hidden="true">
+                  <g transform="rotate(-45, 12, 14.5)">
+                    <path d="M24.1375 15.0092C24.4736 14.673 24.4736 14.12 24.1375 13.7839L14.5955 4.24185C14.2593 3.90571 13.7063 3.90571 13.3702 4.24185C13.034 4.57799 13.034 5.13099 13.3702 5.46713L21.4321 13.5291L0.970973 13.5291C0.493871 13.5291 0.103516 13.9194 0.103516 14.3965C0.103516 14.8736 0.493871 15.264 0.970973 15.264L21.4321 15.264L13.3702 23.3259C13.034 23.662 13.034 24.215 13.3702 24.5512C13.7063 24.8873 14.2593 24.8873 14.5955 24.5512L24.1375 15.0092Z" fill={FLUIDE_SECONDARY}/>
+                  </g>
                 </svg>
               <div>
                 <div style={{ fontWeight: 600, fontSize: '14px' }}>Fluide Parapente</div>
