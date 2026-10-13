@@ -1,0 +1,35 @@
+User-agent: *
+Allow: /
+
+# Bots IA — autorisés à lire et à agir pour un utilisateur
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+# Le sous-domaine de réservation n'est pas indexé par les moteurs de recherche
+# (la vitrine fluide-parapente.fr est le point d'entrée SEO)
+# mais les agents IA peuvent librement lire et utiliser ces pages.
+Sitemap: https://reservation.fluide-parapente.fr/sitemap.xml
