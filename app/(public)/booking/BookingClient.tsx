@@ -197,14 +197,11 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     return getLocalYYYYMMDD(d);
   });
 
-  // Applique le param ?date= après le montage (ne fonctionne pas en SSR)
-  useEffect(() => {
-    const dateParam = new URLSearchParams(window.location.search).get('date');
-    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
-      setPickedDate(dateParam);
-      setGridStartDate(dateParam);
-    }
-  }, []);
+  const dateParamRef = useRef<string | null>(
+    typeof window !== 'undefined'
+      ? (new URLSearchParams(window.location.search).get('date') || null)
+      : null
+  );
 
   // Données de base : vols, compléments, templates, saison, displayDaysCount
   const initial = (initialFlights && initialFlights.length > 0)
@@ -212,8 +209,11 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     : undefined;
   const { flights, giftTemplates, complementsList, displayDaysCount, isLoading, activeSeason, setActiveSeason } = useBookingData(
     (dateStr, count) => {
-      setPickedDate(dateStr);
-      setGridStartDate(calculateGridStart(dateStr, count));
+      // Si un param ?date= est présent, l'utilise à la place de la date par défaut
+      const target = dateParamRef.current ?? dateStr;
+      dateParamRef.current = null;
+      setPickedDate(target);
+      setGridStartDate(target);
     },
     initial,
   );
@@ -293,8 +293,9 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [passengers, setPassengers] = useState<BookingPassenger[]>([]);
   const prefillWeightRef = useRef<number | null>(null);
+  const prefillPassengerNamesRef = useRef<string[]>([]);
 
-  // Pré-remplit le formulaire depuis les query params du chatbot (?prenom=&nom=&email=&tel=&poids=)
+  // Pré-remplit le formulaire depuis les query params du chatbot (?prenom=&nom=&email=&tel=&poids=&passager1=&passager2=...)
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     const prenom = p.get('prenom'); const nom = p.get('nom');
@@ -304,6 +305,13 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     }
     const poids = p.get('poids');
     if (poids) prefillWeightRef.current = Number(poids);
+    // Prénoms des passagers (?passager1=Julien&passager2=Ursula...)
+    const names: string[] = [];
+    for (let i = 1; i <= 10; i++) {
+      const n = p.get(`passager${i}`);
+      if (n) names.push(n); else break;
+    }
+    if (names.length > 0) prefillPassengerNamesRef.current = names;
   }, []);
   
   // 🎯 RÉFÉRENCES SÉCURISÉES POUR ÉVITER L'EFFET DOMINO (Double-clic)
@@ -415,9 +423,11 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
 
         const prefillW = prefillWeightRef.current;
         const autoWeightChecked = prefillW !== null && prefillW >= nP.weight_min && prefillW <= nP.weight_max;
+        const passengerIndex = newPassengers.indexOf(nP);
+        const prefillName = prefillPassengerNamesRef.current[passengerIndex] || '';
         return {
           ...nP,
-          firstName: existing?.firstName || '',
+          firstName: existing?.firstName || prefillName,
           weightChecked: existing?.weightChecked || autoWeightChecked,
           selectedComplements: currentComplements
         };

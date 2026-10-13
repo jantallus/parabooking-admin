@@ -133,7 +133,7 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
 7. Téléphone ?
 
 Une fois toutes les infos collectées, génère un lien de réservation pré-rempli sous cette forme :
-https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS&passagers=N
+https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS&passager1=PRENOM_PASSAGER_1&passager2=PRENOM_PASSAGER_2
 
 - Remplace NOM_DU_VOL par le nom exact de la formule convenue pendant la conversation (ex: Beauregard, Crêt+du+Loup, Aiguille, Loupiot, Classique, Ascendance, Prestige) — ne change JAMAIS de formule à la fin
 - Encode les espaces avec + dans l'URL
