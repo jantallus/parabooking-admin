@@ -116,39 +116,25 @@ export default function ChatWidget() {
           aria-label="Ouvrir le chat"
           style={{
             position: 'fixed',
-            bottom: '24px',
-            left: '24px',
+            bottom: '16px',
+            left: '16px',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             padding: 0,
             zIndex: 9999,
+            filter: 'drop-shadow(0 4px 12px rgba(49,39,131,0.4))',
           }}
         >
-          <div style={{ position: 'relative', display: 'inline-flex' }}>
-            <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: FLUIDE_PRIMARY,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(49,39,131,0.35)',
-            }}>
-              <MessageCircle size={24} color="white" />
-            </div>
-            <div style={{
-              position: 'absolute',
-              bottom: '-6px',
-              left: '10px',
-              width: 0,
-              height: 0,
-              borderLeft: '6px solid transparent',
-              borderRight: '3px solid transparent',
-              borderTop: `7px solid ${FLUIDE_PRIMARY}`,
-            }} />
-          </div>
+          <svg width="58" height="64" viewBox="0 0 60 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path
+              d="M30 4C44 4 53 13 53 27C53 41 44 51 30 51C24 51 18.5 49 14 45.5L5 63L18 52C12 48 7 38 7 27C7 13 16 4 30 4Z"
+              fill={FLUIDE_PRIMARY}
+            />
+            <circle cx="19" cy="27" r="3.2" fill="white" />
+            <circle cx="30" cy="27" r="3.2" fill="white" />
+            <circle cx="41" cy="27" r="3.2" fill="white" />
+          </svg>
         </button>
       )}
 
