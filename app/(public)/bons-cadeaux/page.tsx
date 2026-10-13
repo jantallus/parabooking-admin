@@ -285,6 +285,8 @@ export default function CadeauPage() {
         .content-section { display: flex; align-items: center; gap: 60px; max-width: 1400px; margin: 0 auto; padding: 70px 4vw; }
         .main-bons-cadeaux { margin-top: -90px; }
         @media (max-width: 1024px) { .main-bons-cadeaux { margin-top: 0; } }
+        .boutique-px { padding-left: 16px; padding-right: 16px; }
+        @media (min-width: 768px) { .boutique-px { padding-left: max(4vw, 74px); padding-right: max(4vw, 74px); } }
         .hero-cadeau { background: transparent !important; }
         .card-template .btn-choisir { background-color: #E6007E; transition: background-color 0.3s ease; }
         .card-template .btn-choisir:hover { background-color: #312783; }
@@ -312,7 +314,7 @@ export default function CadeauPage() {
       </section>
 
 
-      <section id="boutique" style={{ backgroundColor: '#FFFFFF', padding: '100px max(4vw, 74px)' }}>
+      <section id="boutique" className="boutique-px" style={{ backgroundColor: '#FFFFFF', paddingTop: '100px', paddingBottom: '100px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div data-reveal style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: '3rem', fontWeight: 700, color: '#312783', marginBottom: '15px' }}>Choisissez votre bon cadeau</h2>
