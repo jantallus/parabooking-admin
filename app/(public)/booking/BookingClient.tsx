@@ -1210,7 +1210,8 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         </div>
       </section>}
 
-      <div className={`relative z-20 max-w-7xl mx-auto pb-48 ${isDirect ? 'pt-6' : 'pt-12'}`} style={{ paddingLeft: 'max(4vw, 74px)', paddingRight: 'max(4vw, 74px)' }}>
+      <div style={{ paddingLeft: 'max(4vw, 74px)', paddingRight: 'max(4vw, 74px)' }}>
+      <div className={`relative z-20 max-w-7xl mx-auto pb-48 ${isDirect ? 'pt-6' : 'pt-12'}`}>
         
         {/* Chargement en mode direct — les vols n'ont pas encore été reçus de l'API */}
         {isDirect && !selectedFlight && (
@@ -2429,6 +2430,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
             </div>
           </div>
         )}
+      </div>
       </div>
 
       {/* --- PANIER BARRE + PANNEAU --- */}
