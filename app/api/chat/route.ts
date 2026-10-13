@@ -117,7 +117,26 @@ Voici quelques avis récents à citer si besoin :
 - Si tu ne sais pas quelque chose, oriente vers le téléphone ou le site
 - Ne promets pas de disponibilités spécifiques — la grille des créneaux est sur le site de réservation
 - Réponses courtes (2-4 phrases max sauf si question complexe)
-- Si la question traduit une méfiance, une inquiétude sur la sécurité ou la fiabilité (ex : "c'est sérieux ?", "est-ce dangereux ?", "comment savoir si vous êtes fiables ?"), rassure avec des faits concrets (assurance, moniteurs professionnels diplômés, expérience) ET propose le lien vers les avis Google : https://share.google/h1Nu7CC7MVmdlz283`;
+- Si la question traduit une méfiance, une inquiétude sur la sécurité ou la fiabilité (ex : "c'est sérieux ?", "est-ce dangereux ?", "comment savoir si vous êtes fiables ?"), rassure avec des faits concrets (assurance, moniteurs professionnels diplômés, expérience) ET propose le lien vers les avis Google : https://share.google/h1Nu7CC7MVmdlz283
+
+## Tunnel de réservation guidé
+Quand un visiteur souhaite réserver (ou que la conversation y mène naturellement), guide-le étape par étape en posant UNE question à la fois dans cet ordre :
+1. Quelle saison ? (hiver ou été)
+2. Quelle formule ? (propose les options adaptées à la saison et au profil : skieur ou non)
+3. Prénom et nom ?
+4. Email ?
+5. Téléphone ?
+6. Poids (en kg) ? (pour vérifier la compatibilité avec la formule)
+
+Une fois toutes les infos collectées, génère un lien de réservation pré-rempli sous cette forme :
+https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS
+
+Remplace NOM_DU_VOL par le nom exact de la formule (ex: Beauregard, Crêt du Loup, Aiguille, Loupiot, Classique, Ascendance, Prestige).
+Encode les espaces avec + dans l'URL.
+Présente ce lien comme : "Voici votre lien personnalisé — il ne vous reste plus qu'à choisir votre créneau et payer !"
+
+Ne demande pas la date : le visiteur choisira son créneau directement sur la page de réservation.
+Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien.`;
 
 export async function POST(req: NextRequest) {
   try {

@@ -283,6 +283,19 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [passengers, setPassengers] = useState<BookingPassenger[]>([]);
+  const prefillWeightRef = useRef<number | null>(null);
+
+  // Pré-remplit le formulaire depuis les query params du chatbot (?prenom=&nom=&email=&tel=&poids=)
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const prenom = p.get('prenom'); const nom = p.get('nom');
+    const email = p.get('email'); const tel = p.get('tel');
+    if (prenom || nom || email || tel) {
+      setContact(c => ({ ...c, firstName: prenom || c.firstName, lastName: nom || c.lastName, email: email || c.email, phone: tel || c.phone }));
+    }
+    const poids = p.get('poids');
+    if (poids) prefillWeightRef.current = Number(poids);
+  }, []);
   
   // 🎯 RÉFÉRENCES SÉCURISÉES POUR ÉVITER L'EFFET DOMINO (Double-clic)
   const selectedFlightRef = useRef(selectedFlight);
@@ -391,10 +404,12 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
           currentComplements.push(photoOption.id);
         }
 
+        const prefillW = prefillWeightRef.current;
+        const autoWeightChecked = prefillW !== null && prefillW >= nP.weight_min && prefillW <= nP.weight_max;
         return {
           ...nP,
           firstName: existing?.firstName || '',
-          weightChecked: existing?.weightChecked || false,
+          weightChecked: existing?.weightChecked || autoWeightChecked,
           selectedComplements: currentComplements
         };
       }));
