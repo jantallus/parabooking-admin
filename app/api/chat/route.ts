@@ -61,7 +61,7 @@ La Clusaz, Haute-Savoie (74220).
 - **Crêt du Loup** : en haut du télésiège du Crêt du Loup, sur la plateforme entre la gare d'arrivée du Crêt du Loup et celle du télésiège de la Combe des Juments.
 - **Aiguille** : même rendez-vous que le Crêt du Loup — le moniteur accompagne ensuite le client au télésiège de l'Aiguille.
 
-**Été :** les instructions précises sont envoyées par email après réservation.
+**Été (toutes formules) :** rendez-vous au départ du télésiège du Crêt du Merle. Le ou les moniteurs accompagnent ensuite les clients dans les remontées mécaniques.
 
 ## Réservation
 Réservation en ligne uniquement : https://reservation.fluide-parapente.fr/booking
