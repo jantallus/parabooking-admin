@@ -42,8 +42,8 @@ et de payer par carte bancaire via Stripe. La réservation est confirmée après
 
 Page dédiée : https://reservation.fluide-parapente.fr/bons-cadeaux
 
-Le bon cadeau est envoyé par email en PDF immédiatement après paiement.
-Validité : selon la formule choisie (généralement 12 à 18 mois).
+Le bon cadeau est envoyé par email en PDF immédiatement après paiement. Validité : 18 mois.
+Une carte physique peut être envoyée par courrier postal sur demande.
 
 ## Contraintes importantes
 

@@ -34,8 +34,13 @@ Il est recommandé de réserver à l'avance, surtout en haute saison (février e
 - **Aiguille** : skieurs confirmés uniquement
 
 ## Bons cadeaux
-Oui, il est possible d'offrir un baptême de parapente grâce aux bons cadeaux, disponibles toute l'année.
-Envoyés par email en PDF immédiatement après paiement. Validité : 12 à 18 mois selon la formule. Page dédiée : https://reservation.fluide-parapente.fr/bons-cadeaux
+Deux façons d'offrir un vol :
+
+**1. Bon cadeau (somme à valoir)** — disponible toute l'année sur https://reservation.fluide-parapente.fr/bons-cadeaux
+C'est une somme utilisable sur l'ensemble de nos prestations. Envoyé par email en PDF immédiatement après paiement. Validité : 18 mois. Une carte physique peut également être envoyée par courrier postal sur demande.
+
+**2. Offrir un vol spécifique** — directement depuis la page de réservation : https://reservation.fluide-parapente.fr/booking
+On choisit la formule souhaitée et le bon est généré pour ce vol précis.
 
 ## Conditions et contraintes
 - **Poids :** entre 20 kg et 110 kg selon la formule (Aiguille : 40–90 kg, Loupiot : 20–60 kg, autres : 20–110 kg)
