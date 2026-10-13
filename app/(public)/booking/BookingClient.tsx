@@ -292,7 +292,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [passengers, setPassengers] = useState<BookingPassenger[]>([]);
-  const prefillWeightRef = useRef<number | null>(null);
+  const prefillWeightRef = useRef<number[]>([]);
   const prefillPassengerNamesRef = useRef<string[]>([]);
   const prefillPhotosRef = useRef(false);
 
@@ -304,8 +304,9 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     if (prenom || nom || email || tel) {
       setContact(c => ({ ...c, firstName: prenom || c.firstName, lastName: nom || c.lastName, email: email || c.email, phone: tel || c.phone }));
     }
+    // Poids des passagers : ?poids=80 (1 passager) ou ?poids=80,55 (plusieurs)
     const poids = p.get('poids');
-    if (poids) prefillWeightRef.current = Number(poids);
+    if (poids) prefillWeightRef.current = poids.split(',').map(Number).filter(n => n > 0);
     if (p.get('photos') === '1') prefillPhotosRef.current = true;
     // Prénoms des passagers (?passager1=Julien&passager2=Ursula...)
     const names: string[] = [];
@@ -423,7 +424,8 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
           currentComplements.push(photoOption.id);
         }
 
-        const prefillW = prefillWeightRef.current;
+        const passengerIndexForWeight = newPassengers.indexOf(nP);
+        const prefillW = prefillWeightRef.current[passengerIndexForWeight] ?? prefillWeightRef.current[0] ?? null;
         const autoWeightChecked = prefillW !== null && prefillW >= nP.weight_min && prefillW <= nP.weight_max;
         const passengerIndex = newPassengers.indexOf(nP);
         const prefillName = prefillPassengerNamesRef.current[passengerIndex] || '';
