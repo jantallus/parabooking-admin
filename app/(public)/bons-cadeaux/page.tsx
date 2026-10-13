@@ -285,7 +285,7 @@ export default function CadeauPage() {
         .content-section { display: flex; align-items: center; gap: 60px; max-width: 1400px; margin: 0 auto; padding: 70px 4vw; }
         .main-bons-cadeaux { margin-top: -90px; }
         @media (max-width: 1024px) { .main-bons-cadeaux { margin-top: 0; } }
-        .boutique-px { padding-left: 24px; padding-right: 24px; }
+        .boutique-px { padding-left: 28px; padding-right: 28px; }
         @media (min-width: 768px) { .boutique-px { padding-left: max(4vw, 74px); padding-right: max(4vw, 74px); } }
         .hero-cadeau { background: transparent !important; }
         .card-template .btn-choisir { background-color: #E6007E; transition: background-color 0.3s ease; }
