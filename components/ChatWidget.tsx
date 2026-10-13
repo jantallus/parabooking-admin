@@ -93,36 +93,19 @@ export default function ChatWidget() {
             filter: 'drop-shadow(0 3px 10px rgba(49,39,131,0.35))',
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="58" height="58" viewBox="0 0 682.66669 682.66669" aria-hidden="true">
-            <defs>
-              <clipPath clipPathUnits="userSpaceOnUse" id="chatClip">
-                <path d="M 0,512 H 512 V 0 H 0 Z"/>
-              </clipPath>
-            </defs>
-            <mask id="chatMask">
-              <rect x="0" y="0" width="100%" height="100%" fill="white"/>
-              <g transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)">
-                <path transform="matrix(1,0,0,1,281,256)" d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:'#ffffff',fillOpacity:1,fillRule:'nonzero',stroke:'none'}}/>
-                <path transform="matrix(1,0,0,1,381,256)" d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:'#ffffff',fillOpacity:1,fillRule:'nonzero',stroke:'none'}}/>
-                <path transform="matrix(1,0,0,1,181,256)" d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:'#ffffff',fillOpacity:1,fillRule:'nonzero',stroke:'none'}}/>
+          <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 682.66669 682.66669" aria-hidden="true">
+            <g transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)">
+              <g transform="translate(256,492)">
+                <path d="m 0,0 c -130.339,0 -236,-105.661 -236,-236 0,-45.885 13.109,-88.702 35.766,-124.937 L -236,-472 l 111.063,35.766 C -88.702,-458.891 -45.885,-472 0,-472 c 130.339,0 236,105.661 236,236 C 236,-105.661 130.339,0 0,0 Z" style={{fill:FLUIDE_PRIMARY,stroke:'none'}}/>
               </g>
-            </mask>
-            <g mask="url(#chatMask)">
-              <g transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)">
-                <g clipPath="url(#chatClip)">
-                  <g transform="translate(256,492)">
-                    <path d="m 0,0 c -130.339,0 -236,-105.661 -236,-236 0,-45.885 13.109,-88.702 35.766,-124.937 L -236,-472 l 111.063,35.766 C -88.702,-458.891 -45.885,-472 0,-472 c 130.339,0 236,105.661 236,236 C 236,-105.661 130.339,0 0,0 Z" style={{fill:'none',stroke:FLUIDE_PRIMARY,strokeWidth:40,strokeLinecap:'round',strokeLinejoin:'round',strokeMiterlimit:10,strokeDasharray:'none',strokeOpacity:1}}/>
-                  </g>
-                  <g transform="translate(281,256)">
-                    <path d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:FLUIDE_PRIMARY,fillOpacity:1,fillRule:'nonzero',stroke:'none'}}/>
-                  </g>
-                  <g transform="translate(381,256)">
-                    <path d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:FLUIDE_PRIMARY,fillOpacity:1,fillRule:'nonzero',stroke:'none'}}/>
-                  </g>
-                  <g transform="translate(181,256)">
-                    <path d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:FLUIDE_PRIMARY,fillOpacity:1,fillRule:'nonzero',stroke:'none'}}/>
-                  </g>
-                </g>
+              <g transform="translate(281,256)">
+                <path d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:'#ffffff',stroke:'none'}}/>
+              </g>
+              <g transform="translate(381,256)">
+                <path d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:'#ffffff',stroke:'none'}}/>
+              </g>
+              <g transform="translate(181,256)">
+                <path d="m 0,0 c 0,-13.807 -11.193,-25 -25,-25 -13.807,0 -25,11.193 -25,25 0,13.807 11.193,25 25,25 C -11.193,25 0,13.807 0,0" style={{fill:'#ffffff',stroke:'none'}}/>
               </g>
             </g>
           </svg>
