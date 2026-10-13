@@ -18,7 +18,7 @@ function FluideArrow({ color = 'white', size = 22 }: { color?: string; size?: nu
   );
 }
 
-// Bulle de chat style WhatsApp — forme entière en SVG avec la flèche Fluide fushia
+// Bulle de chat style WhatsApp — forme entière en SVG avec icône parapente
 function ChatBubbleIcon() {
   return (
     <svg width="54" height="60" viewBox="0 0 60 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -27,12 +27,13 @@ function ChatBubbleIcon() {
         d="M30 4C44 4 53 13 53 27C53 41 44 51 30 51C24 51 18.5 49 14 45.5L5 63L18 52C12 48 7 38 7 27C7 13 16 4 30 4Z"
         fill={FLUIDE_PRIMARY}
       />
-      {/* Flèche Fluide fushia, centrée dans la bulle */}
-      <g transform="translate(20, 14) scale(0.85)">
-        <path
-          d="M24.1375 15.0092C24.4736 14.673 24.4736 14.12 24.1375 13.7839L14.5955 4.24185C14.2593 3.90571 13.7063 3.90571 13.3702 4.24185C13.034 4.57799 13.034 5.13099 13.3702 5.46713L21.4321 13.5291L0.970973 13.5291C0.493871 13.5291 0.103516 13.9194 0.103516 14.3965C0.103516 14.8736 0.493871 15.264 0.970973 15.264L21.4321 15.264L13.3702 23.3259C13.034 23.662 13.034 24.215 13.3702 24.5512C13.7063 24.8873 14.2593 24.8873 14.5955 24.5512L24.1375 15.0092Z"
-          fill={FLUIDE_SECONDARY}
-        />
+      {/* Parapente, centré dans la bulle */}
+      <g transform="translate(17, 14) scale(1)">
+        <path d="M2 13C2 5 24 5 24 13" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
+        <line x1="6.5"  y1="12.5" x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+        <line x1="13"   y1="11"   x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+        <line x1="19.5" y1="12.5" x2="13" y2="20" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+        <circle cx="13" cy="21.5" r="2" fill="white" />
       </g>
     </svg>
   );
