@@ -151,11 +151,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Messages requis' }, { status: 400 });
     }
 
+    const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const systemWithDate = `Nous sommes le ${today}. Utilise cette date comme référence absolue pour toutes les dates futures — ne génère jamais de date passée.\n\n${SYSTEM_PROMPT}`;
+
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 400,
-      system: SYSTEM_PROMPT,
-      messages: messages.slice(-10), // garde les 10 derniers messages max
+      system: systemWithDate,
+      messages: messages.slice(-10),
     });
 
     const text = response.content[0].type === 'text' ? response.content[0].text : '';
