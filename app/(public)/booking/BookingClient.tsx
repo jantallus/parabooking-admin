@@ -1523,7 +1523,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
                             <div className="mb-3">{priceEl}</div>
                             <div className="flex gap-2">
                               <button onClick={() => { setSelectedFlight(flight); setStep(2); }} className="btn-reserver cursor-pointer text-white py-3 md:py-4 rounded-[5px] font-bold flex items-center justify-center" style={{ fontSize: '1.125rem', flex: 1 }} onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#312783')} onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E6007E')}>
-                                Réserver ce vol
+                                Réserver
                               </button>
                               {!appliedVoucher && !appliedPartner && cartEmpty && (
                                 <button
