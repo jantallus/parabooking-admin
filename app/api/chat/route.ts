@@ -47,6 +47,16 @@ Disponibles pour toutes les formules hiver. Envoyés par email en PDF immédiate
 ## Vertige
 En principe non — le vertige est causé par des informations contradictoires entre les yeux, l'oreille interne et les pieds. En parapente, les pieds ne sont pas en contact avec le sol, ce qui élimine cette confusion.
 
+## Mal de l'air
+Très peu de gens en souffrent. Si vous êtes sensible en voiture ou en bateau, il est préférable de choisir un vol du matin en été (conditions très calmes). En hiver, les conditions sont calmes toute la journée.
+
+## Équipement fourni
+Nous fournissons tout l'équipement nécessaire : sellette, casque, parapente, caméra.
+Pour le confort, il est conseillé de porter des vêtements chauds, des lunettes de soleil et des chaussures de sport. En hiver, les mêmes vêtements que pour skier.
+
+## Niveau physique requis
+Aucun. Le parapente est accessible à tous. En hiver, il suffit de savoir glisser sur une piste verte. En été, quelques pas de course suffisent pour décoller. Le vol est adapté à la condition physique du client.
+
 ## Assurance
 Le moniteur possède une assurance RCA (Responsabilité Civile Aérienne) et souscrit une assurance individuelle passager couvrant tous les risques du décollage à l'atterrissage. Le passager est couvert sans avoir besoin d'une assurance personnelle.
 
