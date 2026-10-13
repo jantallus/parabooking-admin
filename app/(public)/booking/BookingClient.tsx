@@ -314,11 +314,9 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
       if (n) names.push(n); else break;
     }
     if (names.length > 0) prefillPassengerNamesRef.current = names;
-    // Photos : pré-sélectionner pour tous les passagers
-    if (p.get('photos') === '1') {
-      const count = names.length || prefillWeightRef.current.length || 1;
-      prefillPhotosRef.current = count;
-    }
+    // Photos : ?photos=N → pré-sélectionner pour N passagers
+    const photosCount = parseInt(p.get('photos') || '0', 10);
+    if (photosCount > 0) prefillPhotosRef.current = photosCount;
   }, []);
   
   // 🎯 RÉFÉRENCES SÉCURISÉES POUR ÉVITER L'EFFET DOMINO (Double-clic)
