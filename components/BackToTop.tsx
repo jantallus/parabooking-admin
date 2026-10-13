@@ -85,6 +85,13 @@ export default function BackToTop() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Ouvre la modale automatiquement si l'URL contient ?rappel=1 (ex: lien depuis le chatbot)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('rappel') === '1') openForm();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name && !form.phone && !form.email) { setError('Merci de renseigner au moins votre nom, téléphone ou email.'); return; }
