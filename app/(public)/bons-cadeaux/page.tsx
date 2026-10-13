@@ -88,6 +88,14 @@ export default function CadeauPage() {
             }
           }
 
+          // Matching par nom de vol (?flight=Crêt+du+Loup) — utilisé par le chatbot
+          const flightNameParam = params.get('flight');
+          if (flightNameParam && !targetId && !params.get('flightId')) {
+            const norm = flightNameParam.toLowerCase().trim();
+            const found = data.find(t => t.flight_name?.toLowerCase().trim() === norm);
+            if (found) setCartItems({ [found.id]: 1 });
+          }
+
           // Mode direct vol : ?flightId=X&flightName=...&flightPrice=...
           const flightId = params.get('flightId');
           if (flightId && !targetId) {
@@ -97,6 +105,14 @@ export default function CadeauPage() {
             setDirectFlightName(fName);
             setDirectFlightPrice(fPrice);
           }
+        }
+
+        // Pré-remplissage depuis le chatbot (?nom=&email=&tel=)
+        const buyerNom = params.get('nom');
+        const buyerEmail = params.get('email');
+        const buyerTel = params.get('tel');
+        if (buyerNom || buyerEmail || buyerTel) {
+          setBuyer({ name: buyerNom || '', email: buyerEmail || '', phone: buyerTel || '' });
         }
 
         // 2. On charge vos paramètres postaux
