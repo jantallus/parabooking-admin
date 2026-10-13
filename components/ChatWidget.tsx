@@ -6,6 +6,19 @@ import { X, Send } from 'lucide-react';
 const FLUIDE_PRIMARY   = '#312783';
 const FLUIDE_SECONDARY = '#E6007E';
 
+function renderMessage(text: string, isUser: boolean): React.ReactNode {
+  const linkColor = isUser ? '#a5b4fc' : FLUIDE_PRIMARY;
+  const parts = text.split(/(\[.*?\]\(https?:\/\/[^)]+\)|\*\*.*?\*\*|https?:\/\/[^\s]+)/g);
+  return parts.map((token, i) => {
+    const mdLink = token.match(/^\[(.*?)\]\((https?:\/\/[^)]+)\)$/);
+    if (mdLink) return <a key={i} href={mdLink[2]} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline' }}>{mdLink[1]}</a>;
+    const bold = token.match(/^\*\*(.*?)\*\*$/);
+    if (bold) return <strong key={i}>{bold[1]}</strong>;
+    if (/^https?:\/\//.test(token)) return <a key={i} href={token} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline' }}>{token}</a>;
+    return <span key={i}>{token}</span>;
+  });
+}
+
 function ParagliderIcon() {
   return (
     <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -167,7 +180,7 @@ export default function ChatWidget() {
                   lineHeight: '1.5',
                   whiteSpace: 'pre-wrap',
                 }}>
-                  {msg.content}
+                  {renderMessage(msg.content, msg.role === 'user')}
                 </div>
               </div>
             ))}
