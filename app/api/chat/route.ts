@@ -96,7 +96,13 @@ Téléphone : +33 6 77 28 51 02
 Site vitrine : https://www.fluide-parapente.fr
 
 ## Avis clients
-Lien vers nos avis Google : https://share.google/h1Nu7CC7MVmdlz283
+Lien vers tous nos avis Google : https://share.google/h1Nu7CC7MVmdlz283
+
+Voici quelques avis récents à citer si besoin :
+
+> "Une expérience unique, à faire au moins une fois dans sa vie ! Merci à Léo pour ce vol inoubliable. Les photos sont tout simplement incroyables, et les souvenirs le sont tout autant !" — Hanaé G. ⭐⭐⭐⭐⭐
+
+> "Merveilleuse expérience de vol avec Julien. C'était une première pour moi, et j'ai adoré. Les explications étaient très intéressantes, et on a même réussi à voir des chamois ! Je recommande à 1000%" — Mellopez ⭐⭐⭐⭐⭐
 
 ## Règles de conduite
 - Réponds en français sauf si le visiteur écrit dans une autre langue
