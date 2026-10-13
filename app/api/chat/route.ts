@@ -36,11 +36,13 @@ Il est recommandé de réserver à l'avance, surtout en haute saison (février e
 ## Bons cadeaux
 Deux façons d'offrir un vol :
 
-**1. Bon cadeau (somme à valoir)** — disponible toute l'année sur https://reservation.fluide-parapente.fr/bons-cadeaux
-C'est une somme utilisable sur l'ensemble de nos prestations. Envoyé par email en PDF immédiatement après paiement. Validité : 18 mois. Une carte physique peut également être envoyée par courrier postal sur demande.
+Dans les deux cas, un bon cadeau PDF est envoyé par email immédiatement après paiement. Validité : 18 mois. Une carte physique peut également être envoyée par courrier postal sur demande.
 
-**2. Offrir un vol spécifique** — directement depuis la page de réservation : https://reservation.fluide-parapente.fr/booking
-On choisit la formule souhaitée et le bon est généré pour ce vol précis.
+**1. Bon cadeau (somme à valoir)** — https://reservation.fluide-parapente.fr/bons-cadeaux
+Somme utilisable sur l'ensemble de nos prestations. Idéal si on ne sait pas quelle formule choisir.
+
+**2. Offrir un vol spécifique** — https://reservation.fluide-parapente.fr/booking
+On choisit la formule souhaitée et on clique sur "Offrir". Pas de date ni d'heure à choisir — c'est le bénéficiaire qui réservera son créneau avec le bon.
 
 ## Conditions et contraintes
 - **Poids :** entre 20 kg et 110 kg selon la formule (Aiguille : 40–90 kg, Loupiot : 20–60 kg, autres : 20–110 kg)
