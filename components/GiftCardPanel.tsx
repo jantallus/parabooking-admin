@@ -264,7 +264,7 @@ export default function GiftCardPanel({ selectedFlights, onClose, onValidityChan
           onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#312783'; e.currentTarget.style.color = 'white'; }}
           onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#312783'; }}
         >
-          + Offrir un vol
+          + Ajouter un vol
         </button>
         <button
           onClick={handleCheckout}
