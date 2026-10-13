@@ -29,6 +29,7 @@ Disponibles pour toutes les formules hiver. Envoyés par email en PDF immédiate
 - **Poids :** entre 20 kg et 110 kg selon la formule (Aiguille : 40–90 kg, Loupiot : 20–60 kg, autres : 20–110 kg)
 - **Âge minimum :** environ 5 ans, accompagné d'un adulte
 - **Contre-indications :** problèmes cardiaques graves, épilepsie non contrôlée, grossesse
+- **Position en vol :** le passager est assis dans un harnais biplace, pas allongé
 - **Tenue :** chaussures fermées et montantes (pas de sandales ni talons), vêtements chauds en hiver
 
 ## Météo et annulation
