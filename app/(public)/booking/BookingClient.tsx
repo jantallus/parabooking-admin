@@ -187,19 +187,24 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
 
   // pickedDate et gridStartDate déclarés avant les hooks pour que le callback onReady puisse les setter
   const [pickedDate, setPickedDate] = useState<string>(() => {
-    const dateParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('date') : null;
-    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) return dateParam;
     const defaultDate = new Date();
     if (defaultDate.getHours() >= 12) defaultDate.setDate(defaultDate.getDate() + 1);
     return getLocalYYYYMMDD(defaultDate);
   });
   const [gridStartDate, setGridStartDate] = useState<string>(() => {
-    const dateParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('date') : null;
-    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) return dateParam;
     const d = new Date();
     if (d.getHours() >= 12) d.setDate(d.getDate() + 1);
     return getLocalYYYYMMDD(d);
   });
+
+  // Applique le param ?date= après le montage (ne fonctionne pas en SSR)
+  useEffect(() => {
+    const dateParam = new URLSearchParams(window.location.search).get('date');
+    if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+      setPickedDate(dateParam);
+      setGridStartDate(dateParam);
+    }
+  }, []);
 
   // Données de base : vols, compléments, templates, saison, displayDaysCount
   const initial = (initialFlights && initialFlights.length > 0)
