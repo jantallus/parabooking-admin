@@ -23,7 +23,9 @@ Ton rôle : répondre aux questions des visiteurs de façon amicale, précise et
 **Option photos/vidéos :** 20 € (tarifs dégressifs si plusieurs personnes). Le moniteur utilise une GoPro sécurisée pendant le vol et transfère le contenu après l'activité.
 **Pack photo/vidéo OFFERT** avec le vol de l'Aiguille en hiver.
 
-**Important :** les remontées mécaniques ne sont pas incluses dans le tarif en hiver.
+**Remontées mécaniques :**
+- **Hiver :** non incluses — la plupart des clients ont déjà leur forfait de ski.
+- **Été :** un forfait remontées mécaniques est nécessaire, mais nous l'achetons pour vous (inclus dans l'organisation du vol). Concerne les week-ends de juin, juillet, août, et les week-ends de septembre.
 
 Il est recommandé de réserver à l'avance, surtout en haute saison (février et août) ou pour des groupes.
 
