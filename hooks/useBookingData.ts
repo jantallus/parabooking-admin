@@ -3,14 +3,22 @@ import { useState, useEffect } from 'react';
 import { getLocalYYYYMMDD } from '@/lib/booking-utils';
 import type { FlightType, GiftCardShopTemplate, Complement } from '@/lib/types';
 
+interface InitialData {
+  flights: FlightType[];
+  complements: Complement[];
+  giftTemplates: GiftCardShopTemplate[];
+  displayDaysCount: number;
+}
+
 export function useBookingData(
-  onReady: (dateStr: string, daysCount: number) => void
+  onReady: (dateStr: string, daysCount: number) => void,
+  initial?: InitialData,
 ) {
-  const [flights, setFlights] = useState<FlightType[]>([]);
-  const [giftTemplates, setGiftTemplates] = useState<GiftCardShopTemplate[]>([]);
-  const [complementsList, setComplementsList] = useState<Complement[]>([]);
-  const [displayDaysCount, setDisplayDaysCount] = useState<number>(3);
-  const [isLoading, setIsLoading] = useState(true);
+  const [flights, setFlights] = useState<FlightType[]>(initial?.flights ?? []);
+  const [giftTemplates, setGiftTemplates] = useState<GiftCardShopTemplate[]>(initial?.giftTemplates ?? []);
+  const [complementsList, setComplementsList] = useState<Complement[]>(initial?.complements ?? []);
+  const [displayDaysCount, setDisplayDaysCount] = useState<number>(initial?.displayDaysCount ?? 3);
+  const [isLoading, setIsLoading] = useState(!initial);
   const [activeSeason, setActiveSeason] = useState<'Standard' | 'Hiver'>('Standard');
 
   useEffect(() => {
@@ -24,10 +32,16 @@ export function useBookingData(
     }
     setActiveSeason(defaultSeason);
 
+    // Si les données initiales ont été passées depuis le serveur, on s'en sert directement.
+    if (initial) {
+      const defaultDate = new Date();
+      if (defaultDate.getHours() >= 12) defaultDate.setDate(defaultDate.getDate() + 1);
+      onReady(getLocalYYYYMMDD(defaultDate), initial.displayDaysCount);
+      return;
+    }
+
     const fetchData = async () => {
       try {
-        // Passe par le proxy Next.js (/api/proxy/...) pour ne pas exposer
-        // l'URL du backend dans le bundle client et garder une architecture cohérente.
         const [resFlights, resComplements, resPublicSettings, resTemplates] = await Promise.all([
           fetch(`/api/proxy/flight-types?t=${Date.now()}`, { cache: 'no-store' }),
           fetch(`/api/proxy/complements?t=${Date.now()}`, { cache: 'no-store' }),

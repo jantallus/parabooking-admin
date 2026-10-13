@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { FlightType, GiftCard, Partner, PublicSlot, Passenger } from '@/lib/types';
+import type { FlightType, GiftCard, Partner, PublicSlot, Passenger, Complement, GiftCardShopTemplate } from '@/lib/types';
 import { useBookingData } from '@/hooks/useBookingData';
 import { useAvailabilities } from '@/hooks/useAvailabilities';
 
@@ -36,7 +36,16 @@ function cloudinaryOptimize(url: string, w = 600, h = 300): string {
 }
 
 
-export default function ReserverPage({ volOverride, seasonOverride }: { volOverride?: string; seasonOverride?: 'Standard' | 'Hiver' } = {}) {
+interface ReserverPageProps {
+  volOverride?: string;
+  seasonOverride?: 'Standard' | 'Hiver';
+  initialFlights?: FlightType[];
+  initialComplements?: Complement[];
+  initialGiftTemplates?: GiftCardShopTemplate[];
+  initialDisplayDaysCount?: number;
+}
+
+export default function ReserverPage({ volOverride, seasonOverride, initialFlights, initialComplements, initialGiftTemplates, initialDisplayDaysCount }: ReserverPageProps = {}) {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const volParam = volOverride ?? searchParams.get('vol');
@@ -189,11 +198,15 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
   });
 
   // Données de base : vols, compléments, templates, saison, displayDaysCount
+  const initial = (initialFlights && initialFlights.length > 0)
+    ? { flights: initialFlights, complements: initialComplements ?? [], giftTemplates: initialGiftTemplates ?? [], displayDaysCount: initialDisplayDaysCount ?? 3 }
+    : undefined;
   const { flights, giftTemplates, complementsList, displayDaysCount, isLoading, activeSeason, setActiveSeason } = useBookingData(
     (dateStr, count) => {
       setPickedDate(dateStr);
       setGridStartDate(calculateGridStart(dateStr, count));
-    }
+    },
+    initial,
   );
 
   useEffect(() => {
