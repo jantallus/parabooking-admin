@@ -93,9 +93,9 @@ export default function ChatWidget() {
           {/* Forme bulle de chat */}
           <div style={{ position: 'relative', display: 'inline-flex' }}>
             <div style={{
-              width: '60px',
-              height: '52px',
-              borderRadius: '18px',
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
               background: FLUIDE_PRIMARY,
               display: 'flex',
               alignItems: 'center',
@@ -107,13 +107,13 @@ export default function ChatWidget() {
             {/* Queue de la bulle */}
             <div style={{
               position: 'absolute',
-              bottom: '-7px',
-              left: '14px',
+              bottom: '-6px',
+              left: '10px',
               width: 0,
               height: 0,
-              borderLeft: '7px solid transparent',
+              borderLeft: '6px solid transparent',
               borderRight: '3px solid transparent',
-              borderTop: `8px solid ${FLUIDE_PRIMARY}`,
+              borderTop: `7px solid ${FLUIDE_PRIMARY}`,
             }} />
           </div>
         </button>
