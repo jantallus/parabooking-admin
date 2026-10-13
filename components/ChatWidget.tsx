@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Send } from 'lucide-react';
+import { X, Send, MessageCircle } from 'lucide-react';
 
 const FLUIDE_PRIMARY   = '#312783';
 const FLUIDE_SECONDARY = '#E6007E';
@@ -116,17 +116,39 @@ export default function ChatWidget() {
           aria-label="Ouvrir le chat"
           style={{
             position: 'fixed',
-            bottom: '16px',
-            left: '16px',
+            bottom: '24px',
+            left: '24px',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
             padding: 0,
             zIndex: 9999,
-            filter: 'drop-shadow(0 4px 12px rgba(49,39,131,0.4))',
           }}
         >
-          <ChatBubbleIcon />
+          <div style={{ position: 'relative', display: 'inline-flex' }}>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: FLUIDE_PRIMARY,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(49,39,131,0.35)',
+            }}>
+              <MessageCircle size={24} color="white" />
+            </div>
+            <div style={{
+              position: 'absolute',
+              bottom: '-6px',
+              left: '10px',
+              width: 0,
+              height: 0,
+              borderLeft: '6px solid transparent',
+              borderRight: '3px solid transparent',
+              borderTop: `7px solid ${FLUIDE_PRIMARY}`,
+            }} />
+          </div>
         </button>
       )}
 
