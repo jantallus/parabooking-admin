@@ -3,6 +3,7 @@ import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import ConsentBanner from '@/components/ui/ConsentBanner';
 import RevealProvider from '@/components/RevealProvider';
+import ChatWidget from '@/components/ChatWidget';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,6 +17,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         </ToastProvider>
       </main>
       <ConsentBanner />
+      <ChatWidget />
     </div>
   );
 }
