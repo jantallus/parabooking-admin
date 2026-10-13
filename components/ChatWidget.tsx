@@ -83,21 +83,39 @@ export default function ChatWidget() {
             position: 'fixed',
             bottom: '24px',
             left: '24px',
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            background: FLUIDE_PRIMARY,
-            color: '#fff',
+            background: 'none',
             border: 'none',
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(49,39,131,0.35)',
+            padding: 0,
             zIndex: 9999,
           }}
         >
-          <ParagliderIcon />
+          {/* Forme bulle de chat */}
+          <div style={{ position: 'relative', display: 'inline-flex' }}>
+            <div style={{
+              width: '60px',
+              height: '52px',
+              borderRadius: '18px',
+              background: FLUIDE_PRIMARY,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(49,39,131,0.35)',
+            }}>
+              <ParagliderIcon />
+            </div>
+            {/* Queue de la bulle */}
+            <div style={{
+              position: 'absolute',
+              bottom: '-7px',
+              left: '14px',
+              width: 0,
+              height: 0,
+              borderLeft: '7px solid transparent',
+              borderRight: '3px solid transparent',
+              borderTop: `8px solid ${FLUIDE_PRIMARY}`,
+            }} />
+          </div>
         </button>
       )}
 
