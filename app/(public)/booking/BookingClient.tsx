@@ -295,6 +295,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const prefillWeightRef = useRef<number[]>([]);
   const prefillPassengerNamesRef = useRef<string[]>([]);
   const prefillPhotosRef = useRef(0);
+  const [chatbotPassengerNames, setChatbotPassengerNames] = useState(false);
 
   // Pré-remplit le formulaire depuis les query params du chatbot (?prenom=&nom=&email=&tel=&poids=&passager1=&passager2=...)
   useEffect(() => {
@@ -313,7 +314,10 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
       const n = p.get(`passager${i}`);
       if (n) names.push(n); else break;
     }
-    if (names.length > 0) prefillPassengerNamesRef.current = names;
+    if (names.length > 0) {
+      prefillPassengerNamesRef.current = names;
+      setChatbotPassengerNames(true);
+    }
     // Photos : ?photos=N → pré-sélectionner pour N passagers
     const photosCount = parseInt(p.get('photos') || '0', 10);
     if (photosCount > 0) prefillPhotosRef.current = photosCount;
@@ -2322,10 +2326,12 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                   />
                 </div>
 
-                <label className="flex items-center gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors" style={{ backgroundColor: 'rgba(0,159,227,0.06)', borderColor: 'rgba(0,159,227,0.2)' }}>
-                  <input type="checkbox" style={cbStyle(contact.isPassenger)} checked={contact.isPassenger} onChange={e => setContact({...contact, isPassenger: e.target.checked})} />
-                  <span style={{ fontSize: '1rem', fontWeight: 700, color: '#312783' }}>Je suis aussi l'un des passagers (m'ajouter au vol)</span>
-                </label>
+                {!chatbotPassengerNames && (
+                  <label className="flex items-center gap-3 cursor-pointer p-4 rounded-[10px] border transition-colors" style={{ backgroundColor: 'rgba(0,159,227,0.06)', borderColor: 'rgba(0,159,227,0.2)' }}>
+                    <input type="checkbox" style={cbStyle(contact.isPassenger)} checked={contact.isPassenger} onChange={e => setContact({...contact, isPassenger: e.target.checked})} />
+                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#312783' }}>Je suis aussi l'un des passagers (m'ajouter au vol)</span>
+                  </label>
+                )}
               </div>
 
               {/* SECTION 2 : PASSAGERS */}
