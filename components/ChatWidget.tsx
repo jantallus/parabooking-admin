@@ -50,7 +50,10 @@ function renderMessage(text: string, isUser: boolean): React.ReactNode {
     const mdLink = token.match(/^\[(.*?)\]\((https?:\/\/[^)]+)\)$/);
     if (mdLink) return <a key={i} href={mdLink[2]} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline' }}>{mdLink[1]}</a>;
     const bold = token.match(/^\*\*(.*?)\*\*$/);
-    if (bold) return <strong key={i}>{bold[1]}</strong>;
+    if (bold) {
+      if (/^https?:\/\//.test(bold[1])) return <a key={i} href={bold[1]} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline', fontWeight: 600 }}>{bold[1]}</a>;
+      return <strong key={i}>{bold[1]}</strong>;
+    }
     if (/^https?:\/\//.test(token)) return <a key={i} href={token} target="_blank" rel="noopener noreferrer" style={{ color: linkColor, textDecoration: 'underline' }}>{token}</a>;
     return <span key={i}>{token}</span>;
   });
