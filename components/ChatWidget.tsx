@@ -32,8 +32,27 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [bottomOffset, setBottomOffset] = useState(24);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Remonte la fenêtre quand le clavier mobile apparaît
+  useEffect(() => {
+    if (!open) { setBottomOffset(24); return; }
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const offset = window.innerHeight - vv.height - vv.offsetTop;
+      setBottomOffset(Math.max(24, offset + 8));
+    };
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    update();
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (open && messages.length === 0) {
@@ -117,12 +136,12 @@ export default function ChatWidget() {
         <div
           style={{
             position: 'fixed',
-            bottom: '24px',
+            bottom: `${bottomOffset}px`,
             left: '24px',
             width: '360px',
             maxWidth: 'calc(100vw - 32px)',
             height: '480px',
-            maxHeight: 'calc(100vh - 48px)',
+            maxHeight: `calc(100vh - ${bottomOffset + 16}px)`,
             background: '#fff',
             borderRadius: '16px',
             boxShadow: '0 8px 32px rgba(49,39,131,0.18)',
