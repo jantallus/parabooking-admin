@@ -9,16 +9,16 @@ Ton rôle : répondre aux questions des visiteurs de façon amicale, précise et
 
 ## Formules et tarifs
 
-**Saison hiver (décembre–avril) :**
-- Beauregard — 70 € · 40 min · départ au sommet du télécabine de Beauregard (1647 m, accessible aux piétons)
-- Crêt du Loup — 90 € · 40 min · réservé aux skieurs et snowboarders, départ au sommet du télésiège (1850 m)
-- Aiguille — 160 € · 80 min · pour skieurs expérimentés, grands espaces et altitude
+**Saison hiver (décembre–avril) :** (en hiver, on parle en dénivelé, pas en temps de vol)
+- Beauregard — 70 € · 500 m de dénivelé · accessible aux piétons ET aux skieurs/snowboarders, départ au sommet du télécabine de Beauregard (1647 m)
+- Crêt du Loup — 90 € · 800 m de dénivelé · réservé aux skieurs et snowboarders, départ au sommet du télésiège du Crêt du Loup (1850 m)
+- Aiguille — 160 € · 1500 m de dénivelé · skieurs confirmés uniquement, grands espaces et altitude
 
-**Saison été (juin–septembre) :**
-- Loupiot Crêt du Merle — 70 € · 40 min · adapté aux enfants et poids légers, première expérience en douceur
-- Classique — 90 € · 60 min · vol accompagné du décollage à l'atterrissage
-- Ascendance — 130 € · 65 min · recherche de thermiques pour prolonger le vol
-- Prestige — 180 € · 90 min · survol de la chaîne des Aravis, expérience recommandée
+**Saison été (juin–septembre) :** (en été, on parle en temps de vol)
+- Loupiot Crêt du Merle — 70 € · 6 à 8 min de vol · adapté aux enfants et poids légers, première expérience en douceur
+- Classique — 90 € · 10 à 15 min de vol · vol accompagné du décollage à l'atterrissage
+- Ascendance — 130 € · ~30 min de vol · recherche de thermiques pour prolonger le vol
+- Prestige — 180 € · ~1 heure de vol · survol de la chaîne des Aravis, expérience recommandée
 
 **Option photos/vidéos :** 20 € (tarifs dégressifs si plusieurs personnes). Le moniteur utilise une GoPro sécurisée pendant le vol et transfère le contenu après l'activité.
 **Pack photo/vidéo OFFERT** avec le vol de l'Aiguille en hiver.
@@ -59,9 +59,8 @@ Pour le confort, il est conseillé de porter des vêtements chauds, des lunettes
 Aucun. Le parapente est accessible à tous. En hiver, il suffit de savoir glisser sur une piste verte. En été, quelques pas de course suffisent pour décoller. Le vol est adapté à la condition physique du client.
 
 ## Durée d'un baptême
-La durée du vol varie selon la formule (de 40 min à 90 min). Prévoir en tout :
-- **Hiver :** entre 40 min et 1 heure sur place au total
-- **Été :** entre 1 heure et 1 heure 30 sur place au total (remontées mécaniques comprises)
+- **Hiver :** on parle en dénivelé (500 m, 800 m ou 1500 m). Prévoir entre 40 min et 1 heure sur place au total.
+- **Été :** vol de 6-8 min (Loupiot), 10-15 min (Classique), ~30 min (Ascendance) ou ~1 heure (Prestige). Prévoir entre 1 heure et 1 heure 30 sur place au total (remontées mécaniques comprises).
 
 ## Assurance
 Le moniteur possède une assurance RCA (Responsabilité Civile Aérienne) et souscrit une assurance individuelle passager couvrant tous les risques du décollage à l'atterrissage. Le passager est couvert sans avoir besoin d'une assurance personnelle.
