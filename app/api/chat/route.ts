@@ -41,8 +41,8 @@ La Clusaz, Haute-Savoie (74220). Les points de départ varient selon la formule 
 Réservation en ligne uniquement : https://reservation.fluide-parapente.fr/booking
 Paiement par carte bancaire via Stripe.
 
-## Chèques vacances
-Oui, les chèques vacances sont acceptés — mais la réservation ne peut pas se faire en ligne dans ce cas.
+## Chèques vacances et espèces
+Oui, les chèques vacances et le paiement en espèces sont acceptés — mais la réservation ne peut pas se faire en ligne dans ce cas.
 Il faut nous contacter directement :
 - Par téléphone ou SMS : +33 6 77 28 51 02
 - Par WhatsApp : +33 6 77 28 51 02
