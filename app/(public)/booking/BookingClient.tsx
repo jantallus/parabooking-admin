@@ -294,6 +294,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const [passengers, setPassengers] = useState<BookingPassenger[]>([]);
   const prefillWeightRef = useRef<number | null>(null);
   const prefillPassengerNamesRef = useRef<string[]>([]);
+  const prefillPhotosRef = useRef(false);
 
   // Pré-remplit le formulaire depuis les query params du chatbot (?prenom=&nom=&email=&tel=&poids=&passager1=&passager2=...)
   useEffect(() => {
@@ -305,6 +306,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     }
     const poids = p.get('poids');
     if (poids) prefillWeightRef.current = Number(poids);
+    if (p.get('photos') === '1') prefillPhotosRef.current = true;
     // Prénoms des passagers (?passager1=Julien&passager2=Ursula...)
     const names: string[] = [];
     for (let i = 1; i <= 10; i++) {
@@ -825,6 +827,15 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     c.name.toLowerCase().includes('video') ||
     c.name.toLowerCase().includes('gopro')
   );
+
+  // Pré-sélectionne les photos si ?photos=1 et que l'option est chargée
+  useEffect(() => {
+    if (!prefillPhotosRef.current || !photoOption) return;
+    prefillPhotosRef.current = false;
+    const updated = { ...pendingComplementsRef.current, [photoOption.id]: 1 };
+    pendingComplementsRef.current = updated;
+    setPendingComplements(updated);
+  }, [photoOption?.id]);
 
   const getComplementCartCount = (compId: number): number => {
     if (passengers.length > 0) {

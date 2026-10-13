@@ -133,12 +133,13 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
 7. Téléphone ?
 
 Une fois toutes les infos collectées, génère un lien de réservation pré-rempli sous cette forme :
-https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS&passager1=PRENOM_PASSAGER_1&passager2=PRENOM_PASSAGER_2
+https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS&passager1=PRENOM_P1&passager2=PRENOM_P2&photos=1
 
 - Remplace NOM_DU_VOL par le nom exact de la formule convenue pendant la conversation (ex: Beauregard, Crêt+du+Loup, Aiguille, Loupiot, Classique, Ascendance, Prestige) — ne change JAMAIS de formule à la fin
-- Encode les espaces avec + dans l'URL
+- Encode les espaces avec + dans l'URL (ex: Crêt+du+Loup)
 - Inclus &date= seulement si une date a été mentionnée
-- Inclus &passagers= seulement si N > 1
+- Inclus TOUJOURS &passager1=PRENOM et &passager2=PRENOM etc. pour chaque passager avec leur prénom exact tel que donné — ne jamais omettre ces paramètres
+- Inclus &photos=1 seulement si le visiteur a confirmé vouloir les photos/vidéos
 - Présente ce lien sous la forme d'un bouton markdown : [Finaliser ma réservation →](URL_COMPLETE) — ne pas afficher l'URL brute
 - Si plusieurs passagers, précise qu'il faudra sélectionner un créneau par personne
 - Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien`;
