@@ -1210,7 +1210,7 @@ export default function ReserverPage({ volOverride, seasonOverride }: { volOverr
         </div>
       </section>}
 
-      <div className={`relative z-20 max-w-7xl mx-auto px-4 pb-48 ${isDirect ? 'pt-6' : 'pt-12'}`}>
+      <div className={`relative z-20 max-w-7xl mx-auto pb-48 ${isDirect ? 'pt-6' : 'pt-12'}`} style={{ paddingLeft: 'max(4vw, 74px)', paddingRight: 'max(4vw, 74px)' }}>
         
         {/* Chargement en mode direct — les vols n'ont pas encore été reçus de l'API */}
         {isDirect && !selectedFlight && (
