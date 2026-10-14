@@ -16,12 +16,13 @@ interface Props {
   onClose: () => void;
   onValidityChange?: (valid: boolean) => void;
   onTotalPriceChange?: (price: number) => void;
+  initialBuyer?: { name: string; email: string; phone: string };
 }
 
-export default function GiftCardPanel({ selectedFlights, onClose, onValidityChange, onTotalPriceChange }: Props) {
+export default function GiftCardPanel({ selectedFlights, onClose, onValidityChange, onTotalPriceChange, initialBuyer }: Props) {
   const { toast } = useToast();
   const panelRef = useRef<HTMLDivElement>(null);
-  const [buyer, setBuyer] = useState({ name: '', email: '', phone: '' });
+  const [buyer, setBuyer] = useState(initialBuyer ?? { name: '', email: '', phone: '' });
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const [shippingSettings, setShippingSettings] = useState({ enabled: false, price: 0 });

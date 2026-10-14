@@ -51,6 +51,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const volParam = volOverride ?? searchParams.get('vol');
   const isDirect = !!volParam;
   const bonParam = searchParams.get('bon');
+  const offrirParam = searchParams.get('offrir'); // nom du vol à pré-sélectionner en mode cadeau
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
@@ -256,6 +257,17 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     };
     apply();
   }, [bonParam, flights]);
+
+  // Mode offrir depuis chatbot : ?offrir=Beauregard → auto-ajoute au panier cadeau
+  const giftAutoTriggeredRef = useRef(false);
+  useEffect(() => {
+    if (!offrirParam || flights.length === 0 || giftAutoTriggeredRef.current) return;
+    const regex = new RegExp('\\b' + offrirParam + '\\b', 'i');
+    const match = flights.find(f => regex.test(f.name));
+    if (!match) return;
+    giftAutoTriggeredRef.current = true;
+    addToGiftCart(match.id);
+  }, [offrirParam, flights]);
 
   // Mode direct : sélectionne le vol correspondant à ?vol= dès que l'API répond
   useEffect(() => {
@@ -1621,6 +1633,11 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                 onClose={() => { setGiftCartQty({}); setGiftSelectionOrder([]); }}
                 onValidityChange={setGiftFormValid}
                 onTotalPriceChange={setGiftTotalPrice}
+                initialBuyer={offrirParam ? {
+                  name: searchParams.get('nom') || '',
+                  email: searchParams.get('email') || '',
+                  phone: searchParams.get('tel') || '',
+                } : undefined}
               />
             )}
           </div>

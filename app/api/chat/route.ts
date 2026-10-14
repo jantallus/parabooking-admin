@@ -65,7 +65,7 @@ Génère ensuite ce lien markdown : [Finaliser mon bon cadeau →](https://reser
 
 ⚠️ Ne demande PAS le nombre de personnes, PAS le poids, PAS la date — le bénéficiaire choisira lui-même son créneau quand il utilisera le bon.
 
-Génère ensuite ce lien markdown : [Finaliser mon bon cadeau →](https://reservation.fluide-parapente.fr/bons-cadeaux?flight=NOM_VOL&nom=PRENOM+NOM&email=EMAIL&tel=TELEPHONE)
+Génère ensuite ce lien markdown : [Finaliser mon bon cadeau →](https://reservation.fluide-parapente.fr/booking?offrir=NOM_VOL&nom=PRENOM+NOM&email=EMAIL&tel=TELEPHONE)
 — NOM_VOL = nom exact encodé (ex: Crêt+du+Loup, Beauregard, Aiguille, Classique, Ascendance, Prestige, Loupiot)
 
 Inclus un récapitulatif avant le lien (formule, acheteur, email, tel).
