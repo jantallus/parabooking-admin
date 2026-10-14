@@ -208,13 +208,16 @@ export async function POST(req: NextRequest) {
     });
 
     const raw = response.content[0].type === 'text' ? response.content[0].text : '';
-    const jsonStr = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim();
-    try {
-      const parsed = JSON.parse(jsonStr);
-      return NextResponse.json({ reply: parsed.reply ?? raw, suggestions: parsed.suggestions ?? [] });
-    } catch {
-      return NextResponse.json({ reply: raw, suggestions: [] });
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.reply) {
+          return NextResponse.json({ reply: parsed.reply, suggestions: parsed.suggestions ?? [] });
+        }
+      } catch { /* fall through */ }
     }
+    return NextResponse.json({ reply: raw, suggestions: [] });
   } catch (err) {
     console.error('Chat error:', err);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
