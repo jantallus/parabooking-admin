@@ -2,6 +2,19 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.parabooking.app';
+
+const checkAvailabilityTool: Anthropic.Tool = {
+  name: 'check_availability',
+  description: "Vérifie les créneaux disponibles pour une date précise. Utilise cet outil dès qu'un visiteur mentionne une date spécifique pour voler.",
+  input_schema: {
+    type: 'object',
+    properties: {
+      date: { type: 'string', description: 'Date au format YYYY-MM-DD' },
+    },
+    required: ['date'],
+  },
+};
 
 const SYSTEM_PROMPT = `Tu es l'assistant de Fluide Parapente, une école de parapente proposant des baptêmes biplaces à La Clusaz (Haute-Savoie, France).
 
@@ -159,6 +172,13 @@ Voici quelques avis récents à citer si besoin :
 - Réponses courtes (2-4 phrases max sauf si question complexe)
 - Si la question traduit une méfiance, une inquiétude sur la sécurité ou la fiabilité (ex : "c'est sérieux ?", "est-ce dangereux ?", "comment savoir si vous êtes fiables ?"), rassure avec des faits concrets (assurance, moniteurs professionnels diplômés, expérience) ET propose le lien vers les avis Google : https://share.google/h1Nu7CC7MVmdlz283
 
+## Disponibilités en temps réel
+Quand un visiteur mentionne une date précise pour voler (ex : "le 28 décembre", "le 15 janvier"), utilise l'outil check_availability pour vérifier les créneaux disponibles ce jour-là.
+- Présente les horaires disponibles sous forme de chips (suggestions) : ["09:00", "10:30", "14:00"] etc.
+- Quand le visiteur choisit un horaire, inclus &heure=HH:MM dans le lien de réservation, en plus de &date=YYYY-MM-DD
+- Si aucun créneau n'est disponible ce jour-là, dis-le clairement et propose de choisir une autre date ou le tunnel rappel
+- N'utilise l'outil QUE pour une date précise — pas pour "en décembre", "cet été", "les vacances de février"
+
 ## Format de réponse obligatoire
 Réponds TOUJOURS en JSON valide avec ces champs :
 {
@@ -230,6 +250,7 @@ https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&p
 - Remplace NOM_DU_VOL par le nom exact de la formule convenue pendant la conversation (ex: Beauregard, Crêt+du+Loup, Aiguille, Loupiot, Classique, Ascendance, Prestige) — ne change JAMAIS de formule à la fin
 - Encode les espaces avec + dans l'URL (ex: Crêt+du+Loup)
 - Inclus &date= seulement si une date a été mentionnée
+- Inclus &heure=HH:MM si un créneau précis a été choisi via l'outil check_availability (ex : &heure=09:00)
 - Inclus TOUJOURS &passager1=PRENOM et &passager2=PRENOM etc. pour chaque passager avec leur prénom exact tel que donné — ne jamais omettre ces paramètres
 - Inclus &photos=N (ex: &photos=2) uniquement si au moins 1 passager veut les photos — N = nombre exact de passagers qui souhaitent l'option (1, 2, etc.) — si personne ne veut les photos, n'inclus PAS &photos dans l'URL
 - Présente ce lien sous la forme d'un bouton markdown : [Finaliser ma réservation →](URL_COMPLETE) — ne pas afficher l'URL brute
@@ -247,14 +268,53 @@ export async function POST(req: NextRequest) {
     const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const systemWithDate = `Nous sommes le ${today}. Utilise cette date comme référence absolue pour toutes les dates futures — ne génère jamais de date passée.\n\n${SYSTEM_PROMPT}`;
 
-    const response = await client.messages.create({
+    const apiMessages = messages.slice(-20).map(({ role, content }: { role: 'user' | 'assistant'; content: string }) => ({ role, content }));
+
+    let response = await client.messages.create({
       model: 'claude-haiku-4-5',
       max_tokens: 1000,
       system: systemWithDate,
-      messages: messages.slice(-20).map(({ role, content }: { role: 'user' | 'assistant'; content: string }) => ({ role, content })),
+      tools: [checkAvailabilityTool],
+      messages: apiMessages,
     });
 
-    const raw = response.content[0].type === 'text' ? response.content[0].text : '';
+    // Gestion du tool use (check_availability)
+    if (response.stop_reason === 'tool_use') {
+      const toolBlock = response.content.find(b => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
+      if (toolBlock?.name === 'check_availability') {
+        const { date } = toolBlock.input as { date: string };
+        let toolResult: string;
+        try {
+          const availRes = await fetch(`${API_URL}/api/public/availabilities?start=${date}&end=${date}`);
+          const slots: Array<{ status: string; start_time: string }> = await availRes.json();
+          const times = [...new Set(
+            slots
+              .filter(s => s.status === 'available')
+              .map(s => new Date(s.start_time).toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }))
+          )].sort();
+          toolResult = times.length > 0
+            ? `Créneaux disponibles le ${date} : ${times.join(', ')}`
+            : `Aucun créneau disponible le ${date}.`;
+        } catch {
+          toolResult = `Impossible de récupérer les disponibilités pour le ${date}.`;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = await client.messages.create({
+          model: 'claude-haiku-4-5',
+          max_tokens: 1000,
+          system: systemWithDate,
+          tools: [checkAvailabilityTool],
+          messages: [
+            ...apiMessages,
+            { role: 'assistant' as const, content: response.content as any },
+            { role: 'user' as const, content: [{ type: 'tool_result' as const, tool_use_id: toolBlock.id, content: toolResult }] },
+          ],
+        });
+      }
+    }
+
+    const raw = response.content.find(b => b.type === 'text')?.text ?? '';
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       try {

@@ -312,6 +312,13 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const prefillWeightRef = useRef<number[]>([]);
   const prefillPassengerNamesRef = useRef<string[]>([]);
   const prefillPhotosRef = useRef(0);
+  const prefillDateForHeureRef = useRef<string | null>(
+    typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('date') || null) : null
+  );
+  const prefillHeureRef = useRef<string | null>(
+    typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('heure') || null) : null
+  );
+  const heureAutoAddedRef = useRef(false);
   const [chatbotPassengerNames, setChatbotPassengerNames] = useState(false);
   const [chatbotPassengerCount, setChatbotPassengerCount] = useState(0);
 
@@ -733,6 +740,19 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
 
     return grid;
   }, [rawSlots, selectedFlight, cart, gridStartDate, flights, displayDaysCount]);
+
+  // Auto-ajout du créneau depuis ?heure= (chatbot → page de réservation)
+  useEffect(() => {
+    if (heureAutoAddedRef.current) return;
+    if (!prefillHeureRef.current || !prefillDateForHeureRef.current || !selectedFlight) return;
+    const date = prefillDateForHeureRef.current;
+    const heure = prefillHeureRef.current;
+    const capacity = gridData[date]?.[heure] ?? 0;
+    if (capacity <= 0) return;
+    heureAutoAddedRef.current = true;
+    const key = `${selectedFlight.id}|${date}|${heure}`;
+    setCart(prev => ({ ...prev, [key]: 1 }));
+  }, [gridData, selectedFlight]);
 
   // Dates qui ont des créneaux pilote planifiés mais tous complets (capacity=0)
   const fullDates = useMemo(() => {
