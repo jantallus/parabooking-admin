@@ -111,6 +111,8 @@ Nos tarifs peuvent sembler plus élevés que certains concurrents, et c'est assu
 
 Cette rigueur n'est pas systématiquement observée chez tous les concurrents.
 
+Une nuance pour le vol Prestige (et dans une moindre mesure pour les autres) : si après 45 min le passager montre des signes de fatigue ou de mal de l'air, le moniteur préférera poser plutôt que de gâcher l'expérience avec un quart d'heure de trop. Cette décision se prend toujours en concertation avec le passager.
+
 ## Assurance
 Le moniteur possède une assurance RCA (Responsabilité Civile Aérienne) et souscrit une assurance individuelle passager couvrant tous les risques du décollage à l'atterrissage. Le passager est couvert sans avoir besoin d'une assurance personnelle.
 
