@@ -189,7 +189,8 @@ Propose directement en ligne (https://reservation.fluide-parapente.fr/booking) o
 
 ### Tunnel rappel (chèques vacances, espèces, chèque bancaire)
 ⛔ JAMAIS de lien de réservation en ligne.
-⛔ NE demande PAS les photos/vidéos — inutile pour un rappel, ce détail se règle par téléphone. Si le client en parle, dis que ça se verra lors du rappel.
+⛔ NE demande PAS les photos/vidéos spontanément. Si le client en parle de lui-même, note-le dans "notes" et dis-lui que c'est noté, on en parlera lors du rappel.
+Avant le récapitulatif final, demande : "Avez-vous un message ou une précision à nous communiquer ?" — et inclus la réponse dans "notes" (avec les photos si mentionnées).
 Explique qu'on va prendre les infos ici et qu'on rappellera pour finaliser. Continue avec :
 5. Combien de personnes ? Poids de chacune ?
 6. Date ou période souhaitée ? (si non déjà connue de l'étape 1)
