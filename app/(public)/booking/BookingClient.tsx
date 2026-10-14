@@ -266,7 +266,12 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     const match = flights.find(f => regex.test(f.name));
     if (!match) return;
     giftAutoTriggeredRef.current = true;
-    addToGiftCart(match.id);
+    const qty = Math.max(1, parseInt(searchParams.get('qty') || '1', 10));
+    adjustGiftQty(match.id, qty);
+    setTimeout(() => {
+      const panel = document.getElementById('gift-panel');
+      if (panel) window.scrollTo({ top: panel.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+    }, 50);
   }, [offrirParam, flights]);
 
   // Mode direct : sélectionne le vol correspondant à ?vol= dès que l'API répond
