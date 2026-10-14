@@ -6,10 +6,17 @@ import { X, Send } from 'lucide-react';
 const FLUIDE_PRIMARY   = '#312783';
 const FLUIDE_SECONDARY = '#E6007E';
 
+interface RappelData {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   suggestions?: string[];
+  rappel?: RappelData | null;
 }
 
 function renderMessage(text: string, isUser: boolean): React.ReactNode {
@@ -42,6 +49,8 @@ export default function ChatWidget() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [bottomOffset, setBottomOffset] = useState(24);
+  const [rappelSent, setRappelSent] = useState(false);
+  const [rappelSending, setRappelSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -77,6 +86,28 @@ export default function ChatWidget() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
+  async function sendRappel(data: RappelData) {
+    if (rappelSending || rappelSent) return;
+    setRappelSending(true);
+    try {
+      const res = await fetch('/api/rappel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }),
+      });
+      if (res.ok) {
+        setRappelSent(true);
+        setMessages(prev => [...prev, { role: 'assistant', content: 'Votre demande a bien été envoyée ! Nous vous recontactons très prochainement. 😊' }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'assistant', content: 'Une erreur est survenue lors de l\'envoi. Appelez-nous au +33 6 77 28 51 02.' }]);
+      }
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.' }]);
+    } finally {
+      setRappelSending(false);
+    }
+  }
+
   async function sendSuggestion(text: string) {
     if (loading) return;
     const newMessages: Message[] = [...messages, { role: 'user', content: text }];
@@ -85,7 +116,7 @@ export default function ChatWidget() {
     try {
       const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: newMessages }) });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [] }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [], rappel: data.rappel ?? null }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.', suggestions: [] }]);
     } finally {
@@ -110,7 +141,7 @@ export default function ChatWidget() {
         body: JSON.stringify({ messages: newMessages }),
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [] }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [], rappel: data.rappel ?? null }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.' }]);
     } finally {
@@ -223,6 +254,17 @@ export default function ChatWidget() {
                           {s}
                         </button>
                       ))}
+                    </div>
+                  )}
+                  {isLast && !loading && msg.role === 'assistant' && msg.rappel && !rappelSent && (
+                    <div style={{ marginTop: '10px', paddingLeft: '2px' }}>
+                      <button
+                        onClick={() => sendRappel(msg.rappel!)}
+                        disabled={rappelSending}
+                        style={{ padding: '10px 18px', borderRadius: '20px', background: rappelSending ? '#94a3b8' : FLUIDE_SECONDARY, color: '#fff', border: 'none', fontSize: '13.5px', fontWeight: 700, cursor: rappelSending ? 'default' : 'pointer' }}
+                      >
+                        {rappelSending ? 'Envoi...' : 'Confirmer ma demande →'}
+                      </button>
                     </div>
                   )}
                 </div>

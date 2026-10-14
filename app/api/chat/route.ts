@@ -151,13 +151,15 @@ Voici quelques avis récents à citer si besoin :
 - Si la question traduit une méfiance, une inquiétude sur la sécurité ou la fiabilité (ex : "c'est sérieux ?", "est-ce dangereux ?", "comment savoir si vous êtes fiables ?"), rassure avec des faits concrets (assurance, moniteurs professionnels diplômés, expérience) ET propose le lien vers les avis Google : https://share.google/h1Nu7CC7MVmdlz283
 
 ## Format de réponse obligatoire
-Réponds TOUJOURS en JSON valide avec exactement deux champs :
+Réponds TOUJOURS en JSON valide avec ces champs :
 {
   "reply": "ton message normal ici",
-  "suggestions": ["suggestion 1", "suggestion 2"]
+  "suggestions": ["suggestion 1", "suggestion 2"],
+  "rappel": null
 }
 - "reply" : ton message habituel (markdown autorisé)
 - "suggestions" : 2 à 4 boutons de réponse rapide pertinents pour la suite, ou [] si aucun n'est utile
+- "rappel" : null par défaut. Uniquement quand tu as collecté toutes les coordonnées pour un rappel : { "name": "PRENOM NOM", "email": "EMAIL", "phone": "TELEPHONE" }
   Exemples : quand tu proposes hiver/été → ["Hiver ❄️", "Été ☀️"] ; quand tu proposes les 2 options bons cadeaux → ["Option 1 — somme à valoir", "Option 2 — vol spécifique"] ; quand tu demandes oui/non → ["Oui", "Non"] ; après avoir posté le lien final → []
   ⚠️ Pour les questions sur la date ou période (ex : "avez-vous une date ?"), mets toujours suggestions à [] — l'utilisateur doit pouvoir taper librement sans être limité à des choix préétablis.
 - NE mets JAMAIS de texte en dehors du JSON
@@ -171,8 +173,12 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
   1. Prénom et nom ?
   2. Email ?
   3. Téléphone ?
-  Une fois les 3 infos obtenues, génère ce lien pré-rempli : [Envoyer ma demande de rappel →](https://reservation.fluide-parapente.fr/booking?rappel=1&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE)
-  Et confirme : "Parfait ! On vous rappelle très prochainement pour finaliser votre réservation. 😊"
+  Une fois les 3 infos obtenues, affiche un récapitulatif dans "reply" et ajoute dans le JSON un champ "rappel" avec les données :
+  {
+    "reply": "Parfait, voici le récapitulatif :\n- **Nom** : PRENOM NOM\n- **Email** : EMAIL\n- **Téléphone** : TELEPHONE\n\nCliquez sur le bouton ci-dessous pour envoyer votre demande — on vous rappelle très prochainement ! 😊",
+    "suggestions": [],
+    "rappel": { "name": "PRENOM NOM", "email": "EMAIL", "phone": "TELEPHONE" }
+  }
 
 NE pose AUCUNE autre question avant que le visiteur ait répondu sur le mode de paiement.
 
@@ -225,11 +231,15 @@ export async function POST(req: NextRequest) {
       try {
         const parsed = JSON.parse(jsonMatch[0]);
         if (parsed.reply) {
-          return NextResponse.json({ reply: parsed.reply, suggestions: parsed.suggestions ?? [] });
+          return NextResponse.json({
+            reply: parsed.reply,
+            suggestions: parsed.suggestions ?? [],
+            rappel: parsed.rappel ?? null,
+          });
         }
       } catch { /* fall through */ }
     }
-    return NextResponse.json({ reply: raw, suggestions: [] });
+    return NextResponse.json({ reply: raw, suggestions: [], rappel: null });
   } catch (err) {
     console.error('Chat error:', err);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
