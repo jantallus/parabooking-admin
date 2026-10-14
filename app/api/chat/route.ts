@@ -144,6 +144,17 @@ Voici quelques avis récents à citer si besoin :
 - Réponses courtes (2-4 phrases max sauf si question complexe)
 - Si la question traduit une méfiance, une inquiétude sur la sécurité ou la fiabilité (ex : "c'est sérieux ?", "est-ce dangereux ?", "comment savoir si vous êtes fiables ?"), rassure avec des faits concrets (assurance, moniteurs professionnels diplômés, expérience) ET propose le lien vers les avis Google : https://share.google/h1Nu7CC7MVmdlz283
 
+## Format de réponse obligatoire
+Réponds TOUJOURS en JSON valide avec exactement deux champs :
+{
+  "reply": "ton message normal ici",
+  "suggestions": ["suggestion 1", "suggestion 2"]
+}
+- "reply" : ton message habituel (markdown autorisé)
+- "suggestions" : 2 à 4 boutons de réponse rapide pertinents pour la suite, ou [] si aucun n'est utile
+  Exemples : quand tu proposes hiver/été → ["Hiver ❄️", "Été ☀️"] ; quand tu proposes les 2 options bons cadeaux → ["Option 1 — somme à valoir", "Option 2 — vol spécifique"] ; quand tu demandes oui/non → ["Oui", "Non"] ; après avoir posté le lien final → []
+- NE mets JAMAIS de texte en dehors du JSON
+
 ## Tunnel de réservation guidé
 Quand un visiteur souhaite réserver (ou que la conversation y mène naturellement), commence toujours par proposer deux options :
 "Souhaitez-vous réserver directement en ligne (lien : https://reservation.fluide-parapente.fr/booking), ou préférez-vous que je vous guide étape par étape pour préparer votre réservation ?"
@@ -187,13 +198,18 @@ export async function POST(req: NextRequest) {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 400,
+      max_tokens: 600,
       system: systemWithDate,
       messages: messages.slice(-10),
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    return NextResponse.json({ reply: text });
+    const raw = response.content[0].type === 'text' ? response.content[0].text : '';
+    try {
+      const parsed = JSON.parse(raw);
+      return NextResponse.json({ reply: parsed.reply ?? raw, suggestions: parsed.suggestions ?? [] });
+    } catch {
+      return NextResponse.json({ reply: raw, suggestions: [] });
+    }
   } catch (err) {
     console.error('Chat error:', err);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

@@ -9,6 +9,7 @@ const FLUIDE_SECONDARY = '#E6007E';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  suggestions?: string[];
 }
 
 function renderMessage(text: string, isUser: boolean): React.ReactNode {
@@ -76,6 +77,23 @@ export default function ChatWidget() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
+  async function sendSuggestion(text: string) {
+    if (loading) return;
+    const newMessages: Message[] = [...messages, { role: 'user', content: text }];
+    setMessages(newMessages);
+    setLoading(true);
+    try {
+      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: newMessages }) });
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [] }]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.', suggestions: [] }]);
+    } finally {
+      setLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }
+
   async function send() {
     const text = input.trim();
     if (!text || loading) return;
@@ -92,7 +110,7 @@ export default function ChatWidget() {
         body: JSON.stringify({ messages: newMessages }),
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [] }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.' }]);
     } finally {
@@ -179,22 +197,37 @@ export default function ChatWidget() {
 
           {/* Messages */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {messages.map((msg, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div style={{
-                  maxWidth: '80%',
-                  padding: '10px 13px',
-                  borderRadius: msg.role === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
-                  background: msg.role === 'user' ? FLUIDE_PRIMARY : '#f1f5f9',
-                  color: msg.role === 'user' ? '#fff' : '#1e293b',
-                  fontSize: '13.5px',
-                  lineHeight: '1.5',
-                  whiteSpace: 'pre-wrap',
-                }}>
-                  {renderMessage(msg.content, msg.role === 'user')}
+            {messages.map((msg, i) => {
+              const isLast = i === messages.length - 1;
+              const showSuggestions = isLast && !loading && msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0;
+              return (
+                <div key={i}>
+                  <div style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                    <div style={{
+                      maxWidth: '80%',
+                      padding: '10px 13px',
+                      borderRadius: msg.role === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                      background: msg.role === 'user' ? FLUIDE_PRIMARY : '#f1f5f9',
+                      color: msg.role === 'user' ? '#fff' : '#1e293b',
+                      fontSize: '13.5px',
+                      lineHeight: '1.5',
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {renderMessage(msg.content, msg.role === 'user')}
+                    </div>
+                  </div>
+                  {showSuggestions && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px', paddingLeft: '2px' }}>
+                      {msg.suggestions!.map((s, si) => (
+                        <button key={si} onClick={() => sendSuggestion(s)} style={{ padding: '6px 12px', borderRadius: '14px', border: `1px solid ${FLUIDE_PRIMARY}`, background: 'white', color: FLUIDE_PRIMARY, fontSize: '12.5px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.background = FLUIDE_PRIMARY; e.currentTarget.style.color = '#fff'; }} onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = FLUIDE_PRIMARY; }}>
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {loading && (
               <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
                 <div style={{ padding: '10px 13px', borderRadius: '14px 14px 14px 2px', background: '#f1f5f9', display: 'flex', gap: '4px', alignItems: 'center' }}>
