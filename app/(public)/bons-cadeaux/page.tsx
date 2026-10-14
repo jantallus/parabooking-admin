@@ -105,14 +105,14 @@ export default function CadeauPage() {
             setDirectFlightName(fName);
             setDirectFlightPrice(fPrice);
           }
-        }
 
-        // Pré-remplissage depuis le chatbot (?nom=&email=&tel=)
-        const buyerNom = params.get('nom');
-        const buyerEmail = params.get('email');
-        const buyerTel = params.get('tel');
-        if (buyerNom || buyerEmail || buyerTel) {
-          setBuyer({ name: buyerNom || '', email: buyerEmail || '', phone: buyerTel || '' });
+          // Pré-remplissage depuis le chatbot (?nom=&email=&tel=)
+          const buyerNom = params.get('nom');
+          const buyerEmail = params.get('email');
+          const buyerTel = params.get('tel');
+          if (buyerNom || buyerEmail || buyerTel) {
+            setBuyer({ name: buyerNom || '', email: buyerEmail || '', phone: buyerTel || '' });
+          }
         }
 
         // 2. On charge vos paramètres postaux
