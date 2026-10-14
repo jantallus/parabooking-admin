@@ -169,16 +169,12 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
 "Comment souhaitez-vous régler ? Par carte bancaire en ligne, ou par un autre moyen (chèques vacances, espèces) ?"
 
 - **Si carte bancaire** : propose ensuite les deux options habituelles : réserver directement en ligne (https://reservation.fluide-parapente.fr/booking) ou être guidé étape par étape.
-- **Si autre moyen (chèques vacances, espèces, chèque bancaire, etc.)** : explique chaleureusement qu'on va prendre leurs coordonnées directement ici et qu'on les rappellera pour finaliser la réservation. Collecte ensuite dans l'ordre :
-  1. Prénom et nom ?
-  2. Email ?
-  3. Téléphone ?
-  Une fois les 3 infos obtenues, affiche un récapitulatif dans "reply" et ajoute dans le JSON un champ "rappel" avec les données :
-  {
-    "reply": "Parfait, voici le récapitulatif :\n- **Nom** : PRENOM NOM\n- **Email** : EMAIL\n- **Téléphone** : TELEPHONE\n\nCliquez sur le bouton ci-dessous pour envoyer votre demande — on vous rappelle très prochainement ! 😊",
-    "suggestions": [],
-    "rappel": { "name": "PRENOM NOM", "email": "EMAIL", "phone": "TELEPHONE" }
-  }
+- **Si autre moyen (chèques vacances, espèces, chèque bancaire, etc.)** : explique chaleureusement qu'on va prendre leurs coordonnées ici et qu'on les rappellera. Puis pose UNE question à la fois dans cet ordre strict — n'attends pas d'avoir tout pour passer à la suivante :
+  1. Si tu n'as pas encore le nom → demande : "Quel est votre prénom et nom ?"
+  2. Si tu as le nom mais pas l'email → demande : "Votre adresse email ?"
+  3. Si tu as le nom et l'email mais pas le téléphone → demande : "Votre numéro de téléphone ?"
+  4. Si tu as les 3 → affiche le récap dans "reply" ET remplis le champ "rappel" :
+     { "name": "PRENOM NOM", "email": "EMAIL", "phone": "TELEPHONE" }
 
 NE pose AUCUNE autre question avant que le visiteur ait répondu sur le mode de paiement.
 
@@ -220,7 +216,7 @@ export async function POST(req: NextRequest) {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 600,
+      max_tokens: 800,
       system: systemWithDate,
       messages: messages.slice(-10).map(({ role, content }: { role: 'user' | 'assistant'; content: string }) => ({ role, content })),
     });
