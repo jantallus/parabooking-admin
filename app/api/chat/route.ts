@@ -204,8 +204,9 @@ export async function POST(req: NextRequest) {
     });
 
     const raw = response.content[0].type === 'text' ? response.content[0].text : '';
+    const jsonStr = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim();
     try {
-      const parsed = JSON.parse(raw);
+      const parsed = JSON.parse(jsonStr);
       return NextResponse.json({ reply: parsed.reply ?? raw, suggestions: parsed.suggestions ?? [] });
     } catch {
       return NextResponse.json({ reply: raw, suggestions: [] });
