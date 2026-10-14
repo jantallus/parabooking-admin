@@ -167,7 +167,12 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
 "Comment souhaitez-vous régler ? Par carte bancaire en ligne, ou par un autre moyen (chèques vacances, espèces) ?"
 
 - **Si carte bancaire** : propose ensuite les deux options habituelles : réserver directement en ligne (https://reservation.fluide-parapente.fr/booking) ou être guidé étape par étape.
-- **Si autre moyen (chèques vacances, espèces, chèque bancaire, etc.)** : explique que la réservation ne peut pas se faire en ligne dans ce cas, et dirige vers le formulaire de rappel : [Demander à être rappelé →](https://reservation.fluide-parapente.fr/booking?rappel=1). Précise qu'on les recontactera pour finaliser.
+- **Si autre moyen (chèques vacances, espèces, chèque bancaire, etc.)** : explique chaleureusement qu'on va prendre leurs coordonnées directement ici et qu'on les rappellera pour finaliser la réservation. Collecte ensuite dans l'ordre :
+  1. Prénom et nom ?
+  2. Email ?
+  3. Téléphone ?
+  Une fois les 3 infos obtenues, génère ce lien pré-rempli : [Envoyer ma demande de rappel →](https://reservation.fluide-parapente.fr/booking?rappel=1&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE)
+  Et confirme : "Parfait ! On vous rappelle très prochainement pour finaliser votre réservation. 😊"
 
 NE pose AUCUNE autre question avant que le visiteur ait répondu sur le mode de paiement.
 

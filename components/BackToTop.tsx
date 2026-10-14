@@ -88,7 +88,14 @@ export default function BackToTop() {
   // Ouvre la modale automatiquement si l'URL contient ?rappel=1 (ex: lien depuis le chatbot)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('rappel') === '1') openForm();
+    if (params.get('rappel') !== '1') return;
+    const prenom = params.get('prenom') ?? '';
+    const nom = params.get('nom') ?? '';
+    const name = [prenom, nom].filter(Boolean).join(' ');
+    const phone = params.get('tel') ?? '';
+    const email = params.get('email') ?? '';
+    setForm(f => ({ ...f, ...(name && { name }), ...(phone && { phone }), ...(email && { email }) }));
+    setSent(false); setError(''); setFormOpen(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
