@@ -262,7 +262,8 @@ Explique qu'on va prendre les infos et rappeler pour finaliser. Continue avec :
 8. Email ?
 9. Téléphone ?
 → Affiche récapitulatif ET remplis "rappel" :
-  { "name": "PRENOM NOM", "email": "EMAIL", "phone": "TELEPHONE", "flight_type": "NOM_FORMULE", "nb_passengers": N, "weight_info": "55 kg, 85 kg", "availability_start": "YYYY-MM-DD ou null", "availability_end": "YYYY-MM-DD ou null" }`;
+  { "name": "PRENOM NOM", "email": "EMAIL", "phone": "TELEPHONE", "flight_type": "NOM_FORMULE", "nb_passengers": N, "weight_info": "55 kg, 85 kg", "availability_start": "YYYY-MM-DD ou null", "availability_end": "YYYY-MM-DD ou null" }
+⛔ Si une date a déjà été collectée plus tôt dans la conversation (même pendant le tunnel CB avant que l'utilisateur bascule vers rappel), inclus-la TOUJOURS dans "availability_start" — ne la laisse JAMAIS à null si elle est connue.`;
 
 export async function POST(req: NextRequest) {
   try {
