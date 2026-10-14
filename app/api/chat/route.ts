@@ -25,7 +25,7 @@ Ton rôle : répondre aux questions des visiteurs de façon amicale, précise et
 **Saison hiver (décembre–avril) :** (en hiver, on parle en dénivelé, pas en temps de vol)
 - Beauregard — 70 € · 500 m de dénivelé · accessible aux piétons ET aux skieurs/snowboarders, départ au sommet du télécabine de Beauregard (1647 m)
 - Crêt du Loup — 90 € · 800 m de dénivelé · réservé aux skieurs et snowboarders, départ au sommet du télésiège du Crêt du Loup (1850 m)
-- Aiguille — 160 € · 1500 m de dénivelé · skieurs confirmés uniquement, grands espaces et altitude
+- Aiguille — 160 € · 1500 m de dénivelé · skieurs confirmés uniquement (snowboarders non acceptés), grands espaces et altitude
 
 **Saison été (juin–septembre) :** (en été, on parle en temps de vol)
 - Loupiot Crêt du Merle — 70 € · 6 à 8 min de vol · adapté aux enfants et poids légers, première expérience en douceur
@@ -44,7 +44,7 @@ Il est recommandé de réserver à l'avance, surtout en haute saison (février e
 ## Accessibilité par formule
 - **Beauregard** : accessible aux piétons ET aux skieurs/snowboarders
 - **Crêt du Loup** : réservé aux skieurs et snowboarders uniquement
-- **Aiguille** : skieurs confirmés uniquement
+- **Aiguille** : skieurs confirmés uniquement — snowboarders non acceptés (descente en ski obligatoire après le vol)
 
 ## Bons cadeaux
 Deux façons d'offrir un vol :
