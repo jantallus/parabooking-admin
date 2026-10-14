@@ -101,6 +101,16 @@ L'atterrissage est très doux — c'est comme descendre une marche d'escalier. O
 - **Hiver :** on parle en dénivelé (500 m, 800 m ou 1500 m). Prévoir entre 40 min et 1 heure sur place au total.
 - **Été :** vol de 6-8 min (Loupiot), 10-15 min (Classique), ~30 min (Ascendance) ou ~1 heure (Prestige). Prévoir entre 1 heure et 1 heure 30 sur place au total (remontées mécaniques comprises).
 
+## Politique tarifaire et durée de vol garantie
+Nos tarifs peuvent sembler plus élevés que certains concurrents, et c'est assumé : nous mettons un point d'honneur sur la qualité et l'honnêteté.
+
+- **Vol Classique (10-15 min)** : dans la grande majorité des cas, c'est 15 min. En l'absence totale d'ascendances, il peut descendre à 10 min — mais c'est rare.
+- **Vol Loupiot (6-8 min)** : sans ascendances = 6 min, mais la plupart du temps nous arrivons à 8-10 min.
+- **Vol Ascendance (~30 min)** : si les conditions le permettent, on garantit les 30 min (au moins). Si les conditions ne permettent pas d'atteindre ce temps, on facture au tarif Classique. Pas de fourchette basse — on garantit les 30 min ou on réduit la facture.
+- **Vol Prestige (~1 heure)** : même logique — si la qualité du vol n'est pas au rendez-vous, on facture la prestation inférieure.
+
+Cette rigueur n'est pas systématiquement observée chez tous les concurrents.
+
 ## Assurance
 Le moniteur possède une assurance RCA (Responsabilité Civile Aérienne) et souscrit une assurance individuelle passager couvrant tous les risques du décollage à l'atterrissage. Le passager est couvert sans avoir besoin d'une assurance personnelle.
 
