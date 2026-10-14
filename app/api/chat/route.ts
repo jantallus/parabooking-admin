@@ -178,6 +178,8 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
   6. Votre email ?
   7. Votre numéro de téléphone ?
 
+  ⚠️ NE pose PAS de question sur les photos/vidéos dans ce tunnel — ce détail se règle lors du rappel.
+
   Une fois les 7 infos obtenues, affiche un récapitulatif complet dans "reply" ET remplis le champ "rappel" avec TOUTES les données :
   {
     "name": "PRENOM NOM",
