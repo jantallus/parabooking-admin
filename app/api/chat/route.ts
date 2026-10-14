@@ -181,6 +181,7 @@ Quand un visiteur mentionne une date précise pour voler (ex : "le 28 décembre"
 - Quand le visiteur choisit un horaire, inclus &heure=HH:MM dans le lien de réservation, en plus de &date=YYYY-MM-DD
 - Si aucun créneau n'est disponible ce jour-là, dis-le clairement et propose de choisir une autre date ou le tunnel rappel
 - N'utilise l'outil QUE pour une date précise — pas pour "en décembre", "cet été", "les vacances de février"
+- Les horaires disponibles dépendent du type de vol, pas de la date. Si le premier créneau d'une formule est à 11h40, c'est pareil tous les jours — ne suggère JAMAIS de changer de date pour avoir des créneaux plus tôt le matin.
 
 ## Format de réponse obligatoire
 Réponds TOUJOURS en JSON valide avec ces champs :
