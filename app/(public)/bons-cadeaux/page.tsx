@@ -88,12 +88,23 @@ export default function CadeauPage() {
             }
           }
 
-          // Matching par nom de vol (?flight=Crêt+du+Loup) — utilisé par le chatbot
+          // Matching par nom de vol (?flight=Beauregard) — utilisé par le chatbot
+          // Cherche dans les flight types (pas les templates) et active le mode direct vol
           const flightNameParam = params.get('flight');
           if (flightNameParam && !targetId && !params.get('flightId')) {
-            const norm = flightNameParam.toLowerCase().trim();
-            const found = data.find(t => t.flight_name?.toLowerCase().trim() === norm);
-            if (found) setCartItems({ [found.id]: 1 });
+            const ftRes = await fetch(`/api/proxy/flight-types?t=${Date.now()}`, { cache: 'no-store' });
+            if (ftRes.ok) {
+              const flightTypes = await ftRes.json();
+              const norm = flightNameParam.toLowerCase().trim();
+              const ft = flightTypes.find((f: { id: number; name: string; price_cents: number }) =>
+                f.name.toLowerCase().trim() === norm
+              );
+              if (ft) {
+                setDirectFlightId(ft.id);
+                setDirectFlightName(ft.name);
+                setDirectFlightPrice(ft.price_cents);
+              }
+            }
           }
 
           // Mode direct vol : ?flightId=X&flightName=...&flightPrice=...
