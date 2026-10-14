@@ -741,7 +741,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     return grid;
   }, [rawSlots, selectedFlight, cart, gridStartDate, flights, displayDaysCount]);
 
-  // Auto-ajout du créneau depuis ?heure= (chatbot → page de réservation)
+  // Auto-ajout du créneau depuis ?heure= et passage direct au formulaire passagers
   useEffect(() => {
     if (heureAutoAddedRef.current) return;
     if (!prefillHeureRef.current || !prefillDateForHeureRef.current || !selectedFlight) return;
@@ -756,6 +756,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     const qty = Math.min(passengerCount, capacity);
     const key = `${selectedFlight.id}|${date}|${heure}`;
     setCart(prev => ({ ...prev, [key]: qty }));
+    setStep(3);
   }, [gridData, selectedFlight]);
 
   // Dates qui ont des créneaux pilote planifiés mais tous complets (capacity=0)
