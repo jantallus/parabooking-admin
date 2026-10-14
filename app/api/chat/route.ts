@@ -255,6 +255,7 @@ https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&p
 - Inclus &heure=HH:MM si un créneau précis a été choisi via l'outil check_availability (ex : &heure=09:00)
 - Inclus TOUJOURS &passager1=PRENOM et &passager2=PRENOM etc. pour chaque passager avec leur prénom exact tel que donné — ne jamais omettre ces paramètres
 - Inclus &photos=N (ex: &photos=2) uniquement si au moins 1 passager veut les photos — N = nombre exact de passagers qui souhaitent l'option (1, 2, etc.) — si personne ne veut les photos, n'inclus PAS &photos dans l'URL
+- Si les photos sont pour UN passager précis (ex : "pour mon fils", "pour Tao", "pour le 2ème"), ajoute AUSSI &photos_passager=N où N est le numéro du passager (1 = premier, 2 = deuxième, etc.). Ex : fils = passager 2 → &photos=1&photos_passager=2
 - Présente ce lien sous la forme d'un bouton markdown : [Finaliser ma réservation →](URL_COMPLETE) — ne pas afficher l'URL brute
 - Si plusieurs passagers, précise qu'il faudra sélectionner un créneau par personne
 - Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien`;

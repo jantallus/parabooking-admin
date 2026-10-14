@@ -312,6 +312,9 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const prefillWeightRef = useRef<number[]>([]);
   const prefillPassengerNamesRef = useRef<string[]>([]);
   const prefillPhotosRef = useRef(0);
+  const prefillPhotosPassagerRef = useRef<number | null>(
+    typeof window !== 'undefined' ? (parseInt(new URLSearchParams(window.location.search).get('photos_passager') || '0', 10) || null) : null
+  );
   const prefillDateForHeureRef = useRef<string | null>(
     typeof window !== 'undefined' ? (new URLSearchParams(window.location.search).get('date') || null) : null
   );
@@ -444,12 +447,24 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
 
         // Apply pending complements (pre-selected in cart before step 3)
         if (!existing) {
+          const passengerIdx = newPassengers.indexOf(nP); // index 0-based
           Object.entries(pendingCounts).forEach(([idStr, qty]) => {
             const compId = parseInt(idStr);
             if (!assignedCounts[compId]) assignedCounts[compId] = 0;
-            if (assignedCounts[compId] < qty && !currentComplements.includes(compId)) {
-              currentComplements.push(compId);
-              assignedCounts[compId]++;
+            // Si un passager précis est ciblé pour les photos (ex: &photos_passager=2)
+            const specificIdx = (compId === photoOption?.id && prefillPhotosPassagerRef.current != null)
+              ? prefillPhotosPassagerRef.current - 1  // convertit en 0-based
+              : null;
+            if (specificIdx !== null) {
+              if (passengerIdx === specificIdx && !currentComplements.includes(compId)) {
+                currentComplements.push(compId);
+                assignedCounts[compId]++;
+              }
+            } else {
+              if (assignedCounts[compId] < qty && !currentComplements.includes(compId)) {
+                currentComplements.push(compId);
+                assignedCounts[compId]++;
+              }
             }
           });
         }
