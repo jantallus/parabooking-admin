@@ -11,6 +11,7 @@ const checkAvailabilityTool: Anthropic.Tool = {
     type: 'object',
     properties: {
       date: { type: 'string', description: 'Date au format YYYY-MM-DD' },
+      flight_type_id: { type: 'number', description: 'ID du type de vol si déjà connu (Beauregard=19, Crêt du Loup=20, Aiguille=21, Loupiot=15, Classique=16, Ascendance=17, Prestige=18)' },
     },
     required: ['date'],
   },
@@ -175,6 +176,7 @@ Si le visiteur mentionne qu'il a ou qu'on lui a offert un bon cadeau, une carte 
 
 ## Disponibilités en temps réel
 Quand un visiteur mentionne une date précise pour voler (ex : "le 28 décembre", "le 15 janvier"), utilise l'outil check_availability pour vérifier les créneaux disponibles ce jour-là.
+- Passe toujours flight_type_id si la formule est déjà connue (IDs : Beauregard=19, Crêt du Loup=20, Aiguille=21, Loupiot=15, Classique=16, Ascendance=17, Prestige=18) — cela filtre les créneaux aux horaires réellement disponibles pour ce vol
 - Présente les horaires disponibles sous forme de chips (suggestions) : ["09:00", "10:30", "14:00"] etc.
 - Quand le visiteur choisit un horaire, inclus &heure=HH:MM dans le lien de réservation, en plus de &date=YYYY-MM-DD
 - Si aucun créneau n'est disponible ce jour-là, dis-le clairement et propose de choisir une autre date ou le tunnel rappel
@@ -284,10 +286,12 @@ export async function POST(req: NextRequest) {
     if (response.stop_reason === 'tool_use') {
       const toolBlock = response.content.find(b => b.type === 'tool_use') as Anthropic.ToolUseBlock | undefined;
       if (toolBlock?.name === 'check_availability') {
-        const { date } = toolBlock.input as { date: string };
+        const { date, flight_type_id } = toolBlock.input as { date: string; flight_type_id?: number };
         let toolResult: string;
         try {
-          const availRes = await fetch(`${API_URL}/api/public/availabilities?start=${date}&end=${date}`);
+          const params = new URLSearchParams({ start: date, end: date });
+          if (flight_type_id) params.set('flight_type_id', String(flight_type_id));
+          const availRes = await fetch(`${API_URL}/api/public/availabilities?${params}`);
           const slots: Array<{ status: string; start_time: string }> = await availRes.json();
           const times = [...new Set(
             slots
