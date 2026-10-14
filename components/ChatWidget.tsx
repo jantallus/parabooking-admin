@@ -225,6 +225,7 @@ export default function ChatWidget() {
             flexDirection: 'column',
             zIndex: 9999,
             overflow: 'hidden',
+            overscrollBehavior: 'contain',
           } : {
             position: 'fixed',
             bottom: `${bottomOffset}px`,
