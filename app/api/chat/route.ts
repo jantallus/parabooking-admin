@@ -156,6 +156,7 @@ Réponds TOUJOURS en JSON valide avec exactement deux champs :
 - "reply" : ton message habituel (markdown autorisé)
 - "suggestions" : 2 à 4 boutons de réponse rapide pertinents pour la suite, ou [] si aucun n'est utile
   Exemples : quand tu proposes hiver/été → ["Hiver ❄️", "Été ☀️"] ; quand tu proposes les 2 options bons cadeaux → ["Option 1 — somme à valoir", "Option 2 — vol spécifique"] ; quand tu demandes oui/non → ["Oui", "Non"] ; après avoir posté le lien final → []
+  ⚠️ Pour les questions sur la date ou période (ex : "avez-vous une date ?"), mets toujours suggestions à [] — l'utilisateur doit pouvoir taper librement sans être limité à des choix préétablis.
 - NE mets JAMAIS de texte en dehors du JSON
 
 ## Tunnel de réservation guidé
