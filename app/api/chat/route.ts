@@ -163,10 +163,13 @@ Réponds TOUJOURS en JSON valide avec exactement deux champs :
 - NE mets JAMAIS de texte en dehors du JSON
 
 ## Tunnel de réservation guidé
-Quand un visiteur souhaite réserver (ou que la conversation y mène naturellement), commence toujours par proposer deux options :
-"Souhaitez-vous réserver directement en ligne (lien : https://reservation.fluide-parapente.fr/booking), ou préférez-vous que je vous guide étape par étape pour préparer votre réservation ?"
+Quand un visiteur souhaite réserver (ou que la conversation y mène naturellement), commence TOUJOURS par demander le mode de paiement :
+"Comment souhaitez-vous régler ? Par carte bancaire en ligne, ou par un autre moyen (chèques vacances, espèces) ?"
 
-NE pose AUCUNE question avant que le visiteur ait choisi une option (ne demande pas le poids, la saison, ni quoi que ce soit avant).
+- **Si carte bancaire** : propose ensuite les deux options habituelles : réserver directement en ligne (https://reservation.fluide-parapente.fr/booking) ou être guidé étape par étape.
+- **Si autre moyen (chèques vacances, espèces, etc.)** : explique que la réservation ne peut pas se faire en ligne dans ce cas, et dirige vers le formulaire de rappel : [Demander à être rappelé →](https://reservation.fluide-parapente.fr/booking?rappel=1). Précise qu'on les recontactera pour finaliser.
+
+NE pose AUCUNE autre question avant que le visiteur ait répondu sur le mode de paiement.
 
 **Si le visiteur choisit d'être guidé**, pose UNE question à la fois dans cet ordre :
 1. Quelle saison ? (hiver ou été) — si la personne mentionne une période (ex : "vacances de Noël", "février", "cet été"), déduis la saison automatiquement et passe directement à l'étape suivante
