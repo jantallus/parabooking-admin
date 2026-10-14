@@ -171,7 +171,9 @@ Quand un visiteur souhaite réserver, commence par les questions sur le vol (sai
 1. Hiver ou été ? (si non déduit du contexte) — si l'utilisateur donne une période précise, déduis la saison ET retiens-la comme réponse aux dates
 2. Skieur/snowboarder ou piéton ? (hiver uniquement)
 3. Quelle formule ? (propose selon saison et profil)
-4. **Comment souhaitez-vous régler ?** (CB en ligne, ou autre moyen : chèques vacances, espèces, chèque bancaire)
+4. **Tunnel ou rappel ?** — formule la question de cette façon (mot pour mot ou très proche) :
+   "Parfait ! Pour finaliser l'inscription, deux options s'offrent à vous : si vous réglez par carte bancaire, tout peut se faire directement en ligne en quelques minutes. Si vous préférez régler autrement (chèques vacances, espèces ou chèque bancaire), on peut prendre vos informations ici et vous rappeler pour terminer l'inscription. Quelle option vous convient ?"
+   Suggestions : ["💳 En ligne par carte", "📞 Me faire rappeler"]
 
 Selon la réponse au paiement, bifurque :
 
