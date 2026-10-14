@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { X, Send } from 'lucide-react';
 
 const FLUIDE_PRIMARY   = '#312783';
@@ -57,8 +57,17 @@ export default function ChatWidget() {
   const [bottomOffset, setBottomOffset] = useState(24);
   const [rappelSent, setRappelSent] = useState(false);
   const [rappelSending, setRappelSending] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // Remonte la fenêtre quand le clavier mobile apparaît
   useEffect(() => {
@@ -175,7 +184,7 @@ export default function ChatWidget() {
             filter: 'drop-shadow(0 3px 10px rgba(49,39,131,0.35))',
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 682.66669 682.66669" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width={isMobile ? 54 : 46} height={isMobile ? 54 : 46} viewBox="0 0 682.66669 682.66669" aria-hidden="true">
             <g transform="matrix(1.3333333,0,0,-1.3333333,0,682.66667)">
               <g transform="translate(256,492)">
                 <path d="m 0,0 c -130.339,0 -236,-105.661 -236,-236 0,-45.885 13.109,-88.702 35.766,-124.937 L -236,-472 l 111.063,35.766 C -88.702,-458.891 -45.885,-472 0,-472 c 130.339,0 236,105.661 236,236 C 236,-105.661 130.339,0 0,0 Z" style={{fill:FLUIDE_PRIMARY,stroke:'none'}}/>
@@ -197,7 +206,18 @@ export default function ChatWidget() {
       {/* Fenêtre de chat */}
       {open && (
         <div
-          style={{
+          style={isMobile ? {
+            position: 'fixed',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            background: '#fff',
+            borderRadius: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            zIndex: 9999,
+            overflow: 'hidden',
+          } : {
             position: 'fixed',
             bottom: `${bottomOffset}px`,
             left: '24px',
@@ -215,25 +235,25 @@ export default function ChatWidget() {
           }}
         >
           {/* En-tête */}
-          <div style={{ background: FLUIDE_PRIMARY, color: '#fff', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <svg width="24" height="24" viewBox="-4 -2 32 34" fill="none" aria-hidden="true">
+          <div style={{ background: FLUIDE_PRIMARY, color: '#fff', padding: isMobile ? '16px 20px' : '14px 16px', paddingTop: isMobile ? 'max(16px, env(safe-area-inset-top))' : '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <svg width={isMobile ? 30 : 24} height={isMobile ? 30 : 24} viewBox="-4 -2 32 34" fill="none" aria-hidden="true">
                   <g transform="rotate(-45, 12, 14.5)">
                     <path d="M24.1375 15.0092C24.4736 14.673 24.4736 14.12 24.1375 13.7839L14.5955 4.24185C14.2593 3.90571 13.7063 3.90571 13.3702 4.24185C13.034 4.57799 13.034 5.13099 13.3702 5.46713L21.4321 13.5291L0.970973 13.5291C0.493871 13.5291 0.103516 13.9194 0.103516 14.3965C0.103516 14.8736 0.493871 15.264 0.970973 15.264L21.4321 15.264L13.3702 23.3259C13.034 23.662 13.034 24.215 13.3702 24.5512C13.7063 24.8873 14.2593 24.8873 14.5955 24.5512L24.1375 15.0092Z" fill={FLUIDE_SECONDARY}/>
                   </g>
                 </svg>
               <div>
-                <div style={{ fontWeight: 600, fontSize: '14px' }}>Fluide Parapente</div>
-                <div style={{ fontSize: '11px', opacity: 0.7 }}>Répond en quelques secondes</div>
+                <div style={{ fontWeight: 700, fontSize: isMobile ? '16px' : '14px' }}>Fluide Parapente</div>
+                <div style={{ fontSize: isMobile ? '12px' : '11px', opacity: 0.7 }}>Répond en quelques secondes</div>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.7, padding: '4px', display: 'flex' }}>
-              <X size={18} />
+            <button onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.8, padding: '6px', display: 'flex', borderRadius: '50%' }}>
+              <X size={isMobile ? 22 : 18} />
             </button>
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px 16px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
             {messages.map((msg, i) => {
               const isLast = i === messages.length - 1;
               const showSuggestions = isLast && !loading && msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0;
@@ -241,13 +261,13 @@ export default function ChatWidget() {
                 <div key={i}>
                   <div style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                     <div style={{
-                      maxWidth: '80%',
-                      padding: '10px 13px',
-                      borderRadius: msg.role === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                      maxWidth: isMobile ? '85%' : '80%',
+                      padding: isMobile ? '12px 15px' : '10px 13px',
+                      borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                       background: msg.role === 'user' ? FLUIDE_PRIMARY : '#f1f5f9',
                       color: msg.role === 'user' ? '#fff' : '#1e293b',
-                      fontSize: '13.5px',
-                      lineHeight: '1.5',
+                      fontSize: isMobile ? '15px' : '13.5px',
+                      lineHeight: '1.55',
                       whiteSpace: 'pre-wrap',
                     }}>
                       {renderMessage(msg.content, msg.role === 'user')}
@@ -256,7 +276,7 @@ export default function ChatWidget() {
                   {showSuggestions && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px', paddingLeft: '2px' }}>
                       {msg.suggestions!.map((s, si) => (
-                        <button key={si} onClick={() => sendSuggestion(s)} style={{ padding: '6px 12px', borderRadius: '14px', border: `1px solid ${FLUIDE_PRIMARY}`, background: 'white', color: FLUIDE_PRIMARY, fontSize: '12.5px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.background = FLUIDE_PRIMARY; e.currentTarget.style.color = '#fff'; }} onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = FLUIDE_PRIMARY; }}>
+                        <button key={si} onClick={() => sendSuggestion(s)} style={{ padding: isMobile ? '9px 16px' : '6px 12px', borderRadius: '18px', border: `1.5px solid ${FLUIDE_PRIMARY}`, background: 'white', color: FLUIDE_PRIMARY, fontSize: isMobile ? '14px' : '12.5px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.background = FLUIDE_PRIMARY; e.currentTarget.style.color = '#fff'; }} onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = FLUIDE_PRIMARY; }}>
                           {s}
                         </button>
                       ))}
@@ -296,8 +316,9 @@ export default function ChatWidget() {
             const asksName = !asksEmail && !asksTel && /pr[eé]nom|votre\s*nom\s*\?/.test(lastAssistant);
             const inputType = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
             const autoComplete = asksEmail ? 'email' : asksTel ? 'tel' : asksName ? 'name' : 'off';
+            const btnSize = isMobile ? 46 : 38;
             return (
-          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '8px', flexShrink: 0 }}>
+          <div style={{ padding: isMobile ? '12px 16px' : '12px', paddingBottom: isMobile ? 'max(12px, env(safe-area-inset-bottom))' : '12px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '8px', flexShrink: 0, background: '#fff' }}>
             <input
               ref={inputRef}
               type={inputType}
@@ -309,10 +330,10 @@ export default function ChatWidget() {
               disabled={loading}
               style={{
                 flex: 1,
-                padding: '9px 13px',
+                padding: isMobile ? '12px 16px' : '9px 13px',
                 border: '1px solid #e2e8f0',
-                borderRadius: '20px',
-                fontSize: '13.5px',
+                borderRadius: '24px',
+                fontSize: isMobile ? '16px' : '13.5px',
                 outline: 'none',
                 background: '#f8fafc',
               }}
@@ -322,8 +343,8 @@ export default function ChatWidget() {
               disabled={!input.trim() || loading}
               aria-label="Envoyer"
               style={{
-                width: '38px',
-                height: '38px',
+                width: `${btnSize}px`,
+                height: `${btnSize}px`,
                 borderRadius: '50%',
                 background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0',
                 color: input.trim() && !loading ? '#fff' : '#94a3b8',
@@ -336,7 +357,7 @@ export default function ChatWidget() {
                 transition: 'background 0.15s',
               }}
             >
-              <Send size={16} />
+              <Send size={isMobile ? 20 : 16} />
             </button>
           </div>
             );
