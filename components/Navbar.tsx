@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation';
 import { useCart } from '@/lib/CartContext';
 
 const LINKS = [
-  { label: 'Parapente La Clusaz',  href: 'https://www.fluide-parapente.fr/' },
   { label: 'Baptême et vol hiver', href: 'https://www.fluide-parapente.fr/bapteme-vol-biplace/' },
   { label: 'Baptême et vol été',   href: 'https://www.fluide-parapente.fr/bapteme-vol-ete/' },
   { label: 'Infos pratiques',      href: 'https://www.fluide-parapente.fr/informations-pratiques/' },
