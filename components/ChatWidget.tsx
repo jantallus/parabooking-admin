@@ -324,7 +324,7 @@ export default function ChatWidget() {
             const asksTel = /t[eé]l[eé]phone\s*\?|t[eé]l\s*\?/.test(lastAssistant);
             const asksName = !asksEmail && !asksTel && /pr[eé]nom|votre\s*nom\s*\?/.test(lastAssistant);
             const inputType = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
-            const autoComplete = asksEmail ? 'email' : asksTel ? 'tel' : asksName ? 'name' : 'off';
+            const autoComplete = asksEmail ? 'email' : asksName ? 'name' : 'off';
             const btnSize = isMobile ? 46 : 38;
             return (
           <div style={{ padding: isMobile ? '12px 16px' : '12px', paddingBottom: isMobile ? 'max(12px, env(safe-area-inset-bottom))' : '12px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '8px', flexShrink: 0, background: '#fff' }}>
