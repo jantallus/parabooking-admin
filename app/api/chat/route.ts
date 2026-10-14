@@ -121,8 +121,8 @@ La Clusaz, Haute-Savoie (74220).
 Réservation en ligne uniquement : https://reservation.fluide-parapente.fr/booking
 Paiement par carte bancaire via Stripe.
 
-## Chèques vacances et espèces
-Oui, les chèques vacances et le paiement en espèces sont acceptés — mais la réservation ne peut pas se faire en ligne dans ce cas.
+## Chèques vacances, espèces et chèques bancaires
+Oui, les chèques vacances, les espèces et les chèques bancaires sont acceptés — mais la réservation ne peut pas se faire en ligne dans ce cas. Le virement bancaire n'est pas accepté.
 Il faut nous contacter directement :
 - Par téléphone ou SMS : +33 6 77 28 51 02
 - Par WhatsApp : +33 6 77 28 51 02
@@ -167,7 +167,7 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
 "Comment souhaitez-vous régler ? Par carte bancaire en ligne, ou par un autre moyen (chèques vacances, espèces) ?"
 
 - **Si carte bancaire** : propose ensuite les deux options habituelles : réserver directement en ligne (https://reservation.fluide-parapente.fr/booking) ou être guidé étape par étape.
-- **Si autre moyen (chèques vacances, espèces, etc.)** : explique que la réservation ne peut pas se faire en ligne dans ce cas, et dirige vers le formulaire de rappel : [Demander à être rappelé →](https://reservation.fluide-parapente.fr/booking?rappel=1). Précise qu'on les recontactera pour finaliser.
+- **Si autre moyen (chèques vacances, espèces, chèque bancaire, etc.)** : explique que la réservation ne peut pas se faire en ligne dans ce cas, et dirige vers le formulaire de rappel : [Demander à être rappelé →](https://reservation.fluide-parapente.fr/booking?rappel=1). Précise qu'on les recontactera pour finaliser.
 
 NE pose AUCUNE autre question avant que le visiteur ait répondu sur le mode de paiement.
 
