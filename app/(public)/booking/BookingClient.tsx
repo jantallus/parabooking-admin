@@ -313,6 +313,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
   const prefillPassengerNamesRef = useRef<string[]>([]);
   const prefillPhotosRef = useRef(0);
   const [chatbotPassengerNames, setChatbotPassengerNames] = useState(false);
+  const [chatbotPassengerCount, setChatbotPassengerCount] = useState(0);
 
   // Pré-remplit le formulaire depuis les query params du chatbot (?prenom=&nom=&email=&tel=&poids=&passager1=&passager2=...)
   useEffect(() => {
@@ -324,7 +325,11 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     }
     // Poids des passagers : ?poids=80 (1 passager) ou ?poids=80,55 (plusieurs)
     const poids = p.get('poids');
-    if (poids) prefillWeightRef.current = poids.split(',').map(Number).filter(n => n > 0);
+    if (poids) {
+      const weights = poids.split(',').map(Number).filter(n => n > 0);
+      prefillWeightRef.current = weights;
+      if (weights.length > 0) setChatbotPassengerCount(weights.length);
+    }
     // Prénoms des passagers (?passager1=Julien&passager2=Ursula...)
     const names: string[] = [];
     for (let i = 1; i <= 10; i++) {
@@ -795,6 +800,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
 
   const handleAdd = (date: string, time: string) => {
     if (!selectedFlight) return;
+    if (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount) return;
     const key = `${selectedFlight.id}|${date}|${time}`;
     setCart(prev => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
     if (cartPopupTimer.current) clearTimeout(cartPopupTimer.current);
@@ -832,6 +838,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     const [, dateStr, timeStr] = key.split('|');
     const capacity = gridData[dateStr]?.[timeStr] ?? 0;
     if (capacity <= 0) return;
+    if (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount) return;
     setCart(prev => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
   };
 
@@ -2147,11 +2154,11 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                           <button
                                             aria-label={`Ajouter un passager – ${getDayName(dateStr)} à ${timeStr}`}
                                             onClick={() => handleAdd(dateStr, timeStr)}
-                                            disabled={capacity === 0}
-                                            className={`w-8 h-8 rounded-[5px] font-bold text-lg flex items-center justify-center transition-colors ${capacity === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-white shadow-sm'}`}
-                                            style={capacity > 0 ? { backgroundColor: '#009FE3' } : {}}
-                                            onMouseEnter={e => { if (capacity > 0) e.currentTarget.style.backgroundColor = '#312783'; }}
-                                            onMouseLeave={e => { if (capacity > 0) e.currentTarget.style.backgroundColor = '#009FE3'; }}
+                                            disabled={capacity === 0 || (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount)}
+                                            className={`w-8 h-8 rounded-[5px] font-bold text-lg flex items-center justify-center transition-colors ${capacity === 0 || (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount) ? 'text-slate-300 cursor-not-allowed' : 'text-white shadow-sm'}`}
+                                            style={capacity > 0 && !(chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount) ? { backgroundColor: '#009FE3' } : {}}
+                                            onMouseEnter={e => { if (capacity > 0 && !(chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount)) e.currentTarget.style.backgroundColor = '#312783'; }}
+                                            onMouseLeave={e => { if (capacity > 0 && !(chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount)) e.currentTarget.style.backgroundColor = '#009FE3'; }}
                                           >+</button>
                                         </div>
                                       </div>
@@ -2581,7 +2588,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                       <span className="flex-1 min-w-0 truncate">{f?.name} <span className="text-slate-400 font-normal">({tStr})</span> × <span style={{ color: '#009FE3' }}>{qty}</span></span>
                       <div className="flex items-center gap-1 shrink-0">
                         <button onClick={() => handleDecrementCart(key)} className="w-6 h-6 bg-white border border-slate-200 rounded-[5px] flex items-center justify-center hover:text-rose-500 transition-colors" title="Enlever 1">−</button>
-                        <button onClick={() => handleIncrementCart(key)} disabled={atCapacity} className={`w-6 h-6 bg-white border rounded-[5px] flex items-center justify-center transition-colors ${atCapacity ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 hover:text-[#E6007E]'}`} title="Ajouter 1"><Plus size={12} /></button>
+                        <button onClick={() => handleIncrementCart(key)} disabled={atCapacity || (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount)} className={`w-6 h-6 bg-white border rounded-[5px] flex items-center justify-center transition-colors ${atCapacity || (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount) ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 hover:text-[#E6007E]'}`} title="Ajouter 1"><Plus size={12} /></button>
                         <button onClick={() => handleDeleteCartItem(key)} className="w-6 h-6 bg-rose-50 rounded-[5px] flex items-center justify-center text-rose-400 hover:bg-rose-500 hover:text-white transition-colors" title="Supprimer cette ligne"><Trash2 size={12} /></button>
                       </div>
                     </div>
@@ -2637,6 +2644,15 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                     <span className="text-2xl font-bold" style={{ color: '#009FE3' }}>{finalPrice.toFixed(2)} €</span>
                   </div>
                 </div>
+
+                {chatbotPassengerCount > 0 && totalItems < chatbotPassengerCount && (
+                  <div className="mb-3 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2 flex items-start gap-2">
+                    <AlertCircle size={14} color="#f59e0b" className="mt-0.5 shrink-0" />
+                    <span style={{ fontSize: '0.72rem', color: '#92400e', lineHeight: 1.5 }}>
+                      Vous avez prévu <strong>{chatbotPassengerCount} vol{chatbotPassengerCount > 1 ? 's' : ''}</strong> mais seulement <strong>{totalItems}</strong> créneau{totalItems > 1 ? 'x' : ''} sélectionné{totalItems > 1 ? 's' : ''}. Ajoutez encore {chatbotPassengerCount - totalItems} créneau{chatbotPassengerCount - totalItems > 1 ? 'x' : ''}.
+                    </span>
+                  </div>
+                )}
 
                 {step === 3 ? (
                   <button
