@@ -293,7 +293,7 @@ export default function ChatWidget() {
             const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant')?.content?.toLowerCase() ?? '';
             const asksEmail = /email\s*\?/.test(lastAssistant);
             const asksTel = /t[eé]l[eé]phone\s*\?|t[eé]l\s*\?/.test(lastAssistant);
-            const asksName = /pr[eé]nom\s*(et\s*nom|nom)?\s*\?|votre\s*nom\s*\?/.test(lastAssistant);
+            const asksName = /pr[eé]nom|votre\s*nom\s*\?/.test(lastAssistant);
             const inputType = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
             const autoComplete = asksEmail ? 'email' : asksTel ? 'tel' : asksName ? 'name' : 'off';
             return (

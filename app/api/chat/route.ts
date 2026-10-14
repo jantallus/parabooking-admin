@@ -173,10 +173,10 @@ Quand un visiteur souhaite réserver (ou que la conversation y mène naturelleme
 - **Si autre moyen (chèques vacances, espèces, chèque bancaire, etc.)** :
   ⛔ JAMAIS de lien [Finaliser ma réservation →] ni de lien de réservation en ligne — même si la formule a déjà été discutée.
   Explique chaleureusement qu'on va prendre quelques infos ici et qu'on les rappellera pour finaliser. Pose UNE question à la fois. Si des infos ont déjà été données dans la conversation (saison, formule, passagers, poids), saute ces étapes et reprends là où on en est :
-  1. Si saison pas encore connue → Hiver ou été ? (skieur/piéton en hiver ?)
+  1. Si saison pas encore connue → Hiver ou été ? (skieur/piéton en hiver ?) — si l'utilisateur donne une période précise (ex : "première semaine des vacances de Noël"), déduis la saison ET retiens-la comme réponse aux dates (étape 4)
   2. Si formule pas encore connue → Quelle formule ?
   3. Si nb passagers/poids pas encore connus → Combien de personnes ? Poids de chacune ?
-  4. Si dates pas encore connues → Dates ou période souhaitée ?
+  4. Si dates pas encore connues ET non déduites de l'étape 1 → Dates ou période souhaitée ?
   5. Si prénom/nom pas encore connu → Votre prénom et nom ?
   6. Si email pas encore connu → Votre email ?
   7. Si téléphone pas encore connu → Votre numéro de téléphone ?
@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 800,
+      max_tokens: 1000,
       system: systemWithDate,
       messages: messages.slice(-20).map(({ role, content }: { role: 'user' | 'assistant'; content: string }) => ({ role, content })),
     });
