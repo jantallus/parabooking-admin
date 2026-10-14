@@ -58,7 +58,9 @@ export default function ChatWidget() {
   const [rappelSent, setRappelSent] = useState(false);
   const [rappelSending, setRappelSending] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mobileHeight, setMobileHeight] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useLayoutEffect(() => {
@@ -69,7 +71,7 @@ export default function ChatWidget() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Remonte la fenêtre (desktop) et scrolle vers le bas (mobile) quand le clavier apparaît
+  // Ajuste la hauteur mobile et remonte la fenêtre desktop quand le clavier apparaît
   useEffect(() => {
     if (!open) { setBottomOffset(24); return; }
     const vv = window.visualViewport;
@@ -77,10 +79,14 @@ export default function ChatWidget() {
     const update = () => {
       const offset = window.innerHeight - vv.height - vv.offsetTop;
       setBottomOffset(Math.max(24, offset + 8));
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant' }), 80);
+      setMobileHeight(vv.height);
+      setTimeout(() => {
+        if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      }, 50);
     };
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
+    update();
     return () => {
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
@@ -98,7 +104,7 @@ export default function ChatWidget() {
   }, [open]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
   }, [messages, loading]);
 
   async function sendRappel(data: RappelData) {
@@ -208,9 +214,11 @@ export default function ChatWidget() {
         <div
           style={isMobile ? {
             position: 'fixed',
-            inset: 0,
+            top: 0,
+            left: 0,
+            right: 0,
             width: '100%',
-            height: '100%',
+            height: mobileHeight > 0 ? `${mobileHeight}px` : '100dvh',
             background: '#fff',
             borderRadius: 0,
             display: 'flex',
@@ -253,7 +261,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px 16px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
+          <div ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px 16px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
             {messages.map((msg, i) => {
               const isLast = i === messages.length - 1;
               const showSuggestions = isLast && !loading && msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0;
