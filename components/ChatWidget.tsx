@@ -329,6 +329,7 @@ export default function ChatWidget() {
             return (
           <div style={{ padding: isMobile ? '12px 16px' : '12px', paddingBottom: isMobile ? 'max(12px, env(safe-area-inset-bottom))' : '12px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '8px', flexShrink: 0, background: '#fff' }}>
             <input
+              key={inputType}
               ref={inputRef}
               type={inputType}
               autoComplete={autoComplete}
