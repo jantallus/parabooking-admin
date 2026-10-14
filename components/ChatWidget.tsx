@@ -10,6 +10,12 @@ interface RappelData {
   name: string;
   email: string;
   phone: string;
+  flight_type?: string;
+  nb_passengers?: number;
+  weight_info?: string;
+  availability_start?: string | null;
+  availability_end?: string | null;
+  notes?: string;
 }
 
 interface Message {
@@ -93,7 +99,7 @@ export default function ChatWidget() {
       const res = await fetch('/api/rappel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: data.name, email: data.email, phone: data.phone }),
+        body: JSON.stringify(data),
       });
       if (res.ok) {
         setRappelSent(true);
