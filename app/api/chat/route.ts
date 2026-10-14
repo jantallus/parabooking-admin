@@ -174,6 +174,7 @@ NE pose AUCUNE question avant que le visiteur ait choisi une option (ne demande 
 6. Email ?
 7. Téléphone ?
 8. Pour combien de passagers souhaitez-vous l'option photos et vidéos (+20 € par personne) ? (0 = aucune, réponse "non" = 0, "oui pour tous" ou "oui" sans précision = nombre total de passagers, "juste pour mon fils" ou "1 seul" = 1, etc.)
+   ↳ Si la réponse est "pour 1" ou "pour un seul" et qu'il y a plusieurs passagers, pose une question de suivi : "Pour lequel des passagers ?" avant de continuer (juste pour confirmer — cela ne change pas l'URL finale mais personnalise la conversation).
 
 Une fois toutes les infos collectées, génère un lien de réservation pré-rempli sous cette forme :
 https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS1,POIDS2&passager1=PRENOM_P1&passager2=PRENOM_P2&photos=1
