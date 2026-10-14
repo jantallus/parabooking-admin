@@ -241,9 +241,16 @@ export default function ChatWidget() {
           </div>
 
           {/* Saisie */}
+          {(() => {
+            const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant')?.content?.toLowerCase() ?? '';
+            const inputType = lastAssistant.includes('email') ? 'email' : lastAssistant.includes('téléphone') || lastAssistant.includes('telephone') ? 'tel' : 'text';
+            const autoComplete = inputType === 'email' ? 'email' : inputType === 'tel' ? 'tel' : 'off';
+            return (
           <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '8px', flexShrink: 0 }}>
             <input
               ref={inputRef}
+              type={inputType}
+              autoComplete={autoComplete}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
@@ -281,6 +288,8 @@ export default function ChatWidget() {
               <Send size={16} />
             </button>
           </div>
+            );
+          })()}
         </div>
       )}
 
