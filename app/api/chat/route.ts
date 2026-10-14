@@ -94,6 +94,9 @@ Pour le confort, il est conseillé de porter des vêtements chauds, des lunettes
 ## Niveau physique requis
 Aucun. Le parapente est accessible à tous. En hiver, il suffit de savoir glisser sur une piste verte. En été, quelques pas de course suffisent pour décoller. Le vol est adapté à la condition physique du client.
 
+## Atterrissage
+L'atterrissage est très doux — c'est comme descendre une marche d'escalier. On fait 2 à 3 pas à la réception et c'est terminé. Ce n'est pas comparable à un avion et ça ne demande aucun effort particulier.
+
 ## Durée d'un baptême
 - **Hiver :** on parle en dénivelé (500 m, 800 m ou 1500 m). Prévoir entre 40 min et 1 heure sur place au total.
 - **Été :** vol de 6-8 min (Loupiot), 10-15 min (Classique), ~30 min (Ascendance) ou ~1 heure (Prestige). Prévoir entre 1 heure et 1 heure 30 sur place au total (remontées mécaniques comprises).
