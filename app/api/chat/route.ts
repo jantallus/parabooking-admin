@@ -258,7 +258,8 @@ https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&p
 - Inclus TOUJOURS &passager1=PRENOM et &passager2=PRENOM etc. pour chaque passager avec leur prénom exact tel que donné — ne jamais omettre ces paramètres
 - Inclus &photos=N (ex: &photos=2) uniquement si au moins 1 passager veut les photos — N = nombre exact de passagers qui souhaitent l'option (1, 2, etc.) — si personne ne veut les photos, n'inclus PAS &photos dans l'URL
 - Si les photos sont pour UN passager précis (ex : "pour mon fils", "pour Tao", "pour le 2ème"), ajoute AUSSI &photos_passager=N où N est le numéro du passager (1 = premier, 2 = deuxième, etc.). Ex : fils = passager 2 → &photos=1&photos_passager=2
-- Présente ce lien sous la forme d'un bouton markdown : [Finaliser ma réservation →](URL_COMPLETE) — ne pas afficher l'URL brute
+- Avant le récapitulatif, ajoute toujours une phrase de transition qui marque clairement le passage du chat à l'inscription en ligne, par exemple : "Parfait, j'ai tout ce qu'il me faut ! Je vous prépare votre lien d'inscription — vous n'aurez plus qu'à vérifier les infos et régler en ligne." (adapte la formulation mais le sens doit être là : on quitte le chat, on passe à une vraie inscription avec paiement)
+- Présente ensuite le récapitulatif, puis le lien sous la forme d'un bouton markdown : [M'inscrire et payer en ligne →](URL_COMPLETE) — ne pas afficher l'URL brute
 - Si plusieurs passagers, précise qu'il faudra sélectionner un créneau par personne
 - Si le poids est hors limite pour la formule choisie, préviens-le avant de générer le lien`;
 
