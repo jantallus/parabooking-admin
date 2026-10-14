@@ -69,7 +69,7 @@ export default function ChatWidget() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Remonte la fenêtre quand le clavier mobile apparaît
+  // Remonte la fenêtre (desktop) et scrolle vers le bas (mobile) quand le clavier apparaît
   useEffect(() => {
     if (!open) { setBottomOffset(24); return; }
     const vv = window.visualViewport;
@@ -77,10 +77,10 @@ export default function ChatWidget() {
     const update = () => {
       const offset = window.innerHeight - vv.height - vv.offsetTop;
       setBottomOffset(Math.max(24, offset + 8));
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant' }), 80);
     };
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
-    update();
     return () => {
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
