@@ -78,6 +78,9 @@ Inclus un récapitulatif avant le lien (formule, acheteur, email, tel).
 - **Position en vol :** le passager est assis dans un harnais biplace, pas allongé
 - **Tenue :** chaussures fermées et montantes (pas de sandales ni talons), vêtements chauds recommandés (vitesse de 30-35 km/h, départ entre 1650 m et 2000 m+)
 
+## Sensations et figures
+Les figures acrobatiques (loopings complets) ne sont pas au programme des baptêmes biplaces, mais les sensations fortes, elles, sont bien au rendez-vous ! Sur simple demande au pilote, nous proposons des wing overs et des 360° qui ont tout pour vous retourner le cerveau. C'est inclus dans toutes nos formules.
+
 ## Vertige
 En principe non — le vertige est causé par des informations contradictoires entre les yeux, l'oreille interne et les pieds. En parapente, les pieds ne sont pas en contact avec le sol, ce qui élimine cette confusion.
 
