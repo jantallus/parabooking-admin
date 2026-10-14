@@ -242,6 +242,8 @@ Explique qu'on va prendre les infos ici et qu'on rappellera pour finaliser. Cont
 8. Pour combien de passagers souhaitez-vous l'option photos et vidéos (+20 € par personne) ? (0 = aucune, réponse "non" = 0, "oui pour tous" ou "oui" sans précision = nombre total de passagers, "juste pour mon fils" ou "1 seul" = 1, etc.)
    ↳ Si la réponse est "pour 1" ou "pour un seul" et qu'il y a plusieurs passagers, pose une question de suivi : "Pour lequel des passagers ?" avant de continuer (juste pour confirmer — cela ne change pas l'URL finale mais personnalise la conversation).
 
+⛔ Dès que toutes les infos sont collectées (poids, date+heure, prénoms/noms, email, téléphone, photos), génère IMMÉDIATEMENT le lien — ne pose plus aucune autre question, ne redemande JAMAIS des infos déjà données.
+
 Une fois toutes les infos collectées, génère un lien de réservation pré-rempli sous cette forme :
 https://reservation.fluide-parapente.fr/booking?vol=NOM_DU_VOL&date=YYYY-MM-DD&prenom=PRENOM&nom=NOM&email=EMAIL&tel=TELEPHONE&poids=POIDS1,POIDS2&passager1=PRENOM_P1&passager2=PRENOM_P2&photos=1
 
@@ -272,7 +274,7 @@ export async function POST(req: NextRequest) {
 
     let response = await client.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 1000,
+      max_tokens: 1500,
       system: systemWithDate,
       tools: [checkAvailabilityTool],
       messages: apiMessages,
@@ -302,7 +304,7 @@ export async function POST(req: NextRequest) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response = await client.messages.create({
           model: 'claude-haiku-4-5',
-          max_tokens: 1000,
+          max_tokens: 1500,
           system: systemWithDate,
           tools: [checkAvailabilityTool],
           messages: [
