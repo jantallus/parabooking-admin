@@ -261,7 +261,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px 16px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
+          <div ref={messagesRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: isMobile ? '20px 16px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
             {messages.map((msg, i) => {
               const isLast = i === messages.length - 1;
               const showSuggestions = isLast && !loading && msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0;
