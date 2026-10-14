@@ -750,8 +750,12 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     const capacity = gridData[date]?.[heure] ?? 0;
     if (capacity <= 0) return;
     heureAutoAddedRef.current = true;
+    // Nombre de passagers = nombre de poids fournis dans ?poids=
+    const poids = new URLSearchParams(window.location.search).get('poids') || '';
+    const passengerCount = poids ? poids.split(',').filter(p => Number(p) > 0).length : 1;
+    const qty = Math.min(passengerCount, capacity);
     const key = `${selectedFlight.id}|${date}|${heure}`;
-    setCart(prev => ({ ...prev, [key]: 1 }));
+    setCart(prev => ({ ...prev, [key]: qty }));
   }, [gridData, selectedFlight]);
 
   // Dates qui ont des créneaux pilote planifiés mais tous complets (capacity=0)
