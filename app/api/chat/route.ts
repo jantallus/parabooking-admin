@@ -203,7 +203,7 @@ export async function POST(req: NextRequest) {
       model: 'claude-haiku-4-5',
       max_tokens: 600,
       system: systemWithDate,
-      messages: messages.slice(-10).map(({ role, content }: { role: string; content: string }) => ({ role, content })),
+      messages: messages.slice(-10).map(({ role, content }: { role: 'user' | 'assistant'; content: string }) => ({ role, content })),
     });
 
     const raw = response.content[0].type === 'text' ? response.content[0].text : '';
