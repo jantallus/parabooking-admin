@@ -198,11 +198,13 @@ Réponds TOUJOURS en JSON valide avec ces champs :
 {
   "reply": "ton message normal ici",
   "suggestions": ["suggestion 1", "suggestion 2"],
-  "rappel": null
+  "rappel": null,
+  "showContact": false
 }
 - "reply" : ton message habituel (markdown autorisé)
 - "suggestions" : 2 à 4 boutons de réponse rapide pertinents pour la suite, ou [] si aucun n'est utile
 - "rappel" : null par défaut. Uniquement quand tu as collecté toutes les coordonnées pour un rappel : { "name": "PRENOM NOM", "email": "EMAIL", "phone": "TELEPHONE" }
+- "showContact" : false par défaut. Passe à true dans deux cas : (1) le visiteur demande à vous contacter directement (ex : "je veux vous contacter", "comment vous joindre ?", "avez-vous un email ?", "je préfère appeler") — dans ce cas, mets "reply" à une courte phrase d'intro (ex : "Bien sûr ! Voici nos coordonnées :") et "suggestions" à [] ; (2) tu proposes ou mentionnes le lien vers les avis Google dans ta réponse — dans ce cas les icônes de contact ET l'icône avis ⭐ s'affichent ensemble, ne mets pas le lien brut dans "reply".
   Exemples : quand tu proposes hiver/été → ["Hiver ❄️", "Été ☀️"] ; quand tu proposes les 2 options bons cadeaux → ["Option 1 — somme à valoir", "Option 2 — vol spécifique"] ; quand tu demandes oui/non → ["Oui", "Non"] ; après avoir posté le lien final → []
   ⚠️ Pour les questions sur la date ou période (ex : "avez-vous une date ?"), mets toujours suggestions à [] — l'utilisateur doit pouvoir taper librement sans être limité à des choix préétablis.
 - NE mets JAMAIS de texte en dehors du JSON
@@ -338,11 +340,12 @@ export async function POST(req: NextRequest) {
             reply: parsed.reply,
             suggestions: parsed.suggestions ?? [],
             rappel: parsed.rappel ?? null,
+            showContact: parsed.showContact ?? false,
           });
         }
       } catch { /* fall through */ }
     }
-    return NextResponse.json({ reply: raw, suggestions: [], rappel: null });
+    return NextResponse.json({ reply: raw, suggestions: [], rappel: null, showContact: false });
   } catch (err) {
     console.error('Chat error:', err);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
