@@ -60,6 +60,7 @@ export default function ChatWidget() {
   const [rappelSent, setRappelSent] = useState(false);
   const [rappelSending, setRappelSending] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [mobileHeight, setMobileHeight] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -258,9 +259,52 @@ export default function ChatWidget() {
                 <div style={{ fontSize: isMobile ? '12px' : '11px', opacity: 0.7 }}>Répond en quelques secondes</div>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.8, padding: '6px', display: 'flex', borderRadius: '50%' }}>
-              <X size={isMobile ? 22 : 18} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {/* Icône téléphone discrète */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setPhoneMenuOpen(o => !o)}
+                  aria-label="Téléphone"
+                  style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.65, padding: '6px', display: 'flex', borderRadius: '50%', transition: 'opacity 0.15s' }}
+                  onPointerEnter={e => (e.currentTarget.style.opacity = '1')}
+                  onPointerLeave={e => (e.currentTarget.style.opacity = '0.65')}
+                >
+                  <svg width={isMobile ? 18 : 16} height={isMobile ? 18 : 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                </button>
+                {phoneMenuOpen && (
+                  <>
+                    <div onClick={() => setPhoneMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10000 }} />
+                    <div style={{ position: 'absolute', top: '38px', right: 0, backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.18)', overflow: 'hidden', zIndex: 10001, minWidth: isMobile ? '180px' : '210px' }}>
+                      {isMobile ? (
+                        <>
+                          <a href="tel:+33677285102" onClick={() => setPhoneMenuOpen(false)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '13px 16px', color: '#1e293b', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600, borderBottom: '1px solid #f1f5f9' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={FLUIDE_SECONDARY} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            Appeler
+                          </a>
+                          <a href="sms:+33677285102" onClick={() => setPhoneMenuOpen(false)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '13px 16px', color: '#1e293b', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={FLUIDE_SECONDARY} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Envoyer un SMS
+                          </a>
+                        </>
+                      ) : (
+                        <a href="tel:+33677285102" onClick={() => setPhoneMenuOpen(false)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '13px 16px', color: '#1e293b', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 700 }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={FLUIDE_SECONDARY} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                          06 77 28 51 02
+                        </a>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+              <button onClick={() => setOpen(false)} aria-label="Fermer" style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', opacity: 0.8, padding: '6px', display: 'flex', borderRadius: '50%' }}>
+                <X size={isMobile ? 22 : 18} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
