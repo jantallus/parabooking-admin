@@ -66,6 +66,7 @@ export default function ChatWidget() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const historyPushedRef = useRef(false);
 
   useLayoutEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)');
@@ -107,6 +108,24 @@ export default function ChatWidget() {
     }
     if (open) setTimeout(() => inputRef.current?.focus(), 100);
   }, [open]);
+
+  // Bouton retour ferme le chat sur mobile
+  useEffect(() => {
+    if (!isMobile) return;
+    if (open) {
+      history.pushState({ chatbot: true }, '');
+      historyPushedRef.current = true;
+      const onPop = () => {
+        historyPushedRef.current = false;
+        setOpen(false);
+      };
+      window.addEventListener('popstate', onPop);
+      return () => window.removeEventListener('popstate', onPop);
+    } else if (historyPushedRef.current) {
+      historyPushedRef.current = false;
+      history.back();
+    }
+  }, [open, isMobile]);
 
   useEffect(() => {
     if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
