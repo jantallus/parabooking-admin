@@ -106,8 +106,8 @@ export default function ChatWidget() {
         content: 'Bonjour ! Une question sur nos vols parapente à La Clusaz ? Je suis là pour vous aider.',
       }]);
     }
-    if (open) setTimeout(() => inputRef.current?.focus(), 100);
-  }, [open]);
+    if (open && !isMobile) setTimeout(() => inputRef.current?.focus(), 100);
+  }, [open, isMobile]);
 
   // Bouton retour ferme le chat sur mobile
   useEffect(() => {
