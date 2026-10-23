@@ -62,6 +62,7 @@ export default function ChatWidget() {
   const [isMobile, setIsMobile] = useState(false);
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [mobileHeight, setMobileHeight] = useState(0);
+  const [viewportTop, setViewportTop] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -76,13 +77,14 @@ export default function ChatWidget() {
 
   // Ajuste la hauteur mobile et remonte la fenêtre desktop quand le clavier apparaît
   useEffect(() => {
-    if (!open) { setBottomOffset(24); return; }
+    if (!open) { setBottomOffset(24); setMobileHeight(0); setViewportTop(0); return; }
     const vv = window.visualViewport;
     if (!vv) return;
     const update = () => {
       const offset = window.innerHeight - vv.height - vv.offsetTop;
       setBottomOffset(Math.max(24, offset + 8));
       setMobileHeight(vv.height);
+      setViewportTop(vv.offsetTop);
       setTimeout(() => {
         if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       }, 50);
@@ -217,7 +219,7 @@ export default function ChatWidget() {
         <div
           style={isMobile ? {
             position: 'fixed',
-            top: 0,
+            top: viewportTop > 0 ? `${viewportTop}px` : 0,
             left: 0,
             right: 0,
             width: '100%',
