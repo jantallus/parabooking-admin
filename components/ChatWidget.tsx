@@ -433,6 +433,7 @@ export default function ChatWidget() {
             const asksTel = /t[eé]l[eé]phone\s*\?|t[eé]l\s*\?/.test(lastAssistant);
             const asksName = !asksEmail && !asksTel && /pr[eé]nom|votre\s*nom\s*\?/.test(lastAssistant);
             const inputType = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
+            const inputMode = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
             const autoComplete = isMobile ? 'off' : (asksEmail ? 'email' : asksTel ? 'tel' : asksName ? 'name' : 'off');
             const btnSize = isMobile ? 46 : 38;
             return (
@@ -440,7 +441,8 @@ export default function ChatWidget() {
             <input
               key={inputType}
               ref={inputRef}
-              type={inputType}
+              type={isMobile ? 'text' : inputType}
+              inputMode={isMobile ? inputMode : undefined}
               autoComplete={autoComplete}
               value={input}
               onChange={e => setInput(e.target.value)}
