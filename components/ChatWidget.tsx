@@ -81,11 +81,16 @@ export default function ChatWidget() {
     if (!open) { setBottomOffset(24); setMobileHeight(0); setViewportTop(0); return; }
     const vv = window.visualViewport;
     if (!vv) return;
-    const update = () => {
+    const applyViewport = () => {
       const offset = window.innerHeight - vv.height - vv.offsetTop;
       setBottomOffset(Math.max(24, offset + 8));
       setMobileHeight(vv.height);
       setViewportTop(vv.offsetTop);
+    };
+    const update = () => {
+      applyViewport();
+      // Relire 400ms après pour rattraper la barre autofill Chrome qui apparaît en décalé
+      setTimeout(applyViewport, 400);
       setTimeout(() => {
         if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       }, 50);
