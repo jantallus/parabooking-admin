@@ -245,7 +245,10 @@ export default function ChatWidget() {
         <div
           style={isMobile ? {
             position: 'fixed',
-            inset: 0,
+            top: viewportTop > 0 ? `${viewportTop}px` : 0,
+            left: 0,
+            right: 0,
+            height: mobileHeight > 0 ? `${mobileHeight}px` : '100dvh',
             background: '#fff',
             borderRadius: 0,
             display: 'flex',
