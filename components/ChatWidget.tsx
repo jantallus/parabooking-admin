@@ -243,11 +243,7 @@ export default function ChatWidget() {
         <div
           style={isMobile ? {
             position: 'fixed',
-            top: viewportTop > 0 ? `${viewportTop}px` : 0,
-            left: 0,
-            right: 0,
-            width: '100%',
-            height: mobileHeight > 0 ? `${mobileHeight}px` : '100dvh',
+            inset: 0,
             background: '#fff',
             borderRadius: 0,
             display: 'flex',
@@ -334,7 +330,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div ref={messagesRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: isMobile ? '20px 16px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
+          <div ref={messagesRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: isMobile ? '20px 16px' : '16px', paddingBottom: isMobile ? '90px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
             {messages.map((msg, i) => {
               const isLast = i === messages.length - 1;
               const showSuggestions = isLast && !loading && msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0;
@@ -431,65 +427,67 @@ export default function ChatWidget() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Saisie */}
-          {(() => {
+          {/* Saisie (desktop uniquement dans ce container) */}
+          {!isMobile && (() => {
             const lastAssistant = ([...messages].reverse().find(m => m.role === 'assistant')?.content ?? '').toLowerCase().replace(/\*+/g, '');
             const asksEmail = /email\s*\?/.test(lastAssistant);
             const asksTel = /t[eé]l[eé]phone\s*\?|t[eé]l\s*\?/.test(lastAssistant);
             const asksName = !asksEmail && !asksTel && /pr[eé]nom|votre\s*nom\s*\?/.test(lastAssistant);
             const inputType = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
-            const inputMode = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
-            const autoComplete = isMobile ? 'off' : (asksEmail ? 'email' : asksTel ? 'tel' : asksName ? 'name' : 'off');
-            const btnSize = isMobile ? 46 : 38;
+            const autoComplete = asksEmail ? 'email' : asksTel ? 'tel' : asksName ? 'name' : 'off';
             return (
-          <div style={{ padding: isMobile ? '12px 16px' : '12px', paddingBottom: isMobile ? 'max(12px, env(safe-area-inset-bottom))' : '12px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '8px', flexShrink: 0, background: '#fff' }}>
+          <div style={{ padding: '12px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '8px', flexShrink: 0, background: '#fff' }}>
             <input
               key={inputType}
               ref={inputRef}
-              type={isMobile ? 'text' : inputType}
-              inputMode={isMobile ? inputMode : undefined}
+              type={inputType}
               autoComplete={autoComplete}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
               placeholder="Votre question…"
               disabled={loading}
-              style={{
-                flex: 1,
-                padding: isMobile ? '12px 16px' : '9px 13px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '24px',
-                fontSize: isMobile ? '16px' : '13.5px',
-                outline: 'none',
-                background: '#f8fafc',
-              }}
+              style={{ flex: 1, padding: '9px 13px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '13.5px', outline: 'none', background: '#f8fafc' }}
             />
-            <button
-              onClick={send}
-              disabled={!input.trim() || loading}
-              aria-label="Envoyer"
-              style={{
-                width: `${btnSize}px`,
-                height: `${btnSize}px`,
-                borderRadius: '50%',
-                background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0',
-                color: input.trim() && !loading ? '#fff' : '#94a3b8',
-                border: 'none',
-                cursor: input.trim() && !loading ? 'pointer' : 'default',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                transition: 'background 0.15s',
-              }}
-            >
-              <Send size={isMobile ? 20 : 16} />
+            <button onClick={send} disabled={!input.trim() || loading} aria-label="Envoyer"
+              style={{ width: '38px', height: '38px', borderRadius: '50%', background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0', color: input.trim() && !loading ? '#fff' : '#94a3b8', border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.15s' }}>
+              <Send size={16} />
             </button>
           </div>
             );
           })()}
         </div>
       )}
+
+      {/* Saisie mobile — fixed bottom, au-dessus du clavier ET de la barre autofill */}
+      {open && isMobile && (() => {
+        const lastAssistant = ([...messages].reverse().find(m => m.role === 'assistant')?.content ?? '').toLowerCase().replace(/\*+/g, '');
+        const asksEmail = /email\s*\?/.test(lastAssistant);
+        const asksTel = /t[eé]l[eé]phone\s*\?|t[eé]l\s*\?/.test(lastAssistant);
+        const inputType = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
+        const inputMode: React.HTMLAttributes<HTMLInputElement>['inputMode'] = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
+        return (
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000, background: '#fff', borderTop: '1px solid #e2e8f0', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))', display: 'flex', gap: '8px' }}>
+            <input
+              key={inputType}
+              ref={inputRef}
+              type="text"
+              inputMode={inputMode}
+              autoComplete="off"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
+              placeholder="Votre question…"
+              disabled={loading}
+              style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc' }}
+            />
+            <button onClick={send} disabled={!input.trim() || loading} aria-label="Envoyer"
+              style={{ width: '46px', height: '46px', borderRadius: '50%', background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0', color: input.trim() && !loading ? '#fff' : '#94a3b8', border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.15s' }}>
+              <Send size={20} />
+            </button>
+          </div>
+        );
+      })()}
 
       <style>{`
         @keyframes bounce {
