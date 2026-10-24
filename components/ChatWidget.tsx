@@ -66,6 +66,7 @@ export default function ChatWidget() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLDivElement>(null);
   const historyPushedRef = useRef(false);
 
   useLayoutEffect(() => {
@@ -179,6 +180,7 @@ export default function ChatWidget() {
     const text = input.trim();
     if (!text || loading) return;
     setInput('');
+    if (mobileInputRef.current) mobileInputRef.current.textContent = '';
 
     const newMessages: Message[] = [...messages, { role: 'user', content: text }];
     setMessages(newMessages);
@@ -459,40 +461,36 @@ export default function ChatWidget() {
         </div>
       )}
 
-      {/* Saisie mobile — fixed bottom, au-dessus du clavier ET de la barre autofill */}
-      {open && isMobile && (() => {
-        const lastAssistant = ([...messages].reverse().find(m => m.role === 'assistant')?.content ?? '').toLowerCase().replace(/\*+/g, '');
-        const asksEmail = /email\s*\?/.test(lastAssistant);
-        const asksTel = /t[eé]l[eé]phone\s*\?|t[eé]l\s*\?/.test(lastAssistant);
-        const inputType = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
-        const inputMode: React.HTMLAttributes<HTMLInputElement>['inputMode'] = asksEmail ? 'email' : asksTel ? 'tel' : 'text';
-        return (
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000, background: '#fff', borderTop: '1px solid #e2e8f0', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))', display: 'flex', gap: '8px' }}>
-            <input
-              key={inputType}
-              ref={inputRef}
-              type="text"
-              inputMode={inputMode}
-              autoComplete="off"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-              placeholder="Votre question…"
-              disabled={loading}
-              style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc' }}
-            />
-            <button onClick={send} disabled={!input.trim() || loading} aria-label="Envoyer"
-              style={{ width: '46px', height: '46px', borderRadius: '50%', background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0', color: input.trim() && !loading ? '#fff' : '#94a3b8', border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.15s' }}>
-              <Send size={20} />
-            </button>
-          </div>
-        );
-      })()}
+      {/* Saisie mobile — contentEditable évite la barre autofill Chrome */}
+      {open && isMobile && (
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000, background: '#fff', borderTop: '1px solid #e2e8f0', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))', display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div
+            ref={mobileInputRef}
+            contentEditable
+            suppressContentEditableWarning
+            role="textbox"
+            aria-label="Votre question"
+            data-placeholder="Votre question…"
+            onInput={e => setInput(e.currentTarget.textContent ?? '')}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+            style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc', minHeight: '46px', maxHeight: '120px', overflowY: 'auto', lineHeight: '1.4', wordBreak: 'break-word', display: 'flex', alignItems: 'center' }}
+          />
+          <button onClick={send} disabled={!input.trim() || loading} aria-label="Envoyer"
+            style={{ width: '46px', height: '46px', borderRadius: '50%', background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0', color: input.trim() && !loading ? '#fff' : '#94a3b8', border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.15s' }}>
+            <Send size={20} />
+          </button>
+        </div>
+      )}
 
       <style>{`
         @keyframes bounce {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-4px); }
+        }
+        [contenteditable][data-placeholder]:empty::before {
+          content: attr(data-placeholder);
+          color: #94a3b8;
+          pointer-events: none;
         }
       `}</style>
     </>
