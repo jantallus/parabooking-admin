@@ -247,7 +247,9 @@ export default function ChatWidget() {
             top: viewportTop > 0 ? `${viewportTop}px` : 0,
             left: 0,
             right: 0,
-            height: mobileHeight > 0 ? `${mobileHeight}px` : '100dvh',
+            height: mobileHeight > 0
+              ? `${mobileHeight < window.innerHeight * 0.8 ? mobileHeight - 52 : mobileHeight}px`
+              : '100dvh',
             background: '#fff',
             borderRadius: 0,
             display: 'flex',
