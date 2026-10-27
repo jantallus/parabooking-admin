@@ -244,7 +244,10 @@ export default function ChatWidget() {
         <div
           style={isMobile ? {
             position: 'fixed',
-            inset: 0,
+            top: viewportTop > 0 ? `${viewportTop}px` : 0,
+            left: 0,
+            right: 0,
+            height: mobileHeight > 0 ? `${mobileHeight}px` : '100dvh',
             background: '#fff',
             borderRadius: 0,
             display: 'flex',
@@ -460,7 +463,7 @@ export default function ChatWidget() {
 
           {/* Saisie mobile — dans le container pour s'ajuster à mobileHeight */}
           {isMobile && (
-            <div style={{ padding: '12px 16px', paddingBottom: '52px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
               <input
                 type="text"
                 placeholder="Votre question…"
