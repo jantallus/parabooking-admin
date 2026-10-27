@@ -474,6 +474,9 @@ export default function ChatWidget() {
             role="textbox"
             aria-label="Votre question"
             data-placeholder="Votre question…"
+            spellCheck={true}
+            autoCorrect="on"
+            autoCapitalize="sentences"
             onInput={e => setInput(e.currentTarget.textContent ?? '')}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
             style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc', minHeight: '46px', maxHeight: '120px', overflowY: 'auto', lineHeight: '1.4', wordBreak: 'break-word', display: 'flex', alignItems: 'center' }}
