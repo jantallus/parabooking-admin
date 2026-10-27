@@ -63,10 +63,10 @@ export default function ChatWidget() {
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [mobileHeight, setMobileHeight] = useState(0);
   const [viewportTop, setViewportTop] = useState(0);
+  const [inputFocused, setInputFocused] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const mobileInputRef = useRef<HTMLInputElement>(null);
   const historyPushedRef = useRef(false);
 
   useLayoutEffect(() => {
@@ -334,7 +334,7 @@ export default function ChatWidget() {
           </div>
 
           {/* Messages */}
-          <div ref={messagesRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: isMobile ? '20px 16px' : '16px', paddingBottom: isMobile ? '90px' : '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
+          <div ref={messagesRef} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', padding: isMobile ? '20px 16px' : '16px', paddingBottom: '16px', display: 'flex', flexDirection: 'column', gap: isMobile ? '14px' : '10px' }}>
             {messages.map((msg, i) => {
               const isLast = i === messages.length - 1;
               const showSuggestions = isLast && !loading && msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0;
@@ -431,7 +431,7 @@ export default function ChatWidget() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Saisie (desktop uniquement dans ce container) */}
+          {/* Saisie desktop */}
           {!isMobile && (() => {
             const lastAssistant = ([...messages].reverse().find(m => m.role === 'assistant')?.content ?? '').toLowerCase().replace(/\*+/g, '');
             const asksEmail = /email\s*\?/.test(lastAssistant);
@@ -460,29 +460,30 @@ export default function ChatWidget() {
           </div>
             );
           })()}
+
+          {/* Saisie mobile — dans le container pour s'ajuster à mobileHeight */}
+          {isMobile && (
+            <div style={{ padding: '12px 16px', paddingBottom: inputFocused ? '64px' : 'max(12px, env(safe-area-inset-bottom))', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+              <input
+                type="text"
+                placeholder="Votre question…"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+                style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc', height: '46px' }}
+              />
+              <button onClick={send} disabled={!input.trim() || loading} aria-label="Envoyer"
+                style={{ width: '46px', height: '46px', borderRadius: '50%', background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0', color: input.trim() && !loading ? '#fff' : '#94a3b8', border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.15s' }}>
+                <Send size={20} />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Saisie mobile */}
-      {open && isMobile && (
-        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10000, background: '#fff', borderTop: '1px solid #e2e8f0', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))', display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <input
-            ref={mobileInputRef}
-            type="text"
-            placeholder="Votre question…"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-            style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc', height: '46px' }}
-          />
-          <button onClick={send} disabled={!input.trim() || loading} aria-label="Envoyer"
-            style={{ width: '46px', height: '46px', borderRadius: '50%', background: input.trim() && !loading ? FLUIDE_SECONDARY : '#e2e8f0', color: input.trim() && !loading ? '#fff' : '#94a3b8', border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.15s' }}>
-            <Send size={20} />
-          </button>
-        </div>
-      )}
-
-      <style>{`
+<style>{`
         @keyframes bounce {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-4px); }
