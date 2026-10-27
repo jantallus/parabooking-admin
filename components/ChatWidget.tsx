@@ -63,7 +63,7 @@ export default function ChatWidget() {
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [mobileHeight, setMobileHeight] = useState(0);
   const [viewportTop, setViewportTop] = useState(0);
-  const [inputFocused, setInputFocused] = useState(false);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -463,14 +463,12 @@ export default function ChatWidget() {
 
           {/* Saisie mobile — dans le container pour s'ajuster à mobileHeight */}
           {isMobile && (
-            <div style={{ padding: '12px 16px', paddingBottom: inputFocused ? '64px' : 'max(12px, env(safe-area-inset-bottom))', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
               <input
                 type="text"
                 placeholder="Votre question…"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                 style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc', height: '46px' }}
               />
