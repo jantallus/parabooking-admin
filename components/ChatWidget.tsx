@@ -471,6 +471,21 @@ export default function ChatWidget() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+                onFocus={() => {
+                  // Polling jusqu'à stabilisation : couvre le cas où vv.resize ne fire pas
+                  const vv = window.visualViewport;
+                  if (!vv) return;
+                  let prev = vv.height;
+                  let stable = 0;
+                  const check = () => {
+                    setMobileHeight(vv.height);
+                    setViewportTop(vv.offsetTop);
+                    stable = vv.height === prev ? stable + 1 : 0;
+                    prev = vv.height;
+                    if (stable < 3) setTimeout(check, 100);
+                  };
+                  setTimeout(check, 100);
+                }}
                 style={{ flex: 1, padding: '12px 16px', border: '1px solid #e2e8f0', borderRadius: '24px', fontSize: '16px', outline: 'none', background: '#f8fafc', height: '46px' }}
               />
               <button onClick={send} disabled={!input.trim() || loading} aria-label="Envoyer"
