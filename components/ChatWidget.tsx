@@ -77,6 +77,15 @@ export default function ChatWidget() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
+  // Lecture synchrone du viewport avant le premier paint (évite le flash avec height:100dvh)
+  useLayoutEffect(() => {
+    if (!open || !isMobile) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    setMobileHeight(vv.height);
+    setViewportTop(vv.offsetTop);
+  }, [open, isMobile]);
+
   // Ajuste la hauteur mobile et remonte la fenêtre desktop quand le clavier apparaît
   useEffect(() => {
     if (!open) { setBottomOffset(24); setMobileHeight(0); setViewportTop(0); return; }
