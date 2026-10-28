@@ -91,8 +91,9 @@ export default function ChatWidget() {
     };
     const update = () => {
       applyViewport();
-      // Relire 400ms après pour rattraper la barre autofill Chrome qui apparaît en décalé
+      // Relire après délai pour rattraper animations de clavier/URL bar lentes
       setTimeout(applyViewport, 400);
+      setTimeout(applyViewport, 800);
       setTimeout(() => {
         if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       }, 50);
@@ -472,17 +473,22 @@ export default function ChatWidget() {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                 onFocus={() => {
-                  // Polling jusqu'à stabilisation : couvre le cas où vv.resize ne fire pas
                   const vv = window.visualViewport;
                   if (!vv) return;
-                  let prev = vv.height;
+                  const initial = vv.height;
+                  let prev = initial;
                   let stable = 0;
+                  let polls = 0;
                   const check = () => {
-                    setMobileHeight(vv.height);
+                    const h = vv.height;
+                    setMobileHeight(h);
                     setViewportTop(vv.offsetTop);
-                    stable = vv.height === prev ? stable + 1 : 0;
-                    prev = vv.height;
-                    if (stable < 3) setTimeout(check, 100);
+                    // Le clavier est détecté quand la hauteur a chuté de >100px
+                    const keyboardOpen = h < initial - 100;
+                    stable = h === prev ? stable + 1 : 0;
+                    prev = h;
+                    // Continuer jusqu'à : clavier ouvert ET stable 3x, OU 20 polls max (2s)
+                    if (++polls < 20 && (!keyboardOpen || stable < 3)) setTimeout(check, 100);
                   };
                   setTimeout(check, 100);
                 }}
