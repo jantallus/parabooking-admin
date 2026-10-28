@@ -1,6 +1,12 @@
 import "./globals.css";
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  interactiveWidget: 'resizes-visual',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://reservation.fluide-parapente.fr'),
