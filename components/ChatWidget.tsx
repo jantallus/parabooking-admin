@@ -77,11 +77,42 @@ export default function ChatWidget() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // useLayoutEffect (pas useEffect) pour enregistrer les listeners avant le paint
-  // → si l'utilisateur ouvre le chat et tape immédiatement, vv.resize est déjà écouté
   useLayoutEffect(() => {
     if (!open) { setBottomOffset(24); setMobileHeight(0); setViewportTop(0); return; }
     const vv = window.visualViewport;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const vk = (navigator as any).virtualKeyboard as any;
+
+    const scrollMessages = () => setTimeout(() => {
+      if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }, 50);
+
+    if (vk) {
+      // VirtualKeyboard API (Chrome 94+) : donne la hauteur exacte du clavier
+      // indépendamment de vv.height qui ne change pas toujours sur Android
+      vk.overlaysContent = true;
+      const apply = () => {
+        const rect: DOMRect = vk.boundingRect;
+        const viewH = vv?.height ?? window.innerHeight;
+        const h = rect.height > 0 ? rect.y : viewH;
+        setMobileHeight(h);
+        setViewportTop(vv?.offsetTop ?? 0);
+        setBottomOffset(Math.max(24, window.innerHeight - viewH + 8));
+        scrollMessages();
+      };
+      vk.addEventListener('geometrychange', apply);
+      vv?.addEventListener('resize', apply);
+      vv?.addEventListener('scroll', apply);
+      apply();
+      return () => {
+        vk.overlaysContent = false;
+        vk.removeEventListener('geometrychange', apply);
+        vv?.removeEventListener('resize', apply);
+        vv?.removeEventListener('scroll', apply);
+      };
+    }
+
+    // Fallback : visualViewport uniquement
     if (!vv) return;
     const applyViewport = () => {
       const offset = window.innerHeight - vv.height - vv.offsetTop;
@@ -91,12 +122,9 @@ export default function ChatWidget() {
     };
     const update = () => {
       applyViewport();
-      // Relire après délai pour rattraper animations de clavier/URL bar lentes
       setTimeout(applyViewport, 400);
       setTimeout(applyViewport, 800);
-      setTimeout(() => {
-        if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-      }, 50);
+      scrollMessages();
     };
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
@@ -476,6 +504,8 @@ export default function ChatWidget() {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                 onFocus={() => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  if ((navigator as any).virtualKeyboard) return; // géré par geometrychange
                   const vv = window.visualViewport;
                   if (!vv) return;
                   const initial = vv.height;
@@ -486,11 +516,9 @@ export default function ChatWidget() {
                     const h = vv.height;
                     setMobileHeight(h);
                     setViewportTop(vv.offsetTop);
-                    // Le clavier est détecté quand la hauteur a chuté de >100px
                     const keyboardOpen = h < initial - 100;
                     stable = h === prev ? stable + 1 : 0;
                     prev = h;
-                    // Continuer jusqu'à : clavier ouvert ET stable 3x, OU 20 polls max (2s)
                     if (++polls < 20 && (!keyboardOpen || stable < 3)) setTimeout(check, 100);
                   };
                   setTimeout(check, 100);
