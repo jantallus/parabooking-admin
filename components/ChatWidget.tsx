@@ -114,6 +114,7 @@ export default function ChatWidget() {
         content: 'Bonjour ! Une question sur nos vols parapente à La Clusaz ? Je suis là pour vous aider.',
       }]);
     }
+    if (open && isMobile) window.scrollTo({ top: 0, behavior: 'smooth' });
     if (open && !isMobile) setTimeout(() => inputRef.current?.focus(), 100);
   }, [open, isMobile]);
 
