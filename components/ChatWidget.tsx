@@ -465,7 +465,7 @@ export default function ChatWidget() {
           {isMobile && (
             <div style={{ padding: '12px 16px', borderTop: '1px solid #e2e8f0', background: '#fff', display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
               <input
-                type="text"
+                type="search"
                 placeholder="Votre question…"
                 value={input}
                 onChange={e => setInput(e.target.value)}
@@ -486,6 +486,7 @@ export default function ChatWidget() {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-4px); }
         }
+        input[type="search"]::-webkit-search-cancel-button { display: none; }
       `}</style>
     </>
   );
