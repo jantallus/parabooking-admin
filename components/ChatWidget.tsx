@@ -208,10 +208,7 @@ export default function ChatWidget() {
       {/* Bulle flottante */}
       {!open && (
         <button
-          onClick={() => {
-            if (isMobile) window.scrollTo({ top: 0, behavior: 'instant' });
-            setOpen(true);
-          }}
+          onClick={() => setOpen(true)}
           aria-label="Ouvrir le chat"
           style={{
             position: 'fixed',
