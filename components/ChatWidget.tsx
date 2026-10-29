@@ -80,58 +80,30 @@ export default function ChatWidget() {
   useLayoutEffect(() => {
     if (!open) { setBottomOffset(24); setMobileHeight(0); setViewportTop(0); return; }
     const vv = window.visualViewport;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const vk = (navigator as any).virtualKeyboard as any;
 
     const scrollMessages = () => setTimeout(() => {
       if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }, 50);
 
-    if (vk) {
-      // VirtualKeyboard API (Chrome 94+) : donne la hauteur exacte du clavier
-      // indépendamment de vv.height qui ne change pas toujours sur Android
-      vk.overlaysContent = true;
-      const apply = () => {
-        const rect: DOMRect = vk.boundingRect;
-        const viewH = vv?.height ?? window.innerHeight;
-        const h = rect.height > 0 ? rect.y : viewH;
-        setMobileHeight(h);
-        setViewportTop(vv?.offsetTop ?? 0);
-        setBottomOffset(Math.max(24, window.innerHeight - viewH + 8));
-        scrollMessages();
-      };
-      vk.addEventListener('geometrychange', apply);
-      vv?.addEventListener('resize', apply);
-      vv?.addEventListener('scroll', apply);
-      apply();
-      return () => {
-        vk.overlaysContent = false;
-        vk.removeEventListener('geometrychange', apply);
-        vv?.removeEventListener('resize', apply);
-        vv?.removeEventListener('scroll', apply);
-      };
-    }
-
-    // Fallback : visualViewport uniquement
-    if (!vv) return;
-    const applyViewport = () => {
-      const offset = window.innerHeight - vv.height - vv.offsetTop;
-      setBottomOffset(Math.max(24, offset + 8));
-      setMobileHeight(vv.height);
-      setViewportTop(vv.offsetTop);
-    };
-    const update = () => {
-      applyViewport();
-      setTimeout(applyViewport, 400);
-      setTimeout(applyViewport, 800);
+    // Avec interactive-widget=resizes-content (layout.tsx), window.innerHeight
+    // diminue quand le clavier s'ouvre → window.resize se déclenche.
+    // C'est plus fiable que vv.height sur Chrome Android.
+    const apply = () => {
+      const h = window.innerHeight;
+      setMobileHeight(h);
+      setViewportTop(vv?.offsetTop ?? 0);
+      setBottomOffset(Math.max(24, (vv ? window.innerHeight - vv.height - vv.offsetTop : 0) + 8));
       scrollMessages();
     };
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    update();
+
+    window.addEventListener('resize', apply);
+    vv?.addEventListener('resize', apply);
+    vv?.addEventListener('scroll', apply);
+    apply();
     return () => {
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
+      window.removeEventListener('resize', apply);
+      vv?.removeEventListener('resize', apply);
+      vv?.removeEventListener('scroll', apply);
     };
   }, [open]);
 
@@ -504,18 +476,17 @@ export default function ChatWidget() {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
                 onFocus={() => {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  if ((navigator as any).virtualKeyboard) return; // géré par geometrychange
-                  const vv = window.visualViewport;
-                  if (!vv) return;
-                  const initial = vv.height;
+                  // Polling de secours : window.innerHeight diminue avec le clavier
+                  // quand interactive-widget=resizes-content est actif
+                  const initial = window.innerHeight;
                   let prev = initial;
                   let stable = 0;
                   let polls = 0;
+                  const vv = window.visualViewport;
                   const check = () => {
-                    const h = vv.height;
+                    const h = window.innerHeight;
                     setMobileHeight(h);
-                    setViewportTop(vv.offsetTop);
+                    setViewportTop(vv?.offsetTop ?? 0);
                     const keyboardOpen = h < initial - 100;
                     stable = h === prev ? stable + 1 : 0;
                     prev = h;
