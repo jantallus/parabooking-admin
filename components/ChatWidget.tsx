@@ -60,6 +60,7 @@ export default function ChatWidget() {
   const [rappelSent, setRappelSent] = useState(false);
   const [rappelSending, setRappelSending] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [consentBannerVisible, setConsentBannerVisible] = useState(false);
   const [phoneMenuOpen, setPhoneMenuOpen] = useState(false);
   const [mobileHeight, setMobileHeight] = useState(0);
   const [viewportTop, setViewportTop] = useState(0);
@@ -75,6 +76,15 @@ export default function ChatWidget() {
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('fluide_consent_v1')) setConsentBannerVisible(true);
+    } catch { /* localStorage inaccessible */ }
+    const onConsent = () => setConsentBannerVisible(false);
+    window.addEventListener('fluide-consent', onConsent);
+    return () => window.removeEventListener('fluide-consent', onConsent);
   }, []);
 
   useLayoutEffect(() => {
@@ -212,7 +222,7 @@ export default function ChatWidget() {
           aria-label="Ouvrir le chat"
           style={{
             position: 'fixed',
-            bottom: '20px',
+            bottom: consentBannerVisible ? '150px' : '20px',
             left: '20px',
             background: 'none',
             border: 'none',

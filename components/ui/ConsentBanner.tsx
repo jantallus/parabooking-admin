@@ -32,6 +32,7 @@ export default function ConsentBanner() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ granted, date: new Date().toISOString() }));
     } catch { /* ignore */ }
     updateConsent(granted);
+    window.dispatchEvent(new CustomEvent('fluide-consent'));
     setVisible(false);
   };
 
