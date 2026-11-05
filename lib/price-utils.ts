@@ -1,5 +1,30 @@
 import type { FlightType, Complement, GiftCard, Passenger } from '@/lib/types';
 
+const priceFormatter = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
+/** "70 €", "130 €", "1,50 €" — jamais de décimales inutiles */
+export function formatPrice(euros: number): string {
+  return priceFormatter.format(euros);
+}
+
+const shortDateFormatter = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'Europe/Paris',
+});
+
+/** "2026-12-13" → "dim. 13 déc." */
+export function formatShortDate(isoDate: string): string {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  return shortDateFormatter.format(new Date(y, m - 1, d));
+}
+
 export interface PriceBreakdown {
   flightTotal: number;
   complementsTotal: number;

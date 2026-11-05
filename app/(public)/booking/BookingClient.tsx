@@ -24,7 +24,7 @@ import { contactSchema } from '@/lib/schemas';
 import { getLocalYYYYMMDD, getDayName, calculateGridStart, getMarketingInfo } from '@/lib/booking-utils';
 import { getSeasonMessage } from '@/lib/season-schedule';
 import { useScrollLock } from '@/hooks/useScrollLock';
-import { calculateBookingPrice } from '@/lib/price-utils';
+import { calculateBookingPrice, formatPrice, formatShortDate } from '@/lib/price-utils';
 import { useCart } from '@/lib/CartContext';
 import { Gift, Camera, Zap, Clock, Weight, FileText, Mountain, Wind, Sun, Snowflake, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, X, Plus, Trash2, AlertCircle, ShoppingCart } from 'lucide-react';
 import GiftCardPanel from '@/components/GiftCardPanel';
@@ -1406,7 +1406,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                           ) : (
                             <>
                               <div style={{ fontWeight: 700, marginBottom: '4px' }}>
-                                Avoir de {((Number(appliedVoucher.price_paid_cents) || 0) / 100).toFixed(0)}€ — utilisable sur toutes les formules
+                                Avoir de {formatPrice((Number(appliedVoucher.price_paid_cents) || 0) / 100)} — utilisable sur toutes les formules
                               </div>
                               <div style={{ color: '#475569', marginBottom: '8px' }}>
                                 Si le vol est moins cher que l&apos;avoir, le solde reste disponible pour les options (photos, vidéos) ou reportable sur une prochaine réservation. Le code est réutilisable tant qu&apos;il reste du crédit.
@@ -1589,19 +1589,19 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                         const priceEl = (
                           <div style={{ flexShrink: 0 }}>
                             {voucherCents == null ? (
-                              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1 }}>{flight.price_cents ? flight.price_cents / 100 : 0}€</div>
+                              <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1 }}>{formatPrice(flight.price_cents ? flight.price_cents / 100 : 0)}</div>
                             ) : delta! <= 0 ? (
                               <>
-                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
+                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{formatPrice(flight.price_cents / 100)}</div>
                                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-                                  <span style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>0€</span>
-                                  {delta! < 0 && <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>{(-delta!) / 100}€ de solde pour les photos et vidéos</span>}
+                                  <span style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>{formatPrice(0)}</span>
+                                  {delta! < 0 && <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#312783' }}>{formatPrice((-delta!) / 100)} de solde pour les photos et vidéos</span>}
                                 </div>
                               </>
                             ) : (
                               <>
-                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{flight.price_cents / 100}€</div>
-                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>{delta! / 100}€</div>
+                                <div style={{ fontSize: '1.25rem', color: '#94a3b8', textDecoration: 'line-through', lineHeight: 1 }}>{formatPrice(flight.price_cents / 100)}</div>
+                                <div style={{ fontSize: '2rem', fontWeight: 700, color: '#E6007E', lineHeight: 1.1 }}>{formatPrice(delta! / 100)}</div>
                               </>
                             )}
                           </div>
@@ -1624,7 +1624,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                       style={{ width: '40px', height: '50px', fontSize: '1.5rem', fontWeight: 700, background: 'white', border: 'none', cursor: 'pointer', color: '#E6007E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >−</button>
                                     <span style={{ padding: '0 10px', fontWeight: 700, color: '#E6007E', fontSize: '1rem', whiteSpace: 'nowrap' }}>
-                                      {flightQty} bon{flightQty > 1 ? 's' : ''} · {(flight.price_cents / 100) * flightQty}€
+                                      {flightQty} bon{flightQty > 1 ? 's' : ''} · {formatPrice((flight.price_cents / 100) * flightQty)}
                                     </span>
                                     <button
                                       type="button"
@@ -2280,13 +2280,13 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                     </div>
                     <div className="text-left md:text-right w-full md:w-auto">
                       <p className="text-3xl font-bold" style={{ color: '#E6007E' }}>
-                        - {discountAmount.toFixed(2)} €
+                        - {formatPrice(discountAmount)}
                       </p>
                       {appliedVoucher.type === 'gift_card' && (() => {
                         const remaining = Number(appliedVoucher.price_paid_cents) / 100 - discountAmount;
                         return remaining > 0.009 ? (
                           <p className="text-xs font-semibold mt-1" style={{ color: '#312783' }}>
-                            + {remaining.toFixed(2).replace('.00', '')} € de solde utilisable sur les options
+                            + {formatPrice(remaining)} de solde utilisable sur les options
                           </p>
                         ) : null;
                       })()}
@@ -2528,7 +2528,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                     <div>
                                       <span className={`font-bold block ${isSelected ? 'text-sky-900' : 'text-slate-700'}`}>
                                         {comp.name} <span className={isLocked ? 'text-[#E6007E]' : ''}>
-                                          {isLockedByActivity ? '(Inclus dans le vol)' : `(+${comp.price_cents / 100}€)`}
+                                          {isLockedByActivity ? '(Inclus dans le vol)' : `(+${formatPrice(comp.price_cents / 100)})`}
                                         </span>
                                       </span>
                                       {comp.description && (
@@ -2561,8 +2561,8 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                     onMouseLeave={e => { if (!isCheckingOut) e.currentTarget.style.backgroundColor = '#E6007E'; }}
                   >
                     {isCheckingOut ? 'Validation en cours…' : finalPrice === 0
-                      ? `Valider la réservation (Gratuit${remainingBalance > 0.009 ? ` · ${remainingBalance % 1 === 0 ? remainingBalance : remainingBalance.toFixed(2)}€ de solde` : ''})`
-                      : `Valider et payer — ${finalPrice.toFixed(2)} €`}
+                      ? `Valider la réservation (Gratuit${remainingBalance > 0.009 ? ` · ${formatPrice(remainingBalance)} de solde` : ''})`
+                      : `Valider et payer — ${formatPrice(finalPrice)}`}
                   </button>
                   <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.7rem', marginTop: '8px' }}>
                     En validant, vous acceptez nos <a href="https://www.fluide-parapente.fr/cgv/" target="_blank" rel="noopener" style={{ color: '#312783', textDecoration: 'underline' }}>CGV</a> et notre <a href="/politique-confidentialite" target="_blank" rel="noopener" style={{ color: '#312783', textDecoration: 'underline' }}>politique de confidentialité</a>.
@@ -2627,7 +2627,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                   const atCapacity = slotCapacity <= 0;
                   return (
                     <div key={key} className="bg-slate-50 rounded-[10px] pl-3 pr-2 py-2 flex items-center justify-between gap-2 text-xs font-bold text-slate-700 border border-slate-200">
-                      <span className="flex-1 min-w-0 truncate">{f?.name} <span className="text-slate-400 font-normal">({tStr})</span> × <span style={{ color: '#009FE3' }}>{qty}</span></span>
+                      <span className="flex-1 min-w-0 truncate">{f?.name} <span className="text-slate-400 font-normal">({formatShortDate(dStr)} {tStr})</span> × <span style={{ color: '#009FE3' }}>{qty}</span></span>
                       <div className="flex items-center gap-1 shrink-0">
                         <button onClick={() => handleDecrementCart(key)} className="w-6 h-6 bg-white border border-slate-200 rounded-[5px] flex items-center justify-center hover:text-rose-500 transition-colors" title="Enlever 1">−</button>
                         <button onClick={() => handleIncrementCart(key)} disabled={atCapacity || (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount)} className={`w-6 h-6 bg-white border rounded-[5px] flex items-center justify-center transition-colors ${atCapacity || (chatbotPassengerCount > 0 && totalItems >= chatbotPassengerCount) ? 'border-slate-100 text-slate-300 cursor-not-allowed' : 'border-slate-200 hover:text-[#E6007E]'}`} title="Ajouter 1"><Plus size={12} /></button>
@@ -2681,9 +2681,9 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total</span>
                   <div className="text-right">
                     {discountAmount > 0 && (
-                      <span className="text-sm font-bold text-rose-400 line-through mr-2">{originalPrice.toFixed(2)} €</span>
+                      <span className="text-sm font-bold text-rose-400 line-through mr-2">{formatPrice(originalPrice)}</span>
                     )}
-                    <span className="text-2xl font-bold" style={{ color: '#009FE3' }}>{finalPrice.toFixed(2)} €</span>
+                    <span className="text-2xl font-bold" style={{ color: '#009FE3' }}>{formatPrice(finalPrice)}</span>
                   </div>
                 </div>
 
