@@ -237,7 +237,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     if (!bonParam || flights.length === 0) return;
     const apply = async () => {
       try {
-        const partnerRes = await fetch(`/api/proxy/public/partners/check/${bonParam}`);
+        const partnerRes = await fetch(`/api/proxy/public/partners/check/${encodeURIComponent(bonParam)}`);
         if (partnerRes.ok) {
           const partnerData = await partnerRes.json();
           setAppliedPartner(partnerData);
@@ -248,7 +248,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
           }
           return;
         }
-        const res = await fetch(`/api/proxy/gift-cards/check/${bonParam}`);
+        const res = await fetch(`/api/proxy/gift-cards/check/${encodeURIComponent(bonParam)}`);
         if (res.ok) {
           const data = await res.json();
           setAppliedVoucher(data);
@@ -1111,7 +1111,8 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     setIsValidatingEarlyVoucher(true);
     setEarlyVoucherError('');
     try {
-      const partnerRes = await fetch(`/api/proxy/public/partners/check/${earlyVoucherInput.trim()}`);
+      const earlyCode = encodeURIComponent(earlyVoucherInput.trim());
+      const partnerRes = await fetch(`/api/proxy/public/partners/check/${earlyCode}`);
       if (partnerRes.ok) {
         const partnerData = await partnerRes.json();
         setAppliedPartner(partnerData);
@@ -1127,9 +1128,9 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
         }
         return;
       }
-      const res = await fetch(`/api/proxy/gift-cards/check/${earlyVoucherInput.trim()}`);
+      const res = await fetch(`/api/proxy/gift-cards/check/${earlyCode}`);
       if (!res.ok) {
-        const errData = await res.json();
+        const errData = await res.json().catch(() => ({}));
         setEarlyVoucherError(errData.message || "Code invalide ou expiré");
       } else {
         const data = await res.json();
@@ -1151,7 +1152,8 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
     setVoucherError('');
     try {
       // Try partner code first
-      const partnerRes = await fetch(`/api/proxy/public/partners/check/${voucherInput.trim()}`);
+      const voucherCode = encodeURIComponent(voucherInput.trim());
+      const partnerRes = await fetch(`/api/proxy/public/partners/check/${voucherCode}`);
       if (partnerRes.ok) {
         const partnerData = await partnerRes.json();
         setAppliedPartner(partnerData);
@@ -1161,10 +1163,10 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
       }
 
       // Fall through to gift card / promo code
-      const res = await fetch(`/api/proxy/gift-cards/check/${voucherInput.trim()}`);
+      const res = await fetch(`/api/proxy/gift-cards/check/${voucherCode}`);
 
       if (!res.ok) {
-        const errData = await res.json();
+        const errData = await res.json().catch(() => ({}));
         setVoucherError(errData.message || "Code invalide ou expiré");
         setAppliedVoucher(null);
       } else {

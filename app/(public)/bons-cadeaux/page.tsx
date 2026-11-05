@@ -253,16 +253,17 @@ export default function CadeauPage() {
     setIsRedeeming(true);
     setRedemptionError('');
     try {
-      const partnerRes = await fetch(`/api/proxy/public/partners/check/${redemptionCode.trim()}`);
+      const redeemCode = encodeURIComponent(redemptionCode.trim());
+      const partnerRes = await fetch(`/api/proxy/public/partners/check/${redeemCode}`);
       if (partnerRes.ok) {
-        window.location.href = `/booking?bon=${encodeURIComponent(redemptionCode.trim())}`;
+        window.location.href = `/booking?bon=${redeemCode}`;
         return;
       }
-      const res = await fetch(`/api/proxy/gift-cards/check/${redemptionCode.trim()}`);
+      const res = await fetch(`/api/proxy/gift-cards/check/${redeemCode}`);
       if (res.ok) {
-        window.location.href = `/booking?bon=${encodeURIComponent(redemptionCode.trim())}`;
+        window.location.href = `/booking?bon=${redeemCode}`;
       } else {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         setRedemptionError(err.message || 'Code invalide ou expiré');
         setIsRedeeming(false);
       }
