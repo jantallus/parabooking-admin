@@ -2172,8 +2172,8 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                     if (isFull) {
                                       return (
                                         <div key={timeStr} className="px-3 py-2.5 rounded-[5px] border border-slate-100 flex items-center justify-between" style={{ backgroundColor: '#f8f9fa' }}>
-                                          <span className="font-bold text-sm text-slate-300">{timeStr}</span>
-                                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-[4px]" style={{ backgroundColor: 'rgba(0,0,0,0.05)', color: '#cbd5e1' }}>Complet</span>
+                                          <span className="font-bold text-sm text-slate-400 line-through">{timeStr}</span>
+                                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-[4px]" style={{ backgroundColor: 'rgba(230,0,126,0.08)', color: '#E6007E' }}>Complet</span>
                                         </div>
                                       );
                                     }
