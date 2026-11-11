@@ -87,7 +87,7 @@ export default function PolitiqueConfidentialitePage() {
             <h2>Responsable du traitement</h2>
             <p>
               <strong>Fluide Parapente</strong> — La Clusaz, Haute-Savoie<br />
-              <a href="mailto:contact@fluide-parapente.fr" className="pc-link">contact@fluide-parapente.fr</a> — 06 77 28 51 02
+              <a href="mailto:contact@fluide-parapente.fr" className="pc-link">contact@fluide-parapente.fr</a> — +33(0)6 77 28 51 02
             </p>
 
             <h2>Données collectées</h2>

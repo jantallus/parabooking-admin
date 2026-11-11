@@ -162,10 +162,10 @@ export default function ChatWidget() {
         setRappelSent(true);
         setMessages(prev => [...prev, { role: 'assistant', content: 'Votre demande a bien été envoyée ! Nous vous recontactons très prochainement. 😊' }]);
       } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: 'Une erreur est survenue lors de l\'envoi. Appelez-nous au +33 6 77 28 51 02.' }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: 'Une erreur est survenue lors de l\'envoi. Appelez-nous au +33(0)6 77 28 51 02.' }]);
       }
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Une erreur est survenue. Appelez-nous au +33(0)6 77 28 51 02.' }]);
     } finally {
       setRappelSending(false);
     }
@@ -181,7 +181,7 @@ export default function ChatWidget() {
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [], rappel: data.rappel ?? null, showContact: data.showContact ?? false, showReviews: data.showReviews ?? false }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.', suggestions: [] }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33(0)6 77 28 51 02.', suggestions: [] }]);
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -206,7 +206,7 @@ export default function ChatWidget() {
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply ?? 'Désolé, une erreur est survenue.', suggestions: data.suggestions ?? [], rappel: data.rappel ?? null, showContact: data.showContact ?? false, showReviews: data.showReviews ?? false }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33 6 77 28 51 02.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Désolé, une erreur est survenue. Appelez-nous au +33(0)6 77 28 51 02.' }]);
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus(), 50);
@@ -332,7 +332,7 @@ export default function ChatWidget() {
                         <a href="tel:+33677285102" onClick={() => setPhoneMenuOpen(false)}
                           style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '13px 16px', color: '#1e293b', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 700 }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={FLUIDE_SECONDARY} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                          06 77 28 51 02
+                          +33(0)6 77 28 51 02
                         </a>
                       )}
                     </div>

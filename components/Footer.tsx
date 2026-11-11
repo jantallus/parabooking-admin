@@ -97,7 +97,7 @@ export default function Footer() {
             <li>
               <a href="tel:+33677285102" style={linkStyle('tel')}
                 onPointerEnter={() => setHovered('tel')} onPointerLeave={() => setHovered(null)}>
-                Tél : 06 77 28 51 02
+                Tél : +33(0)6 77 28 51 02
               </a>
             </li>
             <li>
