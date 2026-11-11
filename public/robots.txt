@@ -32,4 +32,4 @@ Allow: /
 # Le sous-domaine de réservation n'est pas indexé par les moteurs de recherche
 # (la vitrine fluide-parapente.fr est le point d'entrée SEO)
 # mais les agents IA peuvent librement lire et utiliser ces pages.
-Sitemap: https://reservation.fluide-parapente.fr/sitemap.xml
+# Pas de sitemap ici : il proposerait aux moteurs des pages marquées noindex.
