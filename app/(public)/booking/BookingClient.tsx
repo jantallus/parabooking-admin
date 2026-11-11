@@ -28,6 +28,7 @@ import { calculateBookingPrice, formatPrice, formatShortDate } from '@/lib/price
 import { useCart } from '@/lib/CartContext';
 import { Gift, Camera, Zap, Clock, Weight, FileText, Mountain, Wind, Sun, Snowflake, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, X, Plus, Trash2, AlertCircle, ShoppingCart } from 'lucide-react';
 import GiftCardPanel from '@/components/GiftCardPanel';
+import PhoneContactButton from '@/components/booking/PhoneContactButton';
 import { SkiIcon, SnowboardIcon, PedestrianIcon, ChildrenIcon, GoproIcon } from '@/components/icons/ActivityIcons';
 
 function cloudinaryOptimize(url: string, w = 600, h = 300): string {
@@ -2027,13 +2028,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                               : 'Vous avez sélectionné un vol hiver. Pour vous inscrire, choisissez dans nos formules été.'}
                                           </p>
                                           <p className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>Vous pouvez aussi nous contacter :</p>
-                                          <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
-                                          <div className="flex items-center gap-1">
-                                            <span className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
-                                            <button onClick={() => window.dispatchEvent(new CustomEvent('openFlightForm', { detail: { flight_type: selectedFlight?.name || '' } }))} style={{ background: '#E6007E', border: 'none', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }} aria-label="Formulaire de demande de vol">
-                                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
-                                            </button>
-                                          </div>
+                                          <PhoneContactButton />
                                         </div>
                                       );
                                     }
@@ -2055,7 +2050,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                           <p className="text-[11px] leading-tight" style={{ color: '#312783', opacity: 0.5 }}>Prochaines réservations disponibles bientôt</p>
                                         )}
                                         <div className="w-8 border-t border-slate-300 my-0.5" />
-                                        <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
+                                        <PhoneContactButton />
                                       </div>
                                     );
                                   }
@@ -2115,22 +2110,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                         </>
                                       )}
                                       <p className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>Vous pouvez aussi nous contacter :</p>
-                                      <a href="tel:0677285102" className="text-sm font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
-                                      <div className="flex items-center gap-1">
-                                        <span className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>ou cliquer sur</span>
-                                        <button
-                                          onClick={() => window.dispatchEvent(new CustomEvent('openFlightForm', { detail: { flight_type: selectedFlight?.name || '' } }))}
-                                          style={{ background: '#E6007E', border: 'none', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}
-                                          aria-label="Formulaire de demande de vol"
-                                        >
-                                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                            <polyline points="14 2 14 8 20 8"/>
-                                            <line x1="8" y1="13" x2="16" y2="13"/>
-                                            <line x1="8" y1="17" x2="13" y2="17"/>
-                                          </svg>
-                                        </button>
-                                      </div>
+                                      <PhoneContactButton />
                                     </div>
                                   );
                                 })() : (() => {
@@ -2158,7 +2138,7 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                           <p className="text-[9px] leading-tight" style={{ color: '#312783', opacity: 0.5 }}>Prochaines réservations disponibles bientôt</p>
                                         )}
                                         <div className="w-8 border-t border-slate-300 my-0.5" />
-                                        <a href="tel:0677285102" className="text-xs font-black" style={{ color: '#E6007E' }}>06 77 28 51 02</a>
+                                        <PhoneContactButton size={28} />
                                       </div>
                                     );
                                   }
