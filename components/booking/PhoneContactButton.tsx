@@ -30,10 +30,10 @@ export default function PhoneContactButton({ size = 32 }: { size?: number }) {
         href={`tel:${PHONE_TEL}`}
         onClick={handleClick}
         aria-label="Réserver par téléphone"
-        className="inline-flex items-center justify-center rounded-full shrink-0 transition-transform hover:scale-105"
-        style={{ background: '#E6007E', width: size, height: size }}
+        className="inline-flex items-center justify-center shrink-0 transition-transform hover:scale-110"
+        style={{ width: size, height: size }}
       >
-        <Phone size={Math.round(size * 0.5)} color="white" strokeWidth={2.25} />
+        <Phone size={Math.round(size * 0.75)} color="#312783" fill="#312783" strokeWidth={1.5} />
       </a>
 
       {open && createPortal(

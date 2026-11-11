@@ -2027,7 +2027,6 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                               ? 'Vous avez sélectionné un vol été. Pour vous inscrire, choisissez dans nos formules hiver.'
                                               : 'Vous avez sélectionné un vol hiver. Pour vous inscrire, choisissez dans nos formules été.'}
                                           </p>
-                                          <p className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>Vous pouvez aussi nous contacter :</p>
                                           <PhoneContactButton />
                                         </div>
                                       );
@@ -2109,7 +2108,6 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
                                           )}
                                         </>
                                       )}
-                                      <p className="text-[11px]" style={{ color: '#312783', opacity: 0.4 }}>Vous pouvez aussi nous contacter :</p>
                                       <PhoneContactButton />
                                     </div>
                                   );
