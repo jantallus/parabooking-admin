@@ -676,7 +676,8 @@ export default function ReserverPage({ volOverride, seasonOverride, initialFligh
       if (!monSchedules[s.monitor_id]) monSchedules[s.monitor_id] = {};
       monSchedules[s.monitor_id][ms] = { ...s };
 
-      if (s.status !== 'available') return; // pauses et créneaux pris ne s'affichent pas dans la grille
+      // Les horaires réservés par des clients s'affichent « Complet » ; pauses et NON DISPO restent masqués
+      if (s.status === 'unavailable') return;
 
       const dStr = dObj.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
       const tStr = dObj.toLocaleTimeString('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hour12: false });
